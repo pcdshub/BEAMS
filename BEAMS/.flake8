@@ -1,0 +1,17 @@
+[flake8]
+extend-ignore = E203, E731
+exclude =
+    .git,
+    __pycache__,
+    lib,
+    include,
+    lib64,
+indent-size = 2
+max-line-length = 160
+max-complexity = 10
+
+# Explanation section:
+# E203: Whitespace before ':'
+#   This is recommended by black in relation to slice formatting.
+# E731: do not assign a lambda expression, use a def
+#   I think this is lame, anonymous functions can be good if used intentionally

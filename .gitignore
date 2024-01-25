@@ -1,0 +1,12 @@
+# Virtual Environment Ignores
+venv/*
+!venv/README.md
+
+# Python artifact files
+*__pycache__*
+*.egg-info
+
+# Application artifact files
+*.txt
+*.csv
+temp/*

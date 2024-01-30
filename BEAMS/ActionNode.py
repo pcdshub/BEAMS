@@ -2,13 +2,16 @@ import time
 import py_trees
 import atexit
 import multiprocessing
-import multiprocessing.connection
+from VolatileStatus import VolatileStatus
 
 
 class ActionNode(py_trees.behaviour.Behaviour):
-  def __init__(self, name, work_func):
+  def __init__(self, name, work_func, completion_condition):  # TODO: can add failure condition argument...
     super(ActionNode, self).__init__(name)
     self.work_func = work_func
+    self.comp_condition = completion_condition
+    print(type(self.status))
+    self.__volatile_status__ = VolatileStatus(self.status)
     self.logger.debug("%s.__init__()" % (self.__class__.__name__))
 
   def setup(self, **kwargs: int) -> None:
@@ -19,28 +22,24 @@ class ActionNode(py_trees.behaviour.Behaviour):
     self.logger.debug(
         "%s.setup()->connections to an external process" % (self.__class__.__name__)
     )
-    self.parent_connection, self.child_connection = multiprocessing.Pipe()
-    self.planning = multiprocessing.Process(
-        target=self.work_func, args=(self.child_connection,)
+    self.work_proc = multiprocessing.Process(
+        target=self.work_func, args=(self.comp_condition, self.__volatile_status__)
     )
     atexit.register(self.terminate, py_trees.common.Status.FAILURE)
-    self.planning.start()
+    print("Regardsless this should run")
+    self.work_proc.start()
 
   def initialise(self) -> None:
-    """Reset a counter variable."""
-    self.logger.debug(
-        "%s.initialise()->sending new goal" % (self.__class__.__name__)
-    )
-    self.parent_connection.send(["new goal"])
-    self.percentage_completion = 0
+    """ From docs the expected behavior is that status after initialize is running
+    """
+    current_status = self.__volatile_status__.get_value()
+    if current_status == py_trees.common.Status.INVALID:
+      self.__volatile_status__.set_value(py_trees.common.Status.RUNNING)
 
   def update(self) -> py_trees.common.Status:
     """Increment the counter, monitor and decide on a new status."""
-    new_status = py_trees.common.Status.RUNNING
-    if self.parent_connection.poll():
-        self.percentage_completion = self.parent_connection.recv().pop()
-        if self.percentage_completion == 100:
-            new_status = py_trees.common.Status.SUCCESS
+    new_status = self.__volatile_status__.get_value()
+
     if new_status == py_trees.common.Status.SUCCESS:
         self.feedback_message = "Processing finished"
         self.logger.debug(
@@ -52,37 +51,28 @@ class ActionNode(py_trees.behaviour.Behaviour):
                 self.feedback_message,
             )
         )
-    else:
-        self.feedback_message = "{0}%".format(self.percentage_completion)
-        self.logger.debug(
-            "%s.update()[%s][%s]"
-            % (self.__class__.__name__, self.status, self.feedback_message)
-        )
     return new_status
 
   def terminate(self, new_status: py_trees.common.Status) -> None:
       """Nothing to clean up in this example."""
-      self.planning.terminate()
-      self.logger.debug(
-          "%s.terminate()[%s->%s]"
-          % (self.__class__.__name__, self.status, new_status)
-      )
+      if self.work_proc.is_alive():
+        self.work_proc.terminate()
+        self.logger.debug(
+            py_trees.console.red + "%s.terminate()[%s->%s]"
+            % (self.__class__.__name__, self.status, new_status)
+        )
 
 
-def thisjob(connection: multiprocessing.connection.Connection) -> None:
-  idle = True
+def thisjob(comp_condition, volatile_status) -> None:
+  # initial setup
   percentage_complete = 0
+  print("THIS SHOULD GO")
   try:
-    while True:
-      if connection.poll():
-        connection.recv()  # discarding
-        percentage_complete = 0
-        idle = False
-      if not idle:
-        percentage_complete += 10
-        connection.send([percentage_complete])
-        if percentage_complete == 100:
-          idle = True
+    while not comp_condition(percentage_complete):
+      py_trees.console.logdebug(f"yuh {percentage_complete}, {volatile_status.get_value()}")
+      percentage_complete += 10
+      if percentage_complete == 100:
+        volatile_status.set_value(py_trees.common.Status.SUCCESS)
       time.sleep(0.5)
   except KeyboardInterrupt:
     pass
@@ -90,7 +80,8 @@ def thisjob(connection: multiprocessing.connection.Connection) -> None:
 
 def main():
   py_trees.logging.level = py_trees.logging.Level.DEBUG
-  action = ActionNode("action", thisjob)
+  comp_cond = lambda x: x == 100
+  action = ActionNode("action", thisjob, comp_cond)
   action.setup()
   for i in range(20):
     action.tick_once()

@@ -1,17 +1,17 @@
-import time
 import py_trees
 import atexit
 import multiprocessing
-from VolatileStatus import VolatileStatus
+from beams.VolatileStatus import VolatileStatus
 
 
 class ActionNode(py_trees.behaviour.Behaviour):
-  def __init__(self, name, work_func, completion_condition):  # TODO: can add failure condition argument...
+  def __init__(self, name, work_func, completion_condition, **kwargs):  # TODO: can add failure condition argument...
     super(ActionNode, self).__init__(name)
     self.work_func = work_func
     self.comp_condition = completion_condition
     print(type(self.status))
     self.__volatile_status__ = VolatileStatus(self.status)
+    self.additional_args = kwargs
     self.logger.debug("%s.__init__()" % (self.__class__.__name__))
 
   def setup(self, **kwargs: int) -> None:
@@ -23,7 +23,7 @@ class ActionNode(py_trees.behaviour.Behaviour):
         "%s.setup()->connections to an external process" % (self.__class__.__name__)
     )
     self.work_proc = multiprocessing.Process(
-        target=self.work_func, args=(self.comp_condition, self.__volatile_status__)
+        target=self.work_func, args=(self.comp_condition, self.__volatile_status__), kwargs=self.additional_args
     )
     atexit.register(self.terminate, py_trees.common.Status.FAILURE)
     print("Regardsless this should run")
@@ -63,31 +63,5 @@ class ActionNode(py_trees.behaviour.Behaviour):
         )
 
 
-# For test
-def thisjob(comp_condition, volatile_status) -> None:
-  # initial setup
-  percentage_complete = 0
-  print("THIS SHOULD GO")
-  try:
-    while not comp_condition(percentage_complete):
-      py_trees.console.logdebug(f"yuh {percentage_complete}, {volatile_status.get_value()}")
-      percentage_complete += 10
-      if percentage_complete == 100:
-        volatile_status.set_value(py_trees.common.Status.SUCCESS)
-      time.sleep(0.5)
-  except KeyboardInterrupt:
-    pass
-
-
-def main():
-  py_trees.logging.level = py_trees.logging.Level.DEBUG
-  comp_cond = lambda x: x == 100
-  action = ActionNode("action", thisjob, comp_cond)
-  action.setup()
-  for i in range(20):
-    action.tick_once()
-    time.sleep(0.5)
-
-
 if __name__ == '__main__':
-  main()
+  pass

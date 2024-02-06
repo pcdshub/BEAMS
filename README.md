@@ -17,3 +17,6 @@ More to come.
 
 # Makefile interface
 `make test` - runs tests in test directory 
+`make test_verbose` - runs tests in test directory and prints stdout
+`make update_beams` - updates the locally install `beams` package
+`make flake8` - flake check source files

@@ -16,7 +16,7 @@ More to come.
 - `pip3 install requirements.txt`
 
 # Makefile interface
-`make test` - runs tests in test directory 
-`make test_verbose` - runs tests in test directory and prints stdout
-`make update_beams` - updates the locally install `beams` package
-`make flake8` - flake check source files
+* `make test` - runs tests in test directory 
+* `make test_verbose` - runs tests in test directory and prints stdout
+* `make update_beams` - updates the locally install `beams` package
+* `make flake8` - flake check source files

@@ -1,11 +1,12 @@
 import py_trees
 from beams.ActionNode import ActionNode
+from beams.ConditionNode import ConditionNode
 import time
 from multiprocessing import Value
 
 
 class TestTask:
-  def test_task_state_cycle(self, capsys):
+  def test_action_node(self, capsys):
     py_trees.logging.level = py_trees.logging.Level.DEBUG
     # For test
     percentage_complete = Value('i', 0)
@@ -33,8 +34,11 @@ class TestTask:
 
     assert percentage_complete.value == 100
 
-  def test_two(self):
-    # While I have no love for meaningless commited code
-    # this serves as a reminder to write more tests!!
-    self.value = 2
-    assert self.value == 2
+  def test_condition_node(self):
+    yuh = lambda: True
+    con = ConditionNode("con", yuh)
+    py_trees.logging.level = py_trees.logging.Level.DEBUG
+    con.setup()
+    for i in range(3):
+      con.tick_once()
+      time.sleep(0.01)

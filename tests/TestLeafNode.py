@@ -1,6 +1,6 @@
 import py_trees
-from beams.ActionNode import ActionNode
-from beams.ConditionNode import ConditionNode
+from beams.behavior_tree.ActionNode import ActionNode
+from beams.behavior_tree.ConditionNode import ConditionNode
 import time
 from multiprocessing import Value
 

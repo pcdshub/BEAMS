@@ -1,7 +1,7 @@
 import py_trees
 import atexit
 import multiprocessing
-from beams.VolatileStatus import VolatileStatus
+from beams.behavior_tree.VolatileStatus import VolatileStatus
 
 
 class ActionNode(py_trees.behaviour.Behaviour):

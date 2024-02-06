@@ -37,7 +37,7 @@ IntStatusToStatus = {
 
 
 '''
-Thread (process) safe helpers 
+Thread (process) safe helpers
 '''
 
 
@@ -71,7 +71,7 @@ Need to translate from py_trees string enum to normal enum
 class VolatileStatus(SharedEnum):
   def __init__(self, init_status=Status.INVALID):
     super().__init__(StatusToIntStatus[init_status])
-  
+
   def get_value(self):
     return IntStatusToStatus[super().get_value()]
 

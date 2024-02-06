@@ -3,14 +3,12 @@ from multiprocessing import Process, Value
 import time
 from VolatileStatus import VolatileStatus
 
+
 def BTWorker(proc_name, work_func, stop_func=None):
   status = VolatileStatus()
 
   def work_function():
     work_proc = Process(target=work_func, name=proc_name, args=(status,))
-
-
-
 
   def __init__(self, proc_name, stop_func=None):
     self.do_work = Value('i', False)
@@ -31,7 +29,7 @@ def BTWorker(proc_name, work_func, stop_func=None):
       logging.error("Not working, not stopping work")
       return
     self.do_work.value = False
-    if (self.stop_func != None):
+    if (self.stop_func is not None):
       self.stop_func()
 
     print("calling join")
@@ -52,7 +50,7 @@ def BTWorker(proc_name, work_func, stop_func=None):
 if __name__ == "__main__":
   logging.basicConfig(filename='logs/worker.log', encoding='utf-8', level=logging.DEBUG)
   logging.getLogger().addHandler(logging.StreamHandler())
-  s = Worker()
+  s = BTWorker()
   s.start_work()
   time.sleep(3)
   s.stop_work()

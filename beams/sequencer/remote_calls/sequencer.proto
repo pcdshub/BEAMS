@@ -14,12 +14,13 @@ service Sequencer {
 
 // Highest level notion of tree requested to be genearted
 enum SequenceType {
-  SELF_TEST = 0;
-  CHANGE_GMD_GAS = 1;
+  NONE = 0;
+  SELF_TEST = 1;
+  CHANGE_GMD_GAS = 2;
 }
 
 enum RunStateType {
-  UNKOWN = 0;
+  STATE_UNKNOWN = 0;
   PAUSE = 1; // Pause execution of current command.
   STOP_AND_SAFE = 2; // Stop execution of current command. 
   RESUME = 3; // Resume exectution
@@ -62,10 +63,10 @@ message AlterState{
 
 message CommandReply {
   MessageType mess_t = 1;
-  string reply = 2; // for generic stuffs
-  SequenceType current_sequence = 3;
-  string current_node_name = 4;
-  TickStatus current_status = 5;
+  SequenceType current_sequence = 2;
+  string current_node_name = 3;
+  TickStatus current_status = 4;
+  RunStateType current_run_state = 5;
 }
 
 // Inspired by: https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/empty.proto

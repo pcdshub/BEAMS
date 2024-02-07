@@ -6,7 +6,7 @@ exclude =
     lib,
     include,
     lib64,
-    beams/sequencer/remote_calls/*
+    beams/sequencer/remote_calls
 indent-size = 2
 max-line-length = 160
 max-complexity = 10

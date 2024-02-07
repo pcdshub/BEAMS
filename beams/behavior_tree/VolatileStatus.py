@@ -1,7 +1,7 @@
 from py_trees.common import Status
-from multiprocessing import Value
 from enum import Enum
 
+from beams.helpers.SharedEnum import SharedEnum
 '''
 py_trees stores its enums as strings which is painful
 
@@ -37,32 +37,6 @@ IntStatusToStatus = {
 
 
 '''
-Thread (process) safe helpers
-'''
-
-
-class SharedEnum():
-  def __init__(self, enum):
-    self.enum_val = enum
-    self.enum_type = type(enum)
-    print(self.enum_type)
-    self.__safe_val__ = Value('i', enum.value)
-
-  # return value as its enum type
-  def get_value(self):
-    with self.__safe_val__.get_lock():
-      return self.enum_type(self.__safe_val__.value)
-
-  def set_value(self, enum):
-    with self.__safe_val__.get_lock():
-      self.__safe_val__.value = enum.value
-
-  def set_value_by_name(self, enum_name):
-    with self.__safe_val__.get_lock():
-      self.__safe_val__.value = self.enum_type[enum_name].value
-
-
-'''
 Process safe helper for enum types
 Need to translate from py_trees string enum to normal enum
 '''
@@ -77,3 +51,7 @@ class VolatileStatus(SharedEnum):
 
   def set_value(self, status):
     super().set_value(StatusToIntStatus[status])
+
+
+if __name__ == "__main__":
+  VolatileStatus()

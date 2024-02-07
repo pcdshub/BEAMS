@@ -12,14 +12,14 @@ class SharedCommandReply():
   
   def get_value(self):
     """
-    Return such that the tuple can be unwaped and passed as an arg to CommandReply message constructor
+    Return such that the dict can be unwaped and passed as kwargs to CommandReply message constructor via double splat op
     """
     with self.__lock__:
-      return (MessageType.MESSAGE_TYPE_COMMAND_REPLY,
-              self.current_sequence,
-              self.current_node,
-              self.current_tick_status,
-              self.current_run_state)
+      return {"mess_t" : MessageType.MESSAGE_TYPE_COMMAND_REPLY,
+              "current_sequence" : self.current_sequence,
+              "current_node_name" : self.current_node,
+              "current_status" : self.current_tick_status,
+              "current_run_state" : self.current_run_state}
 
   def set_value(self, current_sequence, current_node, current_tick_status, current_run_state):
     with self.__lock__:

@@ -1,7 +1,7 @@
 from py_trees.common import Status
 from enum import Enum
 
-from beams.helpers.SharedEnum import SharedEnum
+from beams.sequencer.helpers.SharedEnum import SharedEnum
 '''
 py_trees stores its enums as strings which is painful
 

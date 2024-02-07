@@ -10,7 +10,7 @@ from beams.sequencer.helpers.Worker import Worker
 
 from beams.sequencer.helpers.SharedCommandReply import SharedCommandReply
 from beams.sequencer.remote_calls.sequencer_pb2_grpc import SequencerServicer, add_SequencerServicer_to_server
-from beams.sequencer.remote_calls.sequencer_pb2 import SequenceCommand, AlterState, CommandReply
+from beams.sequencer.remote_calls.sequencer_pb2 import CommandReply
 
 
 class SequenceServer(SequencerServicer, Worker):
@@ -27,13 +27,16 @@ class SequenceServer(SequencerServicer, Worker):
 
   def EnqueueSequence(self, request, context):
     self.sequence_request_queue.put(request)
-    return CommandReply(*self.command_reply.get_value())
+    return CommandReply(**self.command_reply.get_value())
 
   def ChangeRunState(self, request, context):
     """Command a change in run paradigm of the program
     """
     self.run_state_change_queue.put(request)
-    return CommandReply(*self.command_reply_queue.get_value())
+    return CommandReply(**self.command_reply_queue.get_value())
+
+  def RequestHeartBeat(self, request, context):
+    return CommandReply(**self.command_reply_queue.get_value())
 
   def work_func(self):
       port = "50051"

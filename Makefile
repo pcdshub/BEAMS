@@ -1,6 +1,9 @@
 SHELL:=/bin/bash
 VERSION=0x03
 
+.PHONY: gen_grpc
+gen_grpc:
+	@python3 -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. beams/sequencer/remote_calls/sequencer.proto
 
 .PHONY: update_beams
 update_beams:

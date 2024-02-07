@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+// Sequencer Service Definition
+service Sequencer {
+  // Enqueue a sequence command of varying priority
+  rpc EnqueueSequence (SequenceCommand) returns (CommandReply) {}
+  
+  // Command a change in run paradigm of the program
+  rpc ChangeRunState (AlterState) returns (CommandReply) {}
+
+  // Heart beat message for clients
+  rpc RequestHeartBeat(Empty) returns (CommandReply) {}
+}
+
+// Highest level notion of tree requested to be genearted
+enum SequenceType {
+  SELF_TEST = 0;
+  CHANGE_GMD_GAS = 1;
+}
+
+enum RunStateType {
+  UNKOWN = 0;
+  PAUSE = 1; // Pause execution of current command.
+  STOP_AND_SAFE = 2; // Stop execution of current command. 
+  RESUME = 3; // Resume exectution
+  DEBUG = 4; // Put in wait for tick mode
+
+  TICKING = 5; // for the program to communicate back that it is runnnig nominally
+  WAIT_FOR_TICK = 6; // Send tick to make next step in execution
+}
+
+enum MessageType {
+  MESSAGE_TYPE_UNKOWN = 0;
+  MESSAGE_TYPE_ALTER_RUN_STATE = 1; // Highest priority message
+  MESSAGE_TYPE_ENQUEUE_SEQUENCE_PRIORITY = 2; // Insert this task for next execution
+  MESSAGE_TYPE_ENQUEUE_SEQUENCE = 3; // Append this task to end of task queue
+  MESSAGE_TYPE_COMMAND_REPLY = 4;
+}
+
+enum TickStatus {
+  UNKNOWN = 0;
+  RUNNING = 1;
+  SUCCESS = 2;
+  FAILURE = 3;
+}
+
+// For when we use a real programming language.
+message GenericMessage {
+  MessageType mess_t = 1;
+}
+
+// The response message containing the greetings
+message SequenceCommand {
+  MessageType mess_t = 1;
+  SequenceType seq_t = 2;
+}
+
+message AlterState{
+  MessageType mess_t = 1;
+  RunStateType stateToUpdateTo = 2;
+}
+
+message CommandReply {
+  MessageType mess_t = 1;
+  string reply = 2; // for generic stuffs
+  SequenceType current_sequence = 3;
+  string current_node_name = 4;
+  TickStatus current_status = 5;
+}
+
+// Inspired by: https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/empty.proto
+message Empty{
+
+}

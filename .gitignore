@@ -10,3 +10,6 @@ venv/*
 *.txt
 *.csv
 temp/*
+
+# GRPC artifact files
+beams/sequencer/remote_calls/*_pb2*.py*

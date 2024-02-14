@@ -42,3 +42,14 @@ class TestTask:
     for i in range(3):
       con.tick_once()
       time.sleep(0.01)
+
+  def test_condition_node_with_arg(self):
+    def check(val):
+      True if val is True else False
+    value = False
+    con = ConditionNode("con", check, value)
+    py_trees.logging.level = py_trees.logging.Level.DEBUG
+    con.setup()
+    for i in range(3):
+      con.tick_once()
+      time.sleep(0.01)

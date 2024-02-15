@@ -32,7 +32,9 @@ class SequenceServer(SequencerServicer, Worker):
   def ChangeRunState(self, request, context):
     """Command a change in run paradigm of the program
     """
+    print("GOT REQUEST")
     self.run_state_change_queue.put(request)
+    print(f"size of state change queue {self.run_state_change_queue.qsize()}")
     return CommandReply(**self.sequencer_state.get_command_reply())
 
   def RequestHeartBeat(self, request, context):

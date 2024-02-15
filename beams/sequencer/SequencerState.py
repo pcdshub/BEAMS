@@ -1,13 +1,17 @@
 from multiprocessing import Lock, Array, Value
 from beams.sequencer.remote_calls.sequencer_pb2 import SequenceType, RunStateType, MessageType, TickStatus
-from enum import Enum
+from enum import StrEnum
 import logging
 
-SequencerStateVariable = Enum('SequencerStateVariable', 
-                              ["SEQUENCE", 
-                               "NODE_NAME", 
-                               "STATUS",
-                               "RUN_STATE"])
+
+class SequencerStateVariable(StrEnum):
+  """
+  StrEnum values must be kept in line with CommandReply's defined fields in the remote_calls/sequencer.proto file
+  """
+  SEQUENCE = "sequence"
+  NODE_NAME = "node_name"
+  STATUS = "status"
+  RUN_STATE = "run_state"
 
 
 class SequencerState():
@@ -27,17 +31,17 @@ class SequencerState():
     Return such that the dict can be unwaped and passed as kwargs to CommandReply message constructor via double splat op
     """
     with self.__lock__:
-      command_reply = {k : v.value for k , v in self.state_dictionary.items()}
+      command_reply = {k.value : v.value for k , v in self.state_dictionary.items()}
       command_reply.update({"mess_t" : MessageType.MESSAGE_TYPE_COMMAND_REPLY})
       return command_reply
 
   def set_all_values(self, current_sequence: SequenceType, current_node: str, current_tick_status: TickStatus, current_run_state: RunStateType) -> None:
     logging.debug("Acquiring lock for 'set_all_values'")
     with self.__lock__:
-      self.state_dictionary[SequencerStateVariable.current_sequence].value = current_sequence
-      self.state_dictionary[SequencerStateVariable.current_node_name].value = current_node
-      self.state_dictionary[SequencerStateVariable.current_status].value = current_tick_status
-      self.state_dictionary[SequencerStateVariable.current_run_state].value = current_run_state
+      self.state_dictionary[SequencerStateVariable.SEQUENCE].value = current_sequence
+      self.state_dictionary[SequencerStateVariable.NODE_NAME].value = current_node
+      self.state_dictionary[SequencerStateVariable.STATUS].value = current_tick_status
+      self.state_dictionary[SequencerStateVariable.RUN_STATE].value = current_run_state
 
   def set_value(self, state: SequencerStateVariable, value):
     with self.state_dictionary[state].get_lock():

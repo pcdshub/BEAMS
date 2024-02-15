@@ -6,7 +6,7 @@ import argparse
 
 import grpc
 
-from beams.sequencer.remote_calls.sequencer_pb2 import SequenceCommand, AlterState
+from beams.sequencer.remote_calls.sequencer_pb2 import SequenceCommand, AlterState, Empty
 from beams.sequencer.remote_calls.sequencer_pb2_grpc import SequencerStub
 from beams.sequencer.remote_calls.sequencer_pb2 import SequenceType, RunStateType, MessageType, TickStatus
 
@@ -48,9 +48,10 @@ def run():
       response = stub.EnqueueSequence(SequenceCommand(mess_t=MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE, seq_t=args.sequence))
     else:
       p_message_info("HEARTBEAT", "HEARTBEAT")
-      response = stub.RequestHeartBeat()
+      response = stub.RequestHeartBeat(Empty())
 
     logging.debug(response)
+
 
 if __name__ == "__main__":
   logging.basicConfig(level=logging.DEBUG)

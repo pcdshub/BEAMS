@@ -63,10 +63,10 @@ message AlterState{
 
 message CommandReply {
   MessageType mess_t = 1;
-  SequenceType current_sequence = 2;
-  string current_node_name = 3;
-  TickStatus current_status = 4;
-  RunStateType current_run_state = 5;
+  SequenceType sequence = 2;
+  string node_name = 3;
+  TickStatus status = 4;
+  RunStateType run_state = 5;
 }
 
 // Inspired by: https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/empty.proto

@@ -5,7 +5,7 @@ from beams.behavior_tree import ActionNode, ConditionNode, CheckAndDo
 
 
 class TestTask:
-  def test_action_node(self, capsys):
+  def test_check_and_do(self, capsys):
     percentage_complete = Value('i', 0)
 
     def thisjob(comp_condition, volatile_status, **kwargs) -> None:

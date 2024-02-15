@@ -8,35 +8,35 @@ import grpc
 
 from beams.sequencer.helpers.Worker import Worker
 
-from beams.sequencer.helpers.SharedCommandReply import SharedCommandReply
+from beams.sequencer.SequencerState import SequencerState
 from beams.sequencer.remote_calls.sequencer_pb2_grpc import SequencerServicer, add_SequencerServicer_to_server
 from beams.sequencer.remote_calls.sequencer_pb2 import CommandReply
 
 
 class SequenceServer(SequencerServicer, Worker):
-  def __init__(self, command_reply):
+  def __init__(self, sequencer_state):
     self.thread_pool = futures.ThreadPoolExecutor(max_workers=10)
     self.server = grpc.server(self.thread_pool)
     super().__init__("SequenceServer", lambda: self.server.stop(1))
 
     # in queue
-    self.command_reply = command_reply
+    self.sequencer_state = sequencer_state
     # out queue
     self.sequence_request_queue = Queue(maxsize=100) 
     self.run_state_change_queue = Queue(maxsize=100) 
 
   def EnqueueSequence(self, request, context):
     self.sequence_request_queue.put(request)
-    return CommandReply(**self.command_reply.get_value())
+    return CommandReply(**self.sequencer_state.get_command_reply())
 
   def ChangeRunState(self, request, context):
     """Command a change in run paradigm of the program
     """
     self.run_state_change_queue.put(request)
-    return CommandReply(**self.command_reply_queue.get_value())
+    return CommandReply(**self.sequencer_state.get_command_reply())
 
   def RequestHeartBeat(self, request, context):
-    return CommandReply(**self.command_reply_queue.get_value())
+    return CommandReply(**self.sequencer_state.get_command_reply())
 
   def work_func(self):
       port = "50051"
@@ -51,7 +51,7 @@ class SequenceServer(SequencerServicer, Worker):
 
 if __name__ == "__main__":
     logging.basicConfig()
-    p = SequenceServer(SharedCommandReply())
+    p = SequenceServer(SequencerState())
     p.start_work()
 
     time.sleep(5)

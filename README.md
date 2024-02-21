@@ -20,3 +20,6 @@ More to come.
 * `make test_verbose` - runs tests in test directory and prints stdout
 * `make update_beams` - updates the locally install `beams` package
 * `make flake8` - flake check source files
+
+## Hanging TODOs:
+- make a decorator for work functions in beams/sequencer/Worker.py that logs PID

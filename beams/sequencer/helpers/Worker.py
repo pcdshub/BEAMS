@@ -1,7 +1,6 @@
 import logging
 from multiprocessing import Process, Value
 import time
-
 """
 * An base class for child classes whos main function is to support a work thread.
 * Holds volatile `self.do_work` which is intended to handle kill signal
@@ -11,10 +10,15 @@ import time
 
 
 class Worker():
-  def __init__(self, proc_name, stop_func=None):
+  def __init__(self, proc_name, stop_func=None, work_func=None):
     self.do_work = Value('i', False)
     self.proc_name = proc_name
-    self.work_proc = Process(target=self.work_func, name=self.proc_name)
+    # TODO: we may want to decorate work func so it prints proc id...
+    if (work_func is None):
+      self.work_proc = Process(target=self.work_func, name=self.proc_name)
+    else:
+      self.work_func = work_func
+      self.work_proc = Process(target=self.work_func, name=self.proc_name, args=(self,))
     self.stop_func = stop_func
 
   def start_work(self):

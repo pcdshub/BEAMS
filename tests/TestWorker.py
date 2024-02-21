@@ -31,3 +31,14 @@ class TestTask:
     a.start_work()
     a.stop_work()
     assert val.value == 100
+
+  def test_inline_instantation(self):
+    val = Value('i', 10)
+
+    def work_func(self):
+      while (self.do_work.value or val.value < 100):
+        val.value += 10
+    a = Worker("test_worker", work_func=work_func)
+    a.start_work()
+    a.stop_work()
+    assert val.value == 100

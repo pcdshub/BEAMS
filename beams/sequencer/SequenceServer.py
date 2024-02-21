@@ -1,6 +1,7 @@
 from concurrent import futures
 import logging
 import time
+import os
 
 from multiprocessing import Queue
 
@@ -41,14 +42,15 @@ class SequenceServer(SequencerServicer, Worker):
     return CommandReply(**self.sequencer_state.get_command_reply())
 
   def work_func(self):
-      port = "50051"
-      add_SequencerServicer_to_server(self, self.server)
-      self.server.add_insecure_port("[::]:" + port)
-      self.server.start()
-      print("Server started, listening on " + port)
-      while (self.do_work.value):
-        time.sleep(1)
-      print("exitted")
+    print(f"{self.proc_name} running on pid: {os.getpid()}")
+    port = "50051"
+    add_SequencerServicer_to_server(self, self.server)
+    self.server.add_insecure_port("[::]:" + port)
+    self.server.start()
+    print("Server started, listening on " + port)
+    while (self.do_work.value):
+      time.sleep(1)
+    print("exitted")
 
 
 if __name__ == "__main__":

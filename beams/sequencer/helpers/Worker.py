@@ -13,7 +13,8 @@ import time
 class Worker():
   def __init__(self, proc_name, stop_func=None):
     self.do_work = Value('i', False)
-    self.work_proc = Process(target=self.work_func, name=proc_name)
+    self.proc_name = proc_name
+    self.work_proc = Process(target=self.work_func, name=self.proc_name)
     self.stop_func = stop_func
 
   def start_work(self):
@@ -46,6 +47,10 @@ class Worker():
     logging.info(f"Work thread: {self.work_proc.pid} exit")
     '''
     raise NotImplementedError("Implement a work function in the child class!")
+
+  def set_work_func(self, work_func):
+    self.work_func = work_func
+    self.work_proc = Process(target=self.work_func, name=self.proc_name, args=(self,))
 
 
 if __name__ == "__main__":

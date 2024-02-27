@@ -3,15 +3,21 @@ import logging
 import time
 import os
 
-from multiprocessing import Queue
+from multiprocessing import Semaphore
 
 import grpc
 
 from beams.sequencer.helpers.Worker import Worker
-
+from beams.sequencer.helpers.PriorityQueue import PriorityQueue
 from beams.sequencer.SequencerState import SequencerState
 from beams.sequencer.remote_calls.sequencer_pb2_grpc import SequencerServicer, add_SequencerServicer_to_server
-from beams.sequencer.remote_calls.sequencer_pb2 import CommandReply
+from beams.sequencer.remote_calls.sequencer_pb2 import CommandReply, MessageType
+
+message_priority_dict = {
+  MessageType.MESSAGE_TYPE_ALTER_RUN_STATE : 0,
+  MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE_PRIORITY : 1,
+  MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE : 2
+}
 
 
 class SequenceServer(SequencerServicer, Worker):
@@ -23,19 +29,18 @@ class SequenceServer(SequencerServicer, Worker):
     # in queue
     self.sequencer_state = sequencer_state
     # out queue
-    self.sequence_request_queue = Queue(maxsize=100) 
-    self.run_state_change_queue = Queue(maxsize=100) 
+    self.message_queue = PriorityQueue(message_priority_dict)
+    self.message_ready_sem = Semaphore()
 
-  def EnqueueSequence(self, request, context):
-    self.sequence_request_queue.put(request)
-    return CommandReply(**self.sequencer_state.get_command_reply())
+  def EnqueueCommand(self, request, context):
+    mess_t = request.mess_t
+    if (mess_t in message_priority_dict.keys()):
+      self.message_queue.put(request, mess_t)
+      self.message_ready_sem.release()
+    else:
+      logging.error(f"Message type {mess_t} is not prioritized in sequence servers priority dictionary")
+      # TODO: return this info to client via command reply
 
-  def ChangeRunState(self, request, context):
-    """Command a change in run paradigm of the program
-    """
-    print("GOT REQUEST")
-    self.run_state_change_queue.put(request)
-    print(f"size of state change queue {self.run_state_change_queue.qsize()}")
     return CommandReply(**self.sequencer_state.get_command_reply())
 
   def RequestHeartBeat(self, request, context):

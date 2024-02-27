@@ -3,10 +3,7 @@ syntax = "proto3";
 // Sequencer Service Definition
 service Sequencer {
   // Enqueue a sequence command of varying priority
-  rpc EnqueueSequence (SequenceCommand) returns (CommandReply) {}
-  
-  // Command a change in run paradigm of the program
-  rpc ChangeRunState (AlterState) returns (CommandReply) {}
+  rpc EnqueueCommand (GenericCommand) returns (CommandReply) {}
 
   // Heart beat message for clients
   rpc RequestHeartBeat(Empty) returns (CommandReply) {}
@@ -45,7 +42,7 @@ enum TickStatus {
   FAILURE = 3;
 }
 
-// For when we use a real programming language.
+// For when we use a real programming language
 message GenericMessage {
   MessageType mess_t = 1;
 }
@@ -60,6 +57,14 @@ message AlterState{
   MessageType mess_t = 1;
   RunStateType stateToUpdateTo = 2;
 }
+
+message GenericCommand {
+  MessageType mess_t = 1;
+  oneof kind {
+    SequenceCommand seq_m = 2;
+    AlterState alt_m = 3;
+  }
+} 
 
 message CommandReply {
   MessageType mess_t = 1;

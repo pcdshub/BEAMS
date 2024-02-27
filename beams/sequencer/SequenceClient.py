@@ -6,7 +6,7 @@ import argparse
 
 import grpc
 
-from beams.sequencer.remote_calls.sequencer_pb2 import SequenceCommand, AlterState, Empty
+from beams.sequencer.remote_calls.sequencer_pb2 import SequenceCommand, AlterState, GenericCommand, Empty
 from beams.sequencer.remote_calls.sequencer_pb2_grpc import SequencerStub
 from beams.sequencer.remote_calls.sequencer_pb2 import SequenceType, RunStateType, MessageType, TickStatus
 
@@ -31,28 +31,44 @@ def parse_arguments():
   return parser.parse_args()
 
 
-def run():
-  args = parse_arguments()
-  p_message_info = lambda mtype, mvalue : logging.debug(f"Sending messafe of type {mtype} of value {mvalue}")
-  with grpc.insecure_channel('localhost:50051') as channel:
-    stub = SequencerStub(channel)
-    response = None
-    if (args.run_state is not None):
-      p_message_info(MessageType.MESSAGE_TYPE_ALTER_RUN_STATE, args.run_state)
-      response = stub.ChangeRunState(AlterState(mess_t=MessageType.MESSAGE_TYPE_ALTER_RUN_STATE, stateToUpdateTo=args.run_state))
-    elif (args.priority_sequence is not None):
-      p_message_info(MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE_PRIORITY, args.priority_sequence)
-      response = stub.EnqueueSequence(SequenceCommand(mess_t=MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE_PRIORITY, seq_t=args.priority_sequence))
-    elif (args.sequence is not None):
-      p_message_info(MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE, args.sequence)
-      response = stub.EnqueueSequence(SequenceCommand(mess_t=MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE, seq_t=args.sequence))
-    else:
-      p_message_info("HEARTBEAT", "HEARTBEAT")
-      response = stub.RequestHeartBeat(Empty())
+class SequencerClient():
+  def __init__(self, args):
+    self.args = args
 
-    logging.debug(response)
+  def run(self):
+    p_message_info = lambda mtype, mvalue : logging.debug(f"Sending messafe of type {mtype} of value {mvalue}")
+    with grpc.insecure_channel('localhost:50051') as channel:
+      stub = SequencerStub(channel)
+      mt = None
+      mess = None
+      mess_val = None
+      response = None
+
+      if (self.args.run_state is not None):
+        mt = MessageType.MESSAGE_TYPE_ALTER_RUN_STATE
+        mess = args.run_state
+        mess_val = GenericCommand(mess_t=mt, alt_m=AlterState(mess_t=mt, stateToUpdateTo=mess))
+      elif (self.args.priority_sequence is not None):
+        mt = MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE_PRIORITY
+        mess = args.priority_sequence
+        mess_val = GenericCommand(mess_t=mt, seq_m=SequenceCommand(mess_t=mt, seq_t=mess))
+      elif (self.args.sequence is not None):
+        mt = MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE
+        mess = args.sequence
+        mess_val = GenericCommand(mess_t=mt, seq_m=SequenceCommand(mess_t=mt, seq_t=mess))
+
+      if (mt is not None and mess is not None):
+        p_message_info(mt, mess)
+        response = stub.EnqueueCommand(mess_val)
+      else:
+        p_message_info("HEARTBEAT", "HEARTBEAT")
+        response = stub.RequestHeartBeat(Empty())
+
+      logging.debug(response)
 
 
 if __name__ == "__main__":
   logging.basicConfig(level=logging.DEBUG)
-  run()
+  args = parse_arguments()
+  client = SequencerClient(args)
+  client.run()

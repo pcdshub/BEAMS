@@ -20,3 +20,7 @@ test:
 .PHONY: test_verbose
 test_verbose:
 	@source venv/bin/activate && pytest --capture=tee-sys tests/Test*.py
+
+.PHONY: run_sequencer
+run_sequencer:
+	@source venv/bin/activate && python3 beams/sequencer/Sequencer.py

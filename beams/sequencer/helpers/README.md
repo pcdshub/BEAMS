@@ -1,6 +1,10 @@
 # Sequencing Helpers
 Various helper classes oriented around distributing work or sharing variables in a multiproccesing friendly manner
 
+## PriorityQueue
+* Implements a multiprocessing safe binary tree priority queue enabled by the heapq module.
+
+
 ## Worker
 * An base class for child classes whos main function is to support a work thread.
 * Holds volatile `self.do_work` which is intended to handle kill signal
@@ -9,6 +13,3 @@ Various helper classes oriented around distributing work or sharing variables in
 
 ## SharedEnum
 Utility that wraps enum and allows it to be stored in the standard shared Value() type.
-
-## SharedCommandReply
-Utility that wraps the data intended for a protobuf CommandReply packet such that all entities can be updated in a threadsage manner

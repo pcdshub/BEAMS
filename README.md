@@ -23,3 +23,5 @@ More to come.
 
 ## Hanging TODOs:
 - make a decorator for work functions in beams/sequencer/Worker.py that logs PID
+- handle keyboard interrupt kill signal more elegantly
+- can package Queue and Event in single object

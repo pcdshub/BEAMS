@@ -4,17 +4,19 @@ Warning this is not effecient to search, it is a dumb priority queue. If perform
 But also make it a binary tree, you could utilize the heapq library but it kind of sucks
 """
 
-from queue import PriorityQueue as pqueue
-from multiprocessing import Lock
+import heapq
+from multiprocessing import Lock, Pipe, Value
 import os
 
 
 class PriorityQueue:
   def __init__(self, priority_dict):
-    self.__queue__ = pqueue(maxsize=100)
+    self.__queue__ = []
     self.__priority_dict__ = priority_dict
     self.__lock__ = Lock()
-    self.entry_count = 0
+    self.entry_count = Value('d', 0)
+    self.recv_sock, self.send_sock = Pipe(duplex=False)  # object for transfering pqueue between processes
+    self.send_sock.send(self.__queue__)
 
   def get_priority_int(self, prio_enum):
     try:
@@ -25,19 +27,28 @@ class PriorityQueue:
   def put(self, ent, prio_enum):
     print(f"acquiring the put lock on {os.getpid()}")
     with self.__lock__:
-      print("putting it in")
-      self.__queue__.put((self.get_priority_int(prio_enum), 
-                          self.entry_count,
-                          ent))
-      print(self.__queue__)
-      self.entry_count += 1
+      print("getting queue")
+      q = self.recv_sock.recv()
+      print(f"got queue {q}, putting it in")
+      heapq.heappush(q, (self.get_priority_int(prio_enum), 
+                         self.entry_count.value,
+                         ent))
+      print(f"q is now {q}")
+      self.__queue__ = q  # kinda just for posterity
+      self.entry_count.value += 1  # safe due to lock object
+      self.send_sock.send(q)
     print("lock released")
 
   def pop(self):
     print(f"acquiring the lock for pop on {os.getpid()}")
     with self.__lock__:
-      print(self.__queue__)
-      val = self.__queue__.get()
-      print(val)
-      return val[-1]
+      print("getting queue")
+      q = self.recv_sock.recv()
+      print(f"got queue {q}")
+      val = heapq.heappop(q)
+      print(f"got val {val}")
+      self.send_sock.send(q)
+      self.__queue__ = q
+      print(f"new queue {q}")
     print("releasing lock for pop")
+    return val[-1]

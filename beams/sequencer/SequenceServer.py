@@ -30,12 +30,14 @@ class SequenceServer(SequencerServicer, Worker):
     self.sequencer_state = sequencer_state
     # out queue
     self.message_queue = PriorityQueue(message_priority_dict)
-    self.message_ready_sem = Semaphore()
+    self.message_ready_sem = Semaphore(value=0)
 
   def EnqueueCommand(self, request, context):
     mess_t = request.mess_t
     if (mess_t in message_priority_dict.keys()):
+      print(f"putting {request.seq_m.seq_t} of {mess_t} in queue")
       self.message_queue.put(request, mess_t)
+      time.sleep(.1)
       self.message_ready_sem.release()
     else:
       logging.error(f"Message type {mess_t} is not prioritized in sequence servers priority dictionary")
@@ -54,7 +56,7 @@ class SequenceServer(SequencerServicer, Worker):
     self.server.start()
     print("Server started, listening on " + port)
     while (self.do_work.value):
-      time.sleep(1)
+      time.sleep(.1)
     print("exitted")
 
 

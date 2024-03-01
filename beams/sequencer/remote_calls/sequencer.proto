@@ -12,8 +12,9 @@ service Sequencer {
 // Highest level notion of tree requested to be genearted
 enum SequenceType {
   NONE = 0;
-  SELF_TEST = 1;
-  CHANGE_GMD_GAS = 2;
+  SAFE = 1;
+  SELF_TEST = 2;
+  CHANGE_GMD_GAS = 3;
 }
 
 enum RunStateType {

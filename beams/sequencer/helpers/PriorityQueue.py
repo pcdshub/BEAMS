@@ -7,6 +7,7 @@ But also make it a binary tree, you could utilize the heapq library but it kind 
 import heapq
 from multiprocessing import Lock, Pipe, Value
 import os
+import logging
 
 
 class PriorityQueue:
@@ -25,30 +26,30 @@ class PriorityQueue:
       raise KeyError(f"Priority Enum provided {prio_enum} not in priority_dict")
 
   def put(self, ent, prio_enum):
-    print(f"acquiring the put lock on {os.getpid()}")
+    logging.debug(f"acquiring the put lock on {os.getpid()}")
     with self.__lock__:
-      print("getting queue")
+      logging.debug("getting queue")
       q = self.recv_sock.recv()
-      print(f"got queue {q}, putting it in")
+      logging.debug(f"got queue {q}, putting it in")
       heapq.heappush(q, (self.get_priority_int(prio_enum), 
                          self.entry_count.value,
                          ent))
-      print(f"q is now {q}")
+      logging.debug(f"q is now {q}")
       self.__queue__ = q  # kinda just for posterity
       self.entry_count.value += 1  # safe due to lock object
       self.send_sock.send(q)
-    print("lock released")
+    logging.debug("lock released")
 
   def pop(self):
-    print(f"acquiring the lock for pop on {os.getpid()}")
+    logging.debug(f"acquiring the lock for pop on {os.getpid()}")
     with self.__lock__:
-      print("getting queue")
+      logging.debug("getting queue")
       q = self.recv_sock.recv()
-      print(f"got queue {q}")
+      logging.debug(f"got queue {q}")
       val = heapq.heappop(q)
-      print(f"got val {val}")
+      logging.debug(f"got val {val}")
       self.send_sock.send(q)
       self.__queue__ = q
-      print(f"new queue {q}")
-    print("releasing lock for pop")
+      logging.debug(f"new queue {q}")
+    logging.debug("releasing lock for pop")
     return val[-1]

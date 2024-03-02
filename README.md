@@ -20,6 +20,9 @@ More to come.
 * `make test_verbose` - runs tests in test directory and prints stdout
 * `make update_beams` - updates the locally install `beams` package
 * `make flake8` - flake check source files
+* `make gen_grpc` - generates all needed GRPC files
+* `make docker_image` - builds rhel7 docker image with slac-epics base and BEAMS directory
+* `make run_sequener` - launches sequencer engine
 
 ## Hanging TODOs:
 - make a decorator for work functions in beams/sequencer/Worker.py that logs PID

@@ -1,10 +1,10 @@
 from multiprocessing import Lock, Array, Value
 from beams.sequencer.remote_calls.sequencer_pb2 import SequenceType, RunStateType, MessageType, TickStatus
-from enum import StrEnum
+from enum import Enum
 import logging
 
 
-class SequencerStateVariable(StrEnum):
+class SequencerStateVariable(Enum):
   """
   StrEnum values must be kept in line with CommandReply's defined fields in the remote_calls/sequencer.proto file
   """

@@ -3,3 +3,4 @@ py-trees
 flake8
 pytest
 grpcio-tools
+caproto

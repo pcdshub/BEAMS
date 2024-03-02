@@ -24,3 +24,11 @@ test_verbose:
 .PHONY: run_sequencer
 run_sequencer:
 	@source venv/bin/activate && python3 beams/sequencer/Sequencer.py
+
+.PHONY: docker_build
+docker_build:
+	@docker build -f docker/Dockerfile --tag beams_playpen .
+
+.PHONY: docker_run
+docker_run:
+	@docker run --rm -it --hostname "psbuild-rhel7" beams_playpen || true

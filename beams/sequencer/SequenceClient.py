@@ -55,10 +55,11 @@ class SequencerClient():
       elif (self.args.sequence is not None):
         mt = MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE
         mess = args.sequence
+        print(f"Arg provided {args.sequence}")
         mess_val = GenericCommand(mess_t=mt, seq_m=SequenceCommand(mess_t=mt, seq_t=mess))
 
       if (mt is not None and mess is not None):
-        p_message_info(mt, mess)
+        p_message_info(mt, mess_val)
         response = stub.EnqueueCommand(mess_val)
       else:
         p_message_info("HEARTBEAT", "HEARTBEAT")

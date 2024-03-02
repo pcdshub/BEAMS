@@ -16,10 +16,11 @@ class TestTask:
   def test_get_command_reply(self):
     x = SequencerState()
     y = x.get_command_reply()
-    assert y[SequencerStateVariable.SEQUENCE] == SequenceType.NONE
-    assert y[SequencerStateVariable.NODE_NAME] == b"None"
-    assert y[SequencerStateVariable.STATUS] == TickStatus.UNKNOWN
-    assert y[SequencerStateVariable.RUN_STATE] == RunStateType.STATE_UNKNOWN
+    print(y)
+    assert y[SequencerStateVariable.SEQUENCE.value] == SequenceType.NONE
+    assert y[SequencerStateVariable.NODE_NAME.value] == b"None"
+    assert y[SequencerStateVariable.STATUS.value] == TickStatus.UNKNOWN
+    assert y[SequencerStateVariable.RUN_STATE.value] == RunStateType.STATE_UNKNOWN
     assert y["mess_t"] == MessageType.MESSAGE_TYPE_COMMAND_REPLY
 
   def test_multi_access(self):

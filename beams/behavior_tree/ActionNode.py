@@ -9,7 +9,7 @@ class ActionNode(py_trees.behaviour.Behaviour):
     super(ActionNode, self).__init__(name)
     self.work_func = work_func
     self.comp_condition = completion_condition
-    print(type(self.status))
+    # print(type(self.status))
     self.__volatile_status__ = VolatileStatus(self.status)
     self.additional_args = kwargs
     self.logger.debug("%s.__init__()" % (self.__class__.__name__))
@@ -26,12 +26,13 @@ class ActionNode(py_trees.behaviour.Behaviour):
         target=self.work_func, args=(self.comp_condition, self.__volatile_status__), kwargs=self.additional_args
     )
     atexit.register(self.terminate, py_trees.common.Status.FAILURE)
-    print("Regardsless this should run")
+    # print("Regardsless this should run")
     self.work_proc.start()
 
   def initialise(self) -> None:
     """ From docs the expected behavior is that status after initialize is running
     """
+
     current_status = self.__volatile_status__.get_value()
     if current_status == py_trees.common.Status.INVALID:
       self.__volatile_status__.set_value(py_trees.common.Status.RUNNING)

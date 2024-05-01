@@ -12,6 +12,7 @@ from beams.sequencer.SequenceServer import SequenceServer
 
 from beams.tree_generator.TreeGenerator import GenerateTreeFromRequest
 
+
 class Sequencer(Worker):
   def __init__(self):
     super().__init__("Sequencer")
@@ -64,6 +65,7 @@ class Sequencer(Worker):
           print(f"status of tick: {n.status}")
 
       print(f"{job} done")
+
 
 if __name__ == "__main__":
   s = Sequencer()

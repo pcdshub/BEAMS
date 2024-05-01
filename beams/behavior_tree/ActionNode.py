@@ -23,9 +23,11 @@ class ActionNode(py_trees.behaviour.Behaviour):
         "%s.setup()->connections to an external process" % (self.__class__.__name__)
     )
     self.work_proc = multiprocessing.Process(
-        target=self.work_func, args=(self.comp_condition, self.__volatile_status__), kwargs=self.additional_args
+        target=self.work_func, 
+        args=(self.comp_condition, self.__volatile_status__), 
+        kwargs=self.additional_args
     )
-    atexit.register(self.terminate, py_trees.common.Status.FAILURE)
+    atexit.register(self.terminate, py_trees.common.Status.FAILURE)  # TODO(josh): make sure this does what we think it doess: cleans up resources when it dies
     # print("Regardsless this should run")
     self.work_proc.start()
 

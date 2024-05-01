@@ -10,7 +10,7 @@ class TestTask:
 
     def thisjob(comp_condition, volatile_status, **kwargs) -> None:
       try:
-        # grabbing intended keyword argument. Josh's less than pythonic mechanism for closures
+        # TODO: grabbing intended keyword argument. Josh's less than pythonic mechanism for closures
         percentage_complete = kwargs["percentage_complete"]
         while not comp_condition(percentage_complete.value):
           py_trees.console.logdebug(f"yuh {percentage_complete.value}, {volatile_status.get_value()}")

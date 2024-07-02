@@ -37,7 +37,7 @@ class SequencerClient():
 
   def run(self):
     p_message_info = lambda mtype, mvalue : logging.debug(f"Sending messafe of type {mtype} of value {mvalue}")
-    with grpc.insecure_channel('localhost:50051') as channel:
+    with grpc.insecure_channel('localhost:50051') as channel:  # TODO: obviously not this. Grab from config
       stub = SequencerStub(channel)
       mt = None
       mess = None

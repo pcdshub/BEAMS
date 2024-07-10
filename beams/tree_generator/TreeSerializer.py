@@ -24,6 +24,8 @@ class NodeType(Enum):
   ACTION = "Action"
   CONDITION = "Condition"
   CHECKandDO = "CheckAndDo"
+  FALLBACK = "Fallback"
+  SEQUENCE = "Sequence"
   NONE = "None"
 
 
@@ -66,6 +68,16 @@ class ConditonNodeEntry(_NodeEntry):
 
 
 @dataclass
+class FallbackEntry(_NodeEntry):
+  n_type : NodeType = NodeType.FALLBACK
+
+
+@dataclass
+class SequenceEntry(_NodeEntry):
+  n_type : NodeType = NodeType.SEQUENCE
+
+
+@dataclass
 class CheckEntry():
   Pv: str
   Thresh: int
@@ -84,13 +96,11 @@ class CheckAndDoNodeEntry(_NodeEntry):
   check_entry: CheckEntry
   do_entry: DoEntry
   n_type : NodeType = NodeType.CHECKandDO
-  children: Optional[List[_NodeEntry]] = None
 
   def get_tree(self):
       if (self.check_and_do_type == CheckAndDoNodeType.CHECKPV):
         # Determine what the lambda will caput:
         caput_lambda = lambda : 0
-        print(f"DO ENTRY MOOOODE: {self.do_entry.Mode}")
         # if we are in increment mode, produce a function that can increment current value
         if (self.do_entry.Mode == CheckAndDoNodeTypeMode.INC):
           caput_lambda = lambda x : x + self.do_entry.Value
@@ -105,7 +115,7 @@ class CheckAndDoNodeEntry(_NodeEntry):
             value = caget(self.check_entry.Pv)
             if (value >= self.check_entry.Thresh):  # TODO: we are implicitly connecting the check thresh value with the lamda produced from the do. Maybe fix
               volatile_status.set_value(py_trees.common.Status.SUCCESS)
-            py_trees.console.logdebug(f"Value is {value}, BT Status: {volatile_status.get_value()}")
+            py_trees.console.logdebug(f"{self.name}: Value is {value}, BT Status: {volatile_status.get_value()}")
             caput(self.do_entry.Pv, caput_lambda(value))
             time.sleep(0.01)
         
@@ -122,3 +132,21 @@ class CheckAndDoNodeEntry(_NodeEntry):
         check_and_do_node.setup()
 
         return check_and_do_node
+
+
+# TODO: Ask if we want this and beams.beahvior_tree.CheckAndDo to share a baseclass...
+@dataclass
+class TreeSpec():
+  name : str
+  children: Optional[List[CheckAndDoNodeEntry]] = None
+
+  def get_tree(self):
+    children_trees = [x.get_tree().root for x in self.children]
+    print(children_trees)
+    self.root = py_trees.composites.Sequence(self.name, memory=False)
+    self.root.add_children(children_trees)
+    self.setup()
+    return self
+
+  def setup(self):
+    self.root.setup_with_descendants()

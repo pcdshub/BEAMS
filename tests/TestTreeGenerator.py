@@ -5,7 +5,7 @@ import py_trees
 from epics import caget
 
 from beams.tree_generator.TreeGenerator import TreeGenerator
-from beams.tree_generator.TreeSerializer import CheckAndDoNodeEntry, CheckAndDoNodeType, CheckAndDoNodeTypeMode, CheckEntry, DoEntry
+from beams.tree_generator.TreeSerializer import CheckAndDoNodeEntry, CheckAndDoNodeType, CheckAndDoNodeTypeMode, CheckEntry, DoEntry, TreeSpec
 
 
 class TestTreeGenerator():
@@ -37,4 +37,23 @@ class TestTreeGenerator():
     rel_val = caget("PERC:COMP")
     assert rel_val >= 100
 
-    ioc_proc.kill()
+    ioc_proc.terminate()
+
+  def test_father_tree_execution(self):
+    fname = "tests/artifacts/eggs2.json"
+    tg = TreeGenerator(fname, TreeSpec)
+    tree = tg.get_tree_from_config()
+
+    ioc_proc = Popen(["python3", "tests/mock_iocs/ImagerNaysh.py"])
+
+    while (tree.root.status != py_trees.common.Status.SUCCESS and tree.root.status != py_trees.common.Status.FAILURE): 
+      for n in tree.root.tick():
+        print(f"ticking: {n}")
+        time.sleep(0.05)
+        print(f"status of tick: {n.status}")
+    
+    check_insert = caget("RET:INSERT")
+
+    assert check_insert == 1
+
+    ioc_proc.terminate()

@@ -2,6 +2,7 @@ import py_trees
 import atexit
 import multiprocessing
 from beams.behavior_tree.VolatileStatus import VolatileStatus
+import os
 
 
 class ActionNode(py_trees.behaviour.Behaviour):
@@ -27,8 +28,8 @@ class ActionNode(py_trees.behaviour.Behaviour):
         args=(self.comp_condition, self.__volatile_status__), 
         kwargs=self.additional_args
     )
-    atexit.register(self.terminate, py_trees.common.Status.FAILURE)  # TODO(josh): make sure this does what we think it doess: cleans up resources when it dies
-    # print("Regardsless this should run")
+    # TODO(josh): I am still not happy with my understanding of what this is doing... potential problem point
+    atexit.register(self.work_proc.terminate)  
     self.work_proc.start()
 
   def initialise(self) -> None:
@@ -56,8 +57,9 @@ class ActionNode(py_trees.behaviour.Behaviour):
         )
     return new_status
 
+  # Note: this function does not seem to be procedurally called by the pytrees library. Relfect on  this.
   def terminate(self, new_status: py_trees.common.Status) -> None:
-      """Nothing to clean up in this example."""
+      print(f"TERMINATE CALLED ON {self.name}, pid: {os.getpid()}")
       if self.work_proc.is_alive():
         self.work_proc.terminate()
         self.logger.debug(

@@ -14,6 +14,7 @@ class TestTask:
     def thisjob(comp_condition, volatile_status, **kwargs) -> None:
       try:
         # grabbing intended keyword argument. Josh's less than pythonic mechanism for closures
+        volatile_status.set_value(py_trees.common.Status.RUNNING)
         percentage_complete = kwargs["percentage_complete"]
         while not comp_condition(percentage_complete.value):
           py_trees.console.logdebug(f"yuh {percentage_complete.value}, {volatile_status.get_value()}")
@@ -29,8 +30,8 @@ class TestTask:
     action = ActionNode("action", thisjob, comp_cond, percentage_complete=percentage_complete)
     action.setup()
     for i in range(20):
-      action.tick_once()
       time.sleep(0.01)
+      action.tick_once()
 
     assert percentage_complete.value == 100
 

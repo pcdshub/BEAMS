@@ -5,8 +5,10 @@ from apischema import ValidationError, deserialize, serialize
 from apischema.json_schema import deserialization_schema
 from typing import Optional, List, Union
 from enum import Enum
+from multiprocessing import Event, Lock
 import json
 import time
+import os
 
 from epics import caput, caget
 import py_trees
@@ -15,30 +17,6 @@ import py_trees
 from beams.behavior_tree.ActionNode import ActionNode
 from beams.behavior_tree.CheckAndDo import CheckAndDo
 from beams.behavior_tree.ConditionNode import ConditionNode
-
-config_file_name = "config.json"
-
-
-# Define the ContactType enum
-class NodeType(Enum):
-  ACTION = "Action"
-  CONDITION = "Condition"
-  CHECKandDO = "CheckAndDo"
-  FALLBACK = "Fallback"
-  SEQUENCE = "Sequence"
-  NONE = "None"
-
-
-class ActionNodeType(Enum):
-  CHECKPV = "CheckPV"
-
-
-class ConditionNodeType(Enum):
-  CHECKPV = "CheckPV"
-
-
-class CheckAndDoNodeType(Enum):
-  CHECKPV = "CheckPV"
 
 
 class CheckAndDoNodeTypeMode(Enum):
@@ -49,9 +27,7 @@ class CheckAndDoNodeTypeMode(Enum):
 # Define a schema with standard dataclasses
 @dataclass
 class _NodeEntry:
-  # id: UUID  # TODO: in the future use as a hash / version control mechanism per document
   name: str
-  # n_type: NodeType  # TODO: python is toilsome and makes inheritence weird sometimes. More related to apischema in this case but still sucks
   
   def get_tree(self):
       raise NotImplementedError("Cannot get tree from abstract base class!") 
@@ -59,22 +35,16 @@ class _NodeEntry:
 
 @dataclass
 class ActionNodeEntry(_NodeEntry):
-  n_type : NodeType = NodeType.ACTION
+  
+  class ActionNodeType(Enum):
+    CHECKPV = "CheckPV"
 
 
 @dataclass
 class ConditonNodeEntry(_NodeEntry):
-  n_type : NodeType = NodeType.CONDITION
 
-
-@dataclass
-class FallbackEntry(_NodeEntry):
-  n_type : NodeType = NodeType.FALLBACK
-
-
-@dataclass
-class SequenceEntry(_NodeEntry):
-  n_type : NodeType = NodeType.SEQUENCE
+  class ConditionNodeType(Enum):
+    CHECKPV = "CheckPV"
 
 
 @dataclass
@@ -92,13 +62,16 @@ class DoEntry():
 
 @dataclass
 class CheckAndDoNodeEntry(_NodeEntry):
+
+  class CheckAndDoNodeType(Enum):
+    CHECKPV = "CheckPV"
+
   check_and_do_type: CheckAndDoNodeType
   check_entry: CheckEntry
   do_entry: DoEntry
-  n_type : NodeType = NodeType.CHECKandDO
 
   def get_tree(self):
-      if (self.check_and_do_type == CheckAndDoNodeType.CHECKPV):
+      if (self.check_and_do_type == CheckAndDoNodeEntry.CheckAndDoNodeType.CHECKPV):
         # Determine what the lambda will caput:
         caput_lambda = lambda : 0
         # if we are in increment mode, produce a function that can increment current value
@@ -108,16 +81,25 @@ class CheckAndDoNodeEntry(_NodeEntry):
         elif (self.do_entry.Mode == CheckAndDoNodeTypeMode.SET):
           caput_lambda = lambda x : self.do_entry.Value
 
+        wait_for_tick = Event()
+        wait_for_tick_lock = Lock()
+
         # Work function generator for DO of check and do
         def update_pv(comp_condition, volatile_status, **kwargs):
+          py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} from node: {self.name}")
+          wait_for_tick.wait()
+
+          # Set to running
+          
           value = 0
-          while not comp_condition(value):
+          while not comp_condition(value):  # TODO check work_gate.is_set()
+            py_trees.console.logdebug(f"CALLING CAGET FROM {os.getpid()} from node: {self.name}")
             value = caget(self.check_entry.Pv)
             if (value >= self.check_entry.Thresh):  # TODO: we are implicitly connecting the check thresh value with the lamda produced from the do. Maybe fix
               volatile_status.set_value(py_trees.common.Status.SUCCESS)
             py_trees.console.logdebug(f"{self.name}: Value is {value}, BT Status: {volatile_status.get_value()}")
             caput(self.do_entry.Pv, caput_lambda(value))
-            time.sleep(0.01)
+            time.sleep(0.1)  # TODO(josh): this is a very important hard coded constant, reflcect on where to place with more visibility
         
         # TODO: here is where we can build more complex trees
         # Build Check Node
@@ -126,7 +108,11 @@ class CheckAndDoNodeEntry(_NodeEntry):
 
         # Build Do Node
         comp_cond = lambda check_val: check_val > self.check_entry.Thresh
-        action_node = ActionNode(f"{self.name}_do", update_pv, comp_cond)
+        action_node = ActionNode(name=f"{self.name}_do", 
+                                 work_func=update_pv, 
+                                 completion_condition=comp_cond, 
+                                 work_gate=wait_for_tick,
+                                 work_lock=wait_for_tick_lock)
 
         check_and_do_node = CheckAndDo(f"{self.name}_check_and_do_root", condition_node, action_node)
         check_and_do_node.setup()
@@ -143,7 +129,7 @@ class TreeSpec():
   def get_tree(self):
     children_trees = [x.get_tree().root for x in self.children]
     print(children_trees)
-    self.root = py_trees.composites.Sequence(self.name, memory=False)
+    self.root = py_trees.composites.Sequence(self.name, memory=True)
     self.root.add_children(children_trees)
     self.setup()
     return self

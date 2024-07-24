@@ -15,5 +15,5 @@ class ConditionNode(py_trees.behaviour.Behaviour):
       ret = py_trees.common.Status.SUCCESS
     else:
       ret = py_trees.common.Status.FAILURE
-    self.logger.debug(py_trees.console.cyan + f"Ticking: {self.name} results in {ret}")
+    py_trees.console.logdebug(py_trees.console.cyan + f"Ticking: {self.name} results in {ret}")
     return ret

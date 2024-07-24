@@ -9,17 +9,15 @@ class TestTask:
     percentage_complete = Value('i', 0)
 
     def thisjob(comp_condition, volatile_status, **kwargs) -> None:
-      try:
-        # TODO: grabbing intended keyword argument. Josh's less than pythonic mechanism for closures
-        percentage_complete = kwargs["percentage_complete"]
-        while not comp_condition(percentage_complete.value):
-          py_trees.console.logdebug(f"yuh {percentage_complete.value}, {volatile_status.get_value()}")
-          percentage_complete.value += 10
-          if percentage_complete.value == 100:
-            volatile_status.set_value(py_trees.common.Status.SUCCESS)
-          time.sleep(0.001)
-      except KeyboardInterrupt:
-        pass
+      # TODO: grabbing intended keyword argument. Josh's less than pythonic mechanism for closures
+      volatile_status.set_value(py_trees.common.Status.RUNNING)
+      percentage_complete = kwargs["percentage_complete"]
+      while not comp_condition(percentage_complete.value):
+        py_trees.console.logdebug(f"yuh {percentage_complete.value}, {volatile_status.get_value()}")
+        percentage_complete.value += 10
+        if percentage_complete.value == 100:
+          volatile_status.set_value(py_trees.common.Status.SUCCESS)
+        time.sleep(0.001)
 
     py_trees.logging.level = py_trees.logging.Level.DEBUG
     comp_cond = lambda x: x == 100
@@ -31,8 +29,8 @@ class TestTask:
     candd = CheckAndDo.CheckAndDo("yuhh", check, action)
     candd.setup()
 
-    for i in range(1, 4):
-      candd.root.tick_once()
+    for i in range(1, 10):
       time.sleep(.01)
+      candd.root.tick_once()
 
     assert percentage_complete.value == 100

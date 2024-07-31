@@ -1,0 +1,43 @@
+{% set package_name = "beams" %}
+{% set import_name = "beams" %}
+{% set version = load_file_regex(load_file=os.path.join(import_name, "_version.py"), regex_pattern=".*version = '(\S+)'").group(1) %}
+
+package:
+  name: {{ package_name }}
+  version: {{ version }}
+
+source:
+  path: ..
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+
+requirements:
+  build:
+    - python >=3.9
+    - pip
+    - setuptools_scm
+  run:
+    - python >=3.9
+    - apischema
+    - grpcio-tools
+    - py-trees
+    - pyepics
+
+test:
+  imports:
+    - {{ import_name }}
+  requires:
+    - caproto
+    - coverage
+    - pytest
+    - sphinx
+    - sphinx_rtd_theme
+
+about:
+  home: https://github.com/pcdshub/beams
+  license: LicenseRef-BSD-3-Clause-SLAC
+  license_family: BSD
+  summary:

@@ -15,11 +15,11 @@ flake8:
 
 .PHONY: test
 test:
-	@source venv/bin/activate && pytest
+	@source venv/bin/activate && pytest beams/tests/Test*
 
 .PHONY: test_verbose
 test_verbose:
-	@source venv/bin/activate && pytest --capture=tee-sys
+	@source venv/bin/activate && pytest --capture=tee-sys beams/tests/Test*
 
 .PHONY: run_sequencer
 run_sequencer:

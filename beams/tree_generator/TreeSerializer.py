@@ -103,8 +103,13 @@ class CheckAndDoNodeEntry(_NodeEntry):
         
         # TODO: here is where we can build more complex trees
         # Build Check Node
-        check_lambda = lambda : caget(self.check_entry.Pv) >= self.check_entry.Thresh
-        condition_node = ConditionNode(f"{self.name}_check", check_lambda)
+        def check_func():
+          val = caget(self.check_entry.Pv)
+          if val is None:
+            return False
+          return val >= self.check_entry.Thresh
+
+        condition_node = ConditionNode(f"{self.name}_check", check_func)
 
         # Build Do Node
         comp_cond = lambda check_val: check_val > self.check_entry.Thresh

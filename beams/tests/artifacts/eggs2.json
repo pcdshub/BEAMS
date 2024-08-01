@@ -1,0 +1,31 @@
+{
+  "name": "fake_reticle",
+  "children": [
+    {
+      "name": "ret_find",
+      "check_and_do_type": "CheckPV",
+      "check_entry": {
+        "Pv": "RET:FOUND",
+        "Thresh": 1
+      },
+      "do_entry": {
+        "Pv": "RET:FOUND",
+        "Mode": "SET",
+        "Value": 1
+      }
+    },
+    {
+      "name": "ret_insert",
+      "check_and_do_type": "CheckPV",
+      "check_entry": {
+        "Pv": "RET:INSERT",
+        "Thresh": 1
+      },
+      "do_entry": {
+        "Pv": "RET:INSERT",
+        "Mode": "SET",
+        "Value": 1
+      }
+    }
+  ]
+}

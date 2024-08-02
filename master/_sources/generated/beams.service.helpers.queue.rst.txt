@@ -1,0 +1,12 @@
+beams.service.helpers.queue
+===========================
+
+.. automodule:: beams.service.helpers.queue
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      PriorityQueue
+   

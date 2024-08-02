@@ -1,0 +1,13 @@
+beams.service.remote\_calls.generic\_message\_pb2
+=================================================
+
+.. automodule:: beams.service.remote_calls.generic_message_pb2
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Empty
+      GenericMessage
+   

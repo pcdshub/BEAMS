@@ -1,0 +1,15 @@
+beams.service.remote\_calls.behavior\_tree\_pb2
+===============================================
+
+.. automodule:: beams.service.remote_calls.behavior_tree_pb2
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BehaviorTreeUpdateMessage
+      NodeId
+      NodeInfo
+      TreeDetails
+   

@@ -1,0 +1,15 @@
+beams.service.remote\_calls.command\_pb2
+========================================
+
+.. automodule:: beams.service.remote_calls.command_pb2
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AckNodeMessage
+      CommandMessage
+      LoadNewTreeMessage
+      TickConfigurationMessage
+   

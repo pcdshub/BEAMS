@@ -1,0 +1,12 @@
+beams.widgets.action
+====================
+
+.. automodule:: beams.widgets.action
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SetPVActionWidget
+   

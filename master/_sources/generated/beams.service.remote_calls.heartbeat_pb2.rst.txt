@@ -1,0 +1,12 @@
+beams.service.remote\_calls.heartbeat\_pb2
+==========================================
+
+.. automodule:: beams.service.remote_calls.heartbeat_pb2
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      HeartBeatReply
+   

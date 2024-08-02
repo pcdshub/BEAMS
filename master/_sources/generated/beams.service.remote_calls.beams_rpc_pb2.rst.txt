@@ -1,0 +1,6 @@
+beams.service.remote\_calls.beams\_rpc\_pb2
+===========================================
+
+.. automodule:: beams.service.remote_calls.beams_rpc_pb2
+
+   

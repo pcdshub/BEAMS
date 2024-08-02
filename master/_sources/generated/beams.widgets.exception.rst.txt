@@ -1,0 +1,24 @@
+beams.widgets.exception
+=======================
+
+.. automodule:: beams.widgets.exception
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      excepthook
+      install
+      only_main_thread
+      raise_to_operator
+      uninstall
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      DefaultExceptionNotifier
+      ExceptionDispatcher
+      fake_tb
+   

@@ -1,0 +1,20 @@
+beams.service.remote\_calls.beams\_rpc\_pb2\_grpc
+=================================================
+
+.. automodule:: beams.service.remote_calls.beams_rpc_pb2_grpc
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      add_BEAMS_rpcServicer_to_server
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BEAMS_rpc
+      BEAMS_rpcServicer
+      BEAMS_rpcStub
+   

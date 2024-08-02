@@ -1,0 +1,12 @@
+beams.service.rpc\_client
+=========================
+
+.. automodule:: beams.service.rpc_client
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      RPCClient
+   

@@ -1,0 +1,18 @@
+beams.widgets.base
+==================
+
+.. automodule:: beams.widgets.base
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_embedded_widget
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      EmbeddedNodeWidget
+   

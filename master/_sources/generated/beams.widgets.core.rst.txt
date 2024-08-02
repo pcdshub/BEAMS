@@ -1,0 +1,18 @@
+beams.widgets.core
+==================
+
+.. automodule:: beams.widgets.core
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      insert_widget
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      DesignerDisplay
+   

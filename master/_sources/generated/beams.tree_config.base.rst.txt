@@ -1,0 +1,14 @@
+beams.tree\_config.base
+=======================
+
+.. automodule:: beams.tree_config.base
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BaseItem
+      BehaviorTreeItem
+      ExternalItem
+   

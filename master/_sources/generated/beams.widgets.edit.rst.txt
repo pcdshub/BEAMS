@@ -1,0 +1,12 @@
+beams.widgets.edit
+==================
+
+.. automodule:: beams.widgets.edit
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      EditPage
+   

@@ -1,0 +1,12 @@
+beams.service.helpers.timer
+===========================
+
+.. automodule:: beams.service.helpers.timer
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Timer
+   

@@ -1,0 +1,12 @@
+beams.service.helpers.worker
+============================
+
+.. automodule:: beams.service.helpers.worker
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Worker
+   

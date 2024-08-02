@@ -1,0 +1,6 @@
+beams.widgets.\_\_init\_\_
+==========================
+
+.. currentmodule:: beams.widgets
+
+.. autodata:: __init__

@@ -1,0 +1,12 @@
+beams.service.helpers.enum
+==========================
+
+.. automodule:: beams.service.helpers.enum
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SharedEnum
+   

@@ -1,0 +1,21 @@
+﻿beams.widgets
+=============
+
+.. automodule:: beams.widgets
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+    __init__
+   action
+   base
+   core
+   edit
+   exception
+   node_models
+   qt_models
+   window

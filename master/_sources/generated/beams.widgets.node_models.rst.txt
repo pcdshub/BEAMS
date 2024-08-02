@@ -1,0 +1,26 @@
+beams.widgets.node\_models
+==========================
+
+.. automodule:: beams.widgets.node_models
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      add_items_to_registry
+      create_editor_view
+      gather_models
+      tree_from_graph
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BeamsNode
+      BlankNodeData
+      LeafNodeModel
+      MultiChildNodeModel
+      RootNodeModel
+      TreeNodeMixin
+   

@@ -1,0 +1,14 @@
+beams.widgets.qt\_models
+========================
+
+.. automodule:: beams.widgets.qt_models
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BehaviorTreeModel
+      QtBTreeItem
+      TreeHeader
+   

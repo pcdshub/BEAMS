@@ -1,0 +1,17 @@
+beams.tree\_config.composite
+============================
+
+.. automodule:: beams.tree_config.composite
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BaseSequenceItem
+      ParallelItem
+      ParallelMode
+      SelectorItem
+      SequenceConditionItem
+      SequenceItem
+   

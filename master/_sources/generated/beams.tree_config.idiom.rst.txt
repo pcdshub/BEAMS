@@ -1,0 +1,13 @@
+beams.tree\_config.idiom
+========================
+
+.. automodule:: beams.tree_config.idiom
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      CheckAndDoItem
+      UseCheckConditionItem
+   

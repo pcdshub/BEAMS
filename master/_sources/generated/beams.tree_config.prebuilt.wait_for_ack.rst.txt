@@ -1,0 +1,12 @@
+beams.tree\_config.prebuilt.wait\_for\_ack
+==========================================
+
+.. automodule:: beams.tree_config.prebuilt.wait_for_ack
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      WaitForAckNodeItem
+   

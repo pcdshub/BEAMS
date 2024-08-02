@@ -1,0 +1,20 @@
+beams.service.rpc\_handler
+==========================
+
+.. automodule:: beams.service.rpc_handler
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_tree_from_treetickerdict
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      BeamsService
+      RPCHandler
+      TreeIdKey
+   

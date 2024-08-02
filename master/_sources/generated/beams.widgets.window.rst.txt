@@ -1,0 +1,12 @@
+beams.widgets.window
+====================
+
+.. automodule:: beams.widgets.window
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      MainWindow
+   

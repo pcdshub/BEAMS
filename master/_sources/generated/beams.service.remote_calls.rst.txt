@@ -1,0 +1,18 @@
+beams.service.remote\_calls
+===========================
+
+.. automodule:: beams.service.remote_calls
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   beams_rpc_pb2
+   beams_rpc_pb2_grpc
+   behavior_tree_pb2
+   command_pb2
+   generic_message_pb2
+   heartbeat_pb2

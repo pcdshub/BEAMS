@@ -1,0 +1,11 @@
+[run]
+source =
+    beams
+[report]
+omit =
+    #versioning
+    .*version.*
+    *_version.py
+    #tests
+    *test*
+    beams/tests/*

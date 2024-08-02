@@ -12,7 +12,7 @@ from beams.tree_generator.TreeSerializer import CheckAndDoNodeEntry, CheckAndDoN
 
 class TestTreeGenerator():
   def test_tree_obj_ser(self):
-    fname = "tests/artifacts/eggs.json"
+    fname = "beams/tests/artifacts/eggs.json"
     tg = TreeGenerator(fname, CheckAndDoNodeEntry)
 
     ce = CheckEntry(Pv="PERC:COMP", Thresh=100)
@@ -22,11 +22,11 @@ class TestTreeGenerator():
     assert tg.tree_spec == eg
 
   # def test_tree_obj_execution(self):
-  #   fname = "tests/artifacts/eggs.json"
+  #   fname = "beams/tests/artifacts/eggs.json"
   #   tg = TreeGenerator(fname, CheckAndDoNodeEntry)
 
   #   # start mock IOC # NOTE: assumes test is being run from top level of
-  #   ioc_proc = Popen([sys.executable, "tests/mock_iocs/SelfTestIOC.py"])
+  #   ioc_proc = Popen([sys.executable, "beams/tests/mock_iocs/SelfTestIOC.py"])
     
   #   tree = tg.get_tree_from_config()
 
@@ -51,10 +51,10 @@ class TestTreeGenerator():
   #       print('IOC has exited')
 
   def test_father_tree_execution(self):
-    ioc_proc = Popen([sys.executable, "tests/mock_iocs/ImagerNaysh.py"])
+    ioc_proc = Popen([sys.executable, "beams/tests/mock_iocs/ImagerNaysh.py"])
     time.sleep(1)
 
-    fname = "tests/artifacts/eggs2.json"
+    fname = "beams/tests/artifacts/eggs2.json"
     tg = TreeGenerator(fname, TreeSpec)
     tree = tg.get_tree_from_config()
 

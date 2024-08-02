@@ -1,0 +1,13 @@
+{
+  "name": "self_test",
+  "check_and_do_type": "CheckPV",
+  "check_entry": {
+    "Pv": "PERC:COMP",
+    "Thresh": 100
+  },
+  "do_entry": {
+    "Pv": "PERC:COMP",
+    "Mode": "INC",
+    "Value": 10
+  }
+}

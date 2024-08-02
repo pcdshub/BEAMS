@@ -13,7 +13,7 @@ class TestSerializer:
     
     ser = serialize(CheckAndDoNodeEntry, eg)
     
-    fname = "tests/artifacts/eggs.json"
+    fname = "beams/tests/artifacts/eggs.json"
 
     with open(fname, 'w') as fd:
       json.dump(ser, fd, indent=2)
@@ -42,7 +42,7 @@ class TestSerializer:
     eg_root = TreeSpec(name="fake_reticle", 
                        children=[eg1, eg2])
     
-    fname = "tests/artifacts/eggs2.json"
+    fname = "beams/tests/artifacts/eggs2.json"
     ser = serialize(TreeSpec, eg_root)
     with open(fname, 'w') as fd:
       json.dump(ser, fd, indent=2)

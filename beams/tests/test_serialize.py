@@ -1,7 +1,10 @@
 import json
-from apischema import serialize, deserialize
-from beams.tree_generator.TreeSerializer \
-  import CheckEntry, DoEntry, CheckAndDoNodeEntry, CheckAndDoNodeTypeMode, TreeSpec
+
+from apischema import deserialize, serialize
+
+from beams.tree_generator.TreeSerializer import (CheckAndDoNodeEntry,
+                                                 CheckAndDoNodeTypeMode,
+                                                 CheckEntry, DoEntry, TreeSpec)
 
 
 class TestSerializer:
@@ -10,9 +13,9 @@ class TestSerializer:
     ce = CheckEntry(Pv="PERC:COMP", Thresh=100)
     de = DoEntry(Pv="PERC:COMP", Mode=CheckAndDoNodeTypeMode.INC, Value=10)
     eg = CheckAndDoNodeEntry(name="self_test", check_and_do_type=CheckAndDoNodeEntry.CheckAndDoNodeType.CHECKPV, check_entry=ce, do_entry=de)
-    
+
     ser = serialize(CheckAndDoNodeEntry, eg)
-    
+
     fname = "beams/tests/artifacts/eggs.json"
 
     with open(fname, 'w') as fd:
@@ -33,15 +36,15 @@ class TestSerializer:
     de1 = DoEntry(Pv="RET:FOUND", Mode=CheckAndDoNodeTypeMode.SET, Value=1)
     # de = DoEntry(Pv="RET:SET", Mode=CheckAndDoNodeTypeMode.SET, Value=1)  # TODO: once we have better feel of caproto plumb this up in mock
     eg1 = CheckAndDoNodeEntry(name="ret_find", check_and_do_type=CheckAndDoNodeEntry.CheckAndDoNodeType.CHECKPV, check_entry=ce1, do_entry=de1)
-    
+
     # acquire pixel to world frame transform
     ce2 = CheckEntry(Pv="RET:INSERT", Thresh=1)  # TODO: should make a check / set mode
     de2 = DoEntry(Pv="RET:INSERT", Mode=CheckAndDoNodeTypeMode.SET, Value=1)
     eg2 = CheckAndDoNodeEntry(name="ret_insert", check_and_do_type=CheckAndDoNodeEntry.CheckAndDoNodeType.CHECKPV, check_entry=ce2, do_entry=de2)
 
-    eg_root = TreeSpec(name="fake_reticle", 
+    eg_root = TreeSpec(name="fake_reticle",
                        children=[eg1, eg2])
-    
+
     fname = "beams/tests/artifacts/eggs2.json"
     ser = serialize(TreeSpec, eg_root)
     with open(fname, 'w') as fd:

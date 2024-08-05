@@ -1,8 +1,12 @@
 import time
 from multiprocessing import Process
 
-from beams.sequencer.SequencerState import SequencerState, SequencerStateVariable
-from beams.sequencer.remote_calls.sequencer_pb2 import SequenceType, RunStateType, TickStatus, MessageType
+from beams.sequencer.remote_calls.sequencer_pb2 import (MessageType,
+                                                        RunStateType,
+                                                        SequenceType,
+                                                        TickStatus)
+from beams.sequencer.SequencerState import (SequencerState,
+                                            SequencerStateVariable)
 
 
 class TestTask:

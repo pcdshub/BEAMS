@@ -1,13 +1,15 @@
-from subprocess import Popen, TimeoutExpired
-import time
-import signal 
+import signal
 import sys
+import time
+from subprocess import Popen, TimeoutExpired
 
 import py_trees
 from epics import caget
 
 from beams.tree_generator.TreeGenerator import TreeGenerator
-from beams.tree_generator.TreeSerializer import CheckAndDoNodeEntry, CheckAndDoNodeTypeMode, CheckEntry, DoEntry, TreeSpec
+from beams.tree_generator.TreeSerializer import (CheckAndDoNodeEntry,
+                                                 CheckAndDoNodeTypeMode,
+                                                 CheckEntry, DoEntry, TreeSpec)
 
 
 class TestTreeGenerator():
@@ -27,10 +29,10 @@ class TestTreeGenerator():
 
   #   # start mock IOC # NOTE: assumes test is being run from top level of
   #   ioc_proc = Popen([sys.executable, "beams/tests/mock_iocs/SelfTestIOC.py"])
-    
+
   #   tree = tg.get_tree_from_config()
 
-  #   while (tree.root.status != py_trees.common.Status.SUCCESS and tree.root.status != py_trees.common.Status.FAILURE): 
+  #   while (tree.root.status != py_trees.common.Status.SUCCESS and tree.root.status != py_trees.common.Status.FAILURE):
   #     for n in tree.root.tick():
   #       print(f"ticking: {n}")
   #       time.sleep(0.1)
@@ -58,12 +60,12 @@ class TestTreeGenerator():
     tg = TreeGenerator(fname, TreeSpec)
     tree = tg.get_tree_from_config()
 
-    while (tree.root.status != py_trees.common.Status.SUCCESS and tree.root.status != py_trees.common.Status.FAILURE): 
+    while (tree.root.status != py_trees.common.Status.SUCCESS and tree.root.status != py_trees.common.Status.FAILURE):
       for n in tree.root.tick():
         print(f"ticking: {n}")
         time.sleep(0.1)
         print(f"status of tick: {n.status}")
-    
+
     check_insert = caget("RET:INSERT")
 
     assert check_insert == 1

@@ -1,5 +1,6 @@
-from beams.sequencer.helpers.Worker import Worker
 from multiprocessing import Value
+
+from beams.sequencer.helpers.Worker import Worker
 
 
 class TestTask:
@@ -22,7 +23,7 @@ class TestTask:
   def test_class_member_instantiation(self):
     a = Worker("test_worker")
     val = Value('i', 10)
-    
+
     def work_func(self):
       while (self.do_work.value or val.value < 100):
         val.value += 10

@@ -1,7 +1,9 @@
-from multiprocessing import Value
 import time
+from multiprocessing import Value
+
 import py_trees
-from beams.behavior_tree import ActionNode, ConditionNode, CheckAndDo
+
+from beams.behavior_tree import ActionNode, CheckAndDo, ConditionNode
 
 
 class TestTask:

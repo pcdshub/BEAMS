@@ -1,5 +1,6 @@
-from beams.sequencer.helpers.PriorityQueue import PriorityQueue
 from enum import IntEnum
+
+from beams.sequencer.helpers.PriorityQueue import PriorityQueue
 
 
 class Color(IntEnum):

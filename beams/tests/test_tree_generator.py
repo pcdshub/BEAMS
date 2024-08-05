@@ -1,9 +1,8 @@
-import signal
-import sys
 import time
-from subprocess import Popen, TimeoutExpired
+from pathlib import Path
 
 import py_trees
+from caproto.tests.conftest import run_example_ioc
 from epics import caget
 
 from beams.tree_generator.TreeGenerator import TreeGenerator
@@ -12,62 +11,72 @@ from beams.tree_generator.TreeSerializer import (CheckAndDoNodeEntry,
                                                  CheckEntry, DoEntry, TreeSpec)
 
 
-class TestTreeGenerator():
-  def test_tree_obj_ser(self):
-    fname = "beams/tests/artifacts/eggs.json"
+def test_tree_obj_ser():
+    fname = Path(__file__).parent / "artifacts" / "eggs.json"
     tg = TreeGenerator(fname, CheckAndDoNodeEntry)
 
     ce = CheckEntry(Pv="PERC:COMP", Thresh=100)
     de = DoEntry(Pv="PERC:COMP", Mode=CheckAndDoNodeTypeMode.INC, Value=10)
-    eg = CheckAndDoNodeEntry(name="self_test", check_and_do_type=CheckAndDoNodeEntry.CheckAndDoNodeType.CHECKPV, check_entry=ce, do_entry=de)
+    eg = CheckAndDoNodeEntry(
+        name="self_test",
+        check_and_do_type=CheckAndDoNodeEntry.CheckAndDoNodeType.CHECKPV,
+        check_entry=ce,
+        do_entry=de,
+    )
 
     assert tg.tree_spec == eg
 
-  # def test_tree_obj_execution(self):
-  #   fname = "beams/tests/artifacts/eggs.json"
-  #   tg = TreeGenerator(fname, CheckAndDoNodeEntry)
 
-  #   # start mock IOC # NOTE: assumes test is being run from top level of
-  #   ioc_proc = Popen([sys.executable, "beams/tests/mock_iocs/SelfTestIOC.py"])
+def test_tree_obj_execution(request):
+    fname = Path(__file__).parent / "artifacts" / "eggs.json"
+    tg = TreeGenerator(fname, CheckAndDoNodeEntry)
 
-  #   tree = tg.get_tree_from_config()
+    # start mock IOC # NOTE: assumes test is being run from top level of
+    run_example_ioc(
+        "beams.tests.mock_iocs.SelfTestIOC",
+        request=request,
+        pv_to_check="PERC:COMP",
+    )
 
-  #   while (tree.root.status != py_trees.common.Status.SUCCESS and tree.root.status != py_trees.common.Status.FAILURE):
-  #     for n in tree.root.tick():
-  #       print(f"ticking: {n}")
-  #       time.sleep(0.1)
-  #       print(f"status of tick: {n.status}")
+    tree = tg.get_tree_from_config()
 
-  #   rel_val = caget("PERC:COMP")
-  #   assert rel_val >= 100
+    while (
+        tree.root.status != py_trees.common.Status.SUCCESS
+        and tree.root.status != py_trees.common.Status.FAILURE
+    ):
+        for n in tree.root.tick():
+            print(f"ticking: {n}")
+            time.sleep(0.1)
+            print(f"status of tick: {n.status}")
 
-  #   ioc_proc.send_signal(signal.SIGINT)
+    rel_val = caget("PERC:COMP")
+    assert rel_val >= 100
 
-  #   try:
-  #       ioc_proc.wait(timeout=1)
-  #   except TimeoutExpired:
-  #       print('IOC did not exit in a timely fashion')
-  #       ioc_proc.terminate()
-  #       print('IOC terminated')
-  #   else:
-  #       print('IOC has exited')
 
-  def test_father_tree_execution(self):
-    ioc_proc = Popen([sys.executable, "beams/tests/mock_iocs/ImagerNaysh.py"])
-    time.sleep(1)
+def test_father_tree_execution(request):
+    run_example_ioc(
+        "beams.tests.mock_iocs.ImagerNaysh",
+        request=request,
+        pv_to_check="RET:INSERT",
+    )
 
     fname = "beams/tests/artifacts/eggs2.json"
     tg = TreeGenerator(fname, TreeSpec)
     tree = tg.get_tree_from_config()
 
-    while (tree.root.status != py_trees.common.Status.SUCCESS and tree.root.status != py_trees.common.Status.FAILURE):
-      for n in tree.root.tick():
-        print(f"ticking: {n}")
-        time.sleep(0.1)
-        print(f"status of tick: {n.status}")
+    ct = 0
+    while (
+        tree.root.status != py_trees.common.Status.SUCCESS
+        and tree.root.status != py_trees.common.Status.FAILURE
+        and ct < 50
+    ):
+        ct += 1
+        print((tree.root.status, tree.root.status, ct))
+        for n in tree.root.tick():
+            print(f"ticking: {n}")
+            time.sleep(0.1)
+            print(f"status of tick: {n.status}")
 
     check_insert = caget("RET:INSERT")
 
     assert check_insert == 1
-
-    ioc_proc.terminate()

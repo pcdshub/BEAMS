@@ -3,13 +3,10 @@ from beams.behavior_tree.ActionNode import ActionNode
 from beams.behavior_tree.ConditionNode import ConditionNode
 
 
-class CheckAndDo():
+class CheckAndDo(py_trees.composites.Selector):
   def __init__(self, name: str,  check: ConditionNode, do: ActionNode) -> None:
+    super().__init__(name, memory=True)
     self.name = name
-    self.root = py_trees.composites.Selector(self.name, memory=True)
     self.check = check
     self.do = do
-    self.root.add_children([check, do])
-
-  def setup(self):
-    self.root.setup_with_descendants()
+    self.add_children([check, do])

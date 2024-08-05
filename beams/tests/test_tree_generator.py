@@ -39,12 +39,12 @@ def test_tree_obj_execution(request):
     )
 
     tree = tg.get_tree_from_config()
-
+    tree.setup_with_descendants()
     while (
-        tree.root.status != py_trees.common.Status.SUCCESS
-        and tree.root.status != py_trees.common.Status.FAILURE
+        tree.status != py_trees.common.Status.SUCCESS
+        and tree.status != py_trees.common.Status.FAILURE
     ):
-        for n in tree.root.tick():
+        for n in tree.tick():
             print(f"ticking: {n}")
             time.sleep(0.1)
             print(f"status of tick: {n.status}")

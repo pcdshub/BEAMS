@@ -29,10 +29,10 @@ class TestTask:
     check = ConditionNode.ConditionNode("check", checky, percentage_complete)
 
     candd = CheckAndDo.CheckAndDo("yuhh", check, action)
-    candd.setup()
+    candd.setup_with_descendants()
 
     for i in range(1, 10):
       time.sleep(.01)
-      candd.root.tick_once()
+      candd.tick_once()
 
     assert percentage_complete.value == 100

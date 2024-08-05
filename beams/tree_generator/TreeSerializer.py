@@ -132,7 +132,7 @@ class TreeSpec():
   children: Optional[List[CheckAndDoNodeEntry]] = None
 
   def get_tree(self):
-    children_trees = [x.get_tree().root for x in self.children]
+    children_trees = [x.get_tree() for x in self.children]
     print(children_trees)
     self.root = py_trees.composites.Sequence(self.name, memory=True)
     self.root.add_children(children_trees)

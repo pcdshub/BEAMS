@@ -114,3 +114,6 @@ Thumbs.db
 
 # setuptools-scm _version.py should not be tracked:
 /beams/_version.py
+
+# GRPC artifact files
+beams/sequencer/remote_calls/*_pb2*.py*

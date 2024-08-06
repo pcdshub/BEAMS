@@ -2,4 +2,3 @@ pyepics
 py-trees
 grpcio-tools
 apischema
-pytest-cov

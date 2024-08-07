@@ -46,7 +46,7 @@ def test_tree_obj_execution(request):
     ):
         for n in tree.tick():
             print(f"ticking: {n}")
-            time.sleep(0.1)
+            time.sleep(0.05)
             print(f"status of tick: {n.status}")
 
     rel_val = caget("PERC:COMP")
@@ -74,7 +74,7 @@ def test_father_tree_execution(request):
         print((tree.root.status, tree.root.status, ct))
         for n in tree.root.tick():
             print(f"ticking: {n}")
-            time.sleep(0.1)
+            time.sleep(0.05)
             print(f"status of tick: {n.status}")
 
     check_insert = caget("RET:INSERT")

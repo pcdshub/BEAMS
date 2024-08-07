@@ -31,8 +31,11 @@ class TestTask:
     candd = CheckAndDo.CheckAndDo("yuhh", check, action)
     candd.setup_with_descendants()
 
-    for i in range(1, 10):
-      time.sleep(.01)
-      candd.tick_once()
+    while (
+        candd.status != py_trees.common.Status.SUCCESS
+        and candd.status != py_trees.common.Status.FAILURE
+    ):
+      for i in candd.tick():
+        time.sleep(.01)
 
     assert percentage_complete.value == 100

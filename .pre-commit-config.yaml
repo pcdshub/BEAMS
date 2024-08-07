@@ -3,6 +3,7 @@
 exclude: |
   (?x)^(
     beams/_version.py|
+    beams/sequencer/remote_calls/.*.py.*|
   )$
 
 repos:

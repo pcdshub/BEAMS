@@ -1,8 +1,10 @@
-import py_trees
-from beams.behavior_tree.ActionNode import ActionNode
-from beams.behavior_tree.ConditionNode import ConditionNode
 import time
 from multiprocessing import Value
+
+import py_trees
+
+from beams.behavior_tree.ActionNode import ActionNode
+from beams.behavior_tree.ConditionNode import ConditionNode
 
 
 class TestTask:

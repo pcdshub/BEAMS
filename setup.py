@@ -1,8 +1,19 @@
-from setuptools import setup, find_packages
+import subprocess
+import sys
+
+from setuptools import setup
+from setuptools.command.build_py import build_py
+
+
+class Build(build_py):
+    """Customized setuptools build command - builds protos on build."""
+    def run(self):
+        protoc_command = ["make", "gen_grpc"]
+        if subprocess.call(protoc_command) != 0:
+            sys.exit(-1)
+        super().run()
 
 
 setup(
-    name="beams",
-    version="0.0.1",
-    packages=find_packages(),
+    cmdclass={'build_py': Build}
 )

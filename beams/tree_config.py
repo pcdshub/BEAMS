@@ -146,10 +146,11 @@ class ConditionItem(BaseItem):
         cond_func = self.get_condition_function()
         return ConditionNode(self.name, cond_func)
 
-    def get_condition_function(self) -> Callable[[Any], bool]:
+    def get_condition_function(self) -> Callable[[], bool]:
         op = getattr(operator, self.operator.value)
 
-        def cond_func(val):
+        def cond_func():
+            val = caget(self.pv)
             if val is None:
                 return False
 
@@ -184,14 +185,14 @@ class SetPVActionItem(ActionItem):
             value = 0
 
             # While termination_check is not True
-            while not comp_condition(value):  # TODO check work_gate.is_set()
+            while not comp_condition():  # TODO check work_gate.is_set()
                 py_trees.console.logdebug(
                     f"CALLING CAGET FROM {os.getpid()} from node: "
                     f"{self.name}"
                 )
                 value = caget(self.termination_check.pv)
 
-                if comp_cond(value):
+                if comp_condition():
                     volatile_status.set_value(py_trees.common.Status.SUCCESS)
                 py_trees.console.logdebug(
                     f"{self.name}: Value is {value}, BT Status: "
@@ -201,6 +202,12 @@ class SetPVActionItem(ActionItem):
                 # specific caput logic to SetPVActionItem
                 caput(self.pv, self.value)
                 time.sleep(self.loop_freq)
+
+            # one last check
+            if comp_condition():
+                volatile_status.set_value(py_trees.common.Status.SUCCESS)
+            else:
+                volatile_status.set_value(py_trees.common.Status.FAILURE)
 
         comp_cond = self.termination_check.get_condition_function()
 
@@ -236,14 +243,14 @@ class IncPVActionItem(ActionItem):
             value = 0
 
             # While termination_check is not True
-            while not comp_condition(value):  # TODO check work_gate.is_set()
+            while not comp_condition():  # TODO check work_gate.is_set()
                 py_trees.console.logdebug(
                     f"CALLING CAGET FROM {os.getpid()} from node: "
                     f"{self.name}"
                 )
-                value = caget(self.termination_check.pv)
+                value = caget(self.pv)
 
-                if comp_cond(value):
+                if comp_condition():
                     volatile_status.set_value(py_trees.common.Status.SUCCESS)
                 py_trees.console.logdebug(
                     f"{self.name}: Value is {value}, BT Status: "
@@ -253,6 +260,12 @@ class IncPVActionItem(ActionItem):
                 # specific caput logic to IncPVActionItem
                 caput(self.pv, value + self.increment)
                 time.sleep(self.loop_freq)
+
+            # one last check
+            if comp_condition():
+                volatile_status.set_value(py_trees.common.Status.SUCCESS)
+            else:
+                volatile_status.set_value(py_trees.common.Status.FAILURE)
 
         comp_cond = self.termination_check.get_condition_function()
 

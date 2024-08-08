@@ -162,7 +162,7 @@ class ConditionItem(BaseItem):
 @as_tagged_union
 @dataclass
 class ActionItem(BaseItem):
-    loop_freq: float = 1.0
+    loop_period_sec: float = 1.0
 
 
 @dataclass
@@ -201,7 +201,7 @@ class SetPVActionItem(ActionItem):
 
                 # specific caput logic to SetPVActionItem
                 caput(self.pv, self.value)
-                time.sleep(self.loop_freq)
+                time.sleep(self.loop_period_sec)
 
             # one last check
             if comp_condition():
@@ -259,7 +259,7 @@ class IncPVActionItem(ActionItem):
 
                 # specific caput logic to IncPVActionItem
                 caput(self.pv, value + self.increment)
-                time.sleep(self.loop_freq)
+                time.sleep(self.loop_period_sec)
 
             # one last check
             if comp_condition():

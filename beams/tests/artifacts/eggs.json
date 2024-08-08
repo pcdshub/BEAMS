@@ -14,7 +14,7 @@
         "IncPVActionItem": {
           "name": "",
           "description": "",
-          "loop_freq": 1.0,
+          "loop_period_sec": 1.0,
           "pv": "PERC:COMP",
           "increment": 10,
           "termination_check": {

@@ -20,7 +20,7 @@
               "SetPVActionItem": {
                 "name": "",
                 "description": "",
-                "loop_freq": 1.0,
+                "loop_period_sec": 1.0,
                 "pv": "RET:FOUND",
                 "value": 1,
                 "termination_check": {
@@ -49,7 +49,7 @@
               "SetPVActionItem": {
                 "name": "",
                 "description": "",
-                "loop_freq": 1.0,
+                "loop_period_sec": 1.0,
                 "pv": "RET:INSERT",
                 "value": 1,
                 "termination_check": {

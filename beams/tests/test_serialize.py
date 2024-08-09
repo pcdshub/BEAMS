@@ -1,57 +1,43 @@
-import json
-
 from apischema import deserialize, serialize
 
-from beams.tree_generator.TreeSerializer import (CheckAndDoNodeEntry,
-                                                 CheckAndDoNodeTypeMode,
-                                                 CheckEntry, DoEntry, TreeSpec)
+from beams.tree_config import (BehaviorTreeItem, CheckAndDoItem, ConditionItem,
+                               ConditionOperator, IncPVActionItem,
+                               SequenceItem, SetPVActionItem)
 
 
-class TestSerializer:
-  def test_serialize_basic(self):
+def test_serialize_check_and_do():
     # c_obj = load_config("config.json")
-    ce = CheckEntry(Pv="PERC:COMP", Thresh=100)
-    de = DoEntry(Pv="PERC:COMP", Mode=CheckAndDoNodeTypeMode.INC, Value=10)
-    eg = CheckAndDoNodeEntry(name="self_test", check_and_do_type=CheckAndDoNodeEntry.CheckAndDoNodeType.CHECKPV, check_entry=ce, do_entry=de)
+    cond_item = ConditionItem(pv="PERC:COMP", value=100,
+                              operator=ConditionOperator.greater_equal)
+    action_item = IncPVActionItem(pv="PERC:COMP", increment=10,
+                                  termination_check=cond_item)
+    cnd_item = CheckAndDoItem(name="self_test", check=cond_item, do=action_item)
 
-    ser = serialize(CheckAndDoNodeEntry, eg)
+    tree_item = BehaviorTreeItem(root=cnd_item)
+    ser = serialize(BehaviorTreeItem, tree_item)
+    deser = deserialize(BehaviorTreeItem, ser)
 
-    fname = "beams/tests/artifacts/eggs.json"
+    assert deser == tree_item
 
-    with open(fname, 'w') as fd:
-      json.dump(ser, fd, indent=2)
 
-    with open(fname, 'r') as fd:
-      deser = json.load(fd)
-
-    eg2 = deserialize(CheckAndDoNodeEntry, deser)
-    assert eg2 == eg
-
-  def test_serialize_youre_a_father_now(self):
+def test_serialize_youre_a_father_now():
     """
     Build children check and dos
     """
     # insert reticule if ret is not found
-    ce1 = CheckEntry(Pv="RET:FOUND", Thresh=1)  # TODO: should make a check / set mode
-    de1 = DoEntry(Pv="RET:FOUND", Mode=CheckAndDoNodeTypeMode.SET, Value=1)
-    # de = DoEntry(Pv="RET:SET", Mode=CheckAndDoNodeTypeMode.SET, Value=1)  # TODO: once we have better feel of caproto plumb this up in mock
-    eg1 = CheckAndDoNodeEntry(name="ret_find", check_and_do_type=CheckAndDoNodeEntry.CheckAndDoNodeType.CHECKPV, check_entry=ce1, do_entry=de1)
+    ce1 = ConditionItem(pv="RET:FOUND", value=1, operator=ConditionOperator.equal)
+    de1 = SetPVActionItem(pv="RET:FOUND", value=1, termination_check=ce1)
+    eg1 = CheckAndDoItem(name="ret_find", check=ce1, do=de1)
 
     # acquire pixel to world frame transform
-    ce2 = CheckEntry(Pv="RET:INSERT", Thresh=1)  # TODO: should make a check / set mode
-    de2 = DoEntry(Pv="RET:INSERT", Mode=CheckAndDoNodeTypeMode.SET, Value=1)
-    eg2 = CheckAndDoNodeEntry(name="ret_insert", check_and_do_type=CheckAndDoNodeEntry.CheckAndDoNodeType.CHECKPV, check_entry=ce2, do_entry=de2)
+    ce2 = ConditionItem(pv="RET:INSERT", value=1, operator=ConditionOperator.equal)
+    de2 = SetPVActionItem(pv="RET:INSERT", value=1, termination_check=ce2)
+    eg2 = CheckAndDoItem(name="ret_insert", check=ce2, do=de2)
 
-    eg_root = TreeSpec(name="fake_reticle",
-                       children=[eg1, eg2])
+    root_item = SequenceItem(children=[eg1, eg2])
+    eg_root = BehaviorTreeItem(root=root_item)
 
-    fname = "beams/tests/artifacts/eggs2.json"
-    ser = serialize(TreeSpec, eg_root)
-    with open(fname, 'w') as fd:
-      json.dump(ser, fd, indent=2)
+    ser = serialize(BehaviorTreeItem, eg_root)
 
-    with open(fname, 'r') as fd:
-      deser = json.load(fd)
-
-    eg_deser = deserialize(TreeSpec, deser)
+    eg_deser = deserialize(BehaviorTreeItem, ser)
     assert eg_root == eg_deser

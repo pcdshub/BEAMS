@@ -1,31 +1,69 @@
 {
-  "name": "fake_reticle",
-  "children": [
-    {
-      "name": "ret_find",
-      "check_and_do_type": "CheckPV",
-      "check_entry": {
-        "Pv": "RET:FOUND",
-        "Thresh": 1
-      },
-      "do_entry": {
-        "Pv": "RET:FOUND",
-        "Mode": "SET",
-        "Value": 1
-      }
-    },
-    {
-      "name": "ret_insert",
-      "check_and_do_type": "CheckPV",
-      "check_entry": {
-        "Pv": "RET:INSERT",
-        "Thresh": 1
-      },
-      "do_entry": {
-        "Pv": "RET:INSERT",
-        "Mode": "SET",
-        "Value": 1
-      }
+  "root": {
+    "SequenceItem": {
+      "name": "fake_reticle",
+      "description": "",
+      "memory": false,
+      "children": [
+        {
+          "CheckAndDoItem": {
+            "name": "ret_find",
+            "description": "",
+            "check": {
+              "name": "",
+              "description": "",
+              "pv": "RET:FOUND",
+              "value": 1,
+              "operator": "ge"
+            },
+            "do": {
+              "SetPVActionItem": {
+                "name": "",
+                "description": "",
+                "loop_period_sec": 1.0,
+                "pv": "RET:FOUND",
+                "value": 1,
+                "termination_check": {
+                  "name": "",
+                  "description": "",
+                  "pv": "RET:FOUND",
+                  "value": 1,
+                  "operator": "ge"
+                }
+              }
+            }
+          }
+        },
+        {
+          "CheckAndDoItem": {
+            "name": "ret_insert",
+            "description": "",
+            "check": {
+              "name": "",
+              "description": "",
+              "pv": "RET:INSERT",
+              "value": 1,
+              "operator": "ge"
+            },
+            "do": {
+              "SetPVActionItem": {
+                "name": "",
+                "description": "",
+                "loop_period_sec": 1.0,
+                "pv": "RET:INSERT",
+                "value": 1,
+                "termination_check": {
+                  "name": "",
+                  "description": "",
+                  "pv": "RET:INSERT",
+                  "value": 1,
+                  "operator": "ge"
+                }
+              }
+            }
+          }
+        }
+      ]
     }
-  ]
+  }
 }

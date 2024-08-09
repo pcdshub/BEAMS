@@ -1,13 +1,31 @@
 {
-  "name": "self_test",
-  "check_and_do_type": "CheckPV",
-  "check_entry": {
-    "Pv": "PERC:COMP",
-    "Thresh": 100
-  },
-  "do_entry": {
-    "Pv": "PERC:COMP",
-    "Mode": "INC",
-    "Value": 10
+  "root": {
+    "CheckAndDoItem": {
+      "name": "self_test",
+      "description": "",
+      "check": {
+        "name": "",
+        "description": "",
+        "pv": "PERC:COMP",
+        "value": 100,
+        "operator": "ge"
+      },
+      "do": {
+        "IncPVActionItem": {
+          "name": "",
+          "description": "",
+          "loop_period_sec": 1.0,
+          "pv": "PERC:COMP",
+          "increment": 10,
+          "termination_check": {
+            "name": "",
+            "description": "",
+            "pv": "PERC:COMP",
+            "value": 100,
+            "operator": "ge"
+          }
+        }
+      }
+    }
   }
 }

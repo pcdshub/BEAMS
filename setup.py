@@ -7,6 +7,7 @@ from setuptools.command.build_py import build_py
 
 class Build(build_py):
     """Customized setuptools build command - builds protos on build."""
+
     def run(self):
         protoc_command = ["make", "gen_grpc"]
         if subprocess.call(protoc_command) != 0:
@@ -14,6 +15,4 @@ class Build(build_py):
         super().run()
 
 
-setup(
-    cmdclass={'build_py': Build}
-)
+setup(cmdclass={"build_py": Build})

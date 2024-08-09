@@ -7,10 +7,12 @@ from beams.tree_config import (BehaviorTreeItem, CheckAndDoItem, ConditionItem,
 
 def test_serialize_check_and_do():
     # c_obj = load_config("config.json")
-    cond_item = ConditionItem(pv="PERC:COMP", value=100,
-                              operator=ConditionOperator.greater_equal)
-    action_item = IncPVActionItem(pv="PERC:COMP", increment=10,
-                                  termination_check=cond_item)
+    cond_item = ConditionItem(
+        pv="PERC:COMP", value=100, operator=ConditionOperator.greater_equal
+    )
+    action_item = IncPVActionItem(
+        pv="PERC:COMP", increment=10, termination_check=cond_item
+    )
     cnd_item = CheckAndDoItem(name="self_test", check=cond_item, do=action_item)
 
     tree_item = BehaviorTreeItem(root=cnd_item)

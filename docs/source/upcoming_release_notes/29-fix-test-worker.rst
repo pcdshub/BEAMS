@@ -11,7 +11,7 @@ Features
 
 Bugfixes
 --------
-- test_worker was failing non deterministically due to logically ungated work functions 
+- test_worker was failing non deterministically due to logically ungated work functions
 - test_check_and_do was failing non deterministically due to lack of closed loop ticking
 
 Maintenance

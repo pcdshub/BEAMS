@@ -12,19 +12,20 @@ class MockImager(PVGroup):
     ----------
     COMP (int)
     """
+
     FOUND = pvproperty(
         value=0,
-        doc='Represents if simulated reticule is found',
+        doc="Represents if simulated reticule is found",
     )
     INSERT = pvproperty(
         value=0,
-        doc='Represents if simulated reticule is inserted',
+        doc="Represents if simulated reticule is inserted",
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ioc_options, run_options = ioc_arg_parser(
-        default_prefix='RET:',
-        desc=dedent(MockImager.__doc__))
+        default_prefix="RET:", desc=dedent(MockImager.__doc__)
+    )
     ioc = MockImager(**ioc_options)
     run(ioc.pvdb, **run_options)

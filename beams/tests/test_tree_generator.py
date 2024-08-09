@@ -29,9 +29,9 @@ def test_tree_obj_execution(request):
     )
 
     tree.setup()
-    while (
-        tree.root.status not in (py_trees.common.Status.SUCCESS,
-                                 py_trees.common.Status.FAILURE)
+    while tree.root.status not in (
+        py_trees.common.Status.SUCCESS,
+        py_trees.common.Status.FAILURE,
     ):
         tree.tick()
         time.sleep(0.05)
@@ -52,8 +52,8 @@ def test_father_tree_execution(request):
     tree.setup()
     ct = 0
     while (
-        tree.root.status not in (py_trees.common.Status.SUCCESS,
-                                 py_trees.common.Status.FAILURE)
+        tree.root.status
+        not in (py_trees.common.Status.SUCCESS, py_trees.common.Status.FAILURE)
         and ct < 50
     ):
         ct += 1

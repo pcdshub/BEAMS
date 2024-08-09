@@ -7,7 +7,7 @@ API Breaks
 
 Features
 --------
-- Becomes easier to nest check and do nodes. 
+- Becomes easier to nest check and do nodes.
 - rebase the CheckAndDo class such that it extends base class py_trees.composites.Selector this can be seen as the first of beams.idioms
 
 Bugfixes

@@ -1,11 +1,13 @@
-from py_trees.common import Status
 from enum import Enum
 
+from py_trees.common import Status
+
 from beams.sequencer.helpers.SharedEnum import SharedEnum
-'''
+
+"""
 py_trees stores its enums as strings which is painful
 
-'''
+"""
 
 
 class IntStatus(Enum):
@@ -22,36 +24,34 @@ class IntStatus(Enum):
 
 
 StatusToIntStatus = {
-  Status.INVALID : IntStatus.INVALID,
-  Status.FAILURE : IntStatus.FAILURE,
-  Status.RUNNING : IntStatus.RUNNING,
-  Status.SUCCESS : IntStatus.SUCCESS
+    Status.INVALID: IntStatus.INVALID,
+    Status.FAILURE: IntStatus.FAILURE,
+    Status.RUNNING: IntStatus.RUNNING,
+    Status.SUCCESS: IntStatus.SUCCESS,
 }
 
 IntStatusToStatus = {
-  IntStatus.INVALID : Status.INVALID,
-  IntStatus.FAILURE : Status.FAILURE,
-  IntStatus.RUNNING : Status.RUNNING,
-  IntStatus.SUCCESS : Status.SUCCESS
+    IntStatus.INVALID: Status.INVALID,
+    IntStatus.FAILURE: Status.FAILURE,
+    IntStatus.RUNNING: Status.RUNNING,
+    IntStatus.SUCCESS: Status.SUCCESS,
 }
 
 
-'''
-Process safe helper for enum types
-Need to translate from py_trees string enum to normal enum
-'''
-
-
 class VolatileStatus(SharedEnum):
-  def __init__(self, init_status=Status.INVALID):
-    super().__init__(StatusToIntStatus[init_status])
+    """
+    Process safe helper for enum types
+    Need to translate from py_trees string enum to normal enum
+    """
+    def __init__(self, init_status=Status.INVALID):
+        super().__init__(StatusToIntStatus[init_status])
 
-  def get_value(self):
-    return IntStatusToStatus[super().get_value()]
+    def get_value(self):
+        return IntStatusToStatus[super().get_value()]
 
-  def set_value(self, status):
-    super().set_value(StatusToIntStatus[status])
+    def set_value(self, status):
+        super().set_value(StatusToIntStatus[status])
 
 
 if __name__ == "__main__":
-  VolatileStatus()
+    VolatileStatus()

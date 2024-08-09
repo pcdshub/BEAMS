@@ -20,7 +20,7 @@ enum SequenceType {
 enum RunStateType {
   STATE_UNKNOWN = 0;
   PAUSE = 1; // Pause execution of current command.
-  STOP_AND_SAFE = 2; // Stop execution of current command. 
+  STOP_AND_SAFE = 2; // Stop execution of current command.
   RESUME = 3; // Resume exectution
   DEBUG = 4; // Put in wait for tick mode
 
@@ -65,7 +65,7 @@ message GenericCommand {
     SequenceCommand seq_m = 2;
     AlterState alt_m = 3;
   }
-} 
+}
 
 message CommandReply {
   MessageType mess_t = 1;

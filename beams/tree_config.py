@@ -25,7 +25,7 @@ from beams.serialization import as_tagged_union
 
 def get_tree_from_path(path: Path) -> py_trees.trees.BehaviourTree:
     """Deserialize a json file, return the tree it specifies"""
-    with open(path, 'r') as fd:
+    with open(path, "r") as fd:
         deser = json.load(fd)
         tree_item = deserialize(BehaviorTreeItem, deser)
 
@@ -43,8 +43,8 @@ class BehaviorTreeItem:
 @as_tagged_union
 @dataclass
 class BaseItem:
-    name: str = ''
-    description: str = ''
+    name: str = ""
+    description: str = ""
 
     def get_tree(self) -> Behaviour:
         """Get the tree node that this dataclass represents"""
@@ -53,7 +53,7 @@ class BaseItem:
 
 @dataclass
 class ExternalItem(BaseItem):
-    path: str = ''
+    path: str = ""
 
     def get_tree(self) -> Behaviour:
         # grab file
@@ -63,6 +63,7 @@ class ExternalItem(BaseItem):
 
 class ParallelMode(Enum):
     """Simple enum mimicing the ``py_trees.common.ParallelPolicy`` options"""
+
     Base = "Base"
     SuccessOnAll = "SuccesOnAll"
     SuccessOnONe = "SuccessOnOne"
@@ -82,7 +83,7 @@ class ParallelItem(BaseItem):
         node = Parallel(
             name=self.name,
             policy=getattr(ParallelPolicy, self.policy.value),
-            children=children
+            children=children,
         )
 
         return node
@@ -91,6 +92,7 @@ class ParallelItem(BaseItem):
 @dataclass
 class SelectorItem(BaseItem):
     """aka fallback node"""
+
     memory: bool = False
     children: Optional[List[BaseItem]] = field(default_factory=list)
 
@@ -99,11 +101,7 @@ class SelectorItem(BaseItem):
         for child in self.children:
             children.append(child.get_tree())
 
-        node = Selector(
-            name=self.name,
-            memory=self.memory,
-            children=children
-        )
+        node = Selector(name=self.name, memory=self.memory, children=children)
         return node
 
 
@@ -117,28 +115,24 @@ class SequenceItem(BaseItem):
         for child in self.children:
             children.append(child.get_tree())
 
-        node = Sequence(
-            name=self.name,
-            memory=self.memory,
-            children=children
-        )
+        node = Sequence(name=self.name, memory=self.memory, children=children)
 
         return node
 
 
 # Custom LCLS-built Behaviors (idioms)
 class ConditionOperator(Enum):
-    equal = 'eq'
-    not_equal = 'ne'
-    less = 'lt'
-    greater = 'gt'
-    less_equal = 'le'
-    greater_equal = 'ge'
+    equal = "eq"
+    not_equal = "ne"
+    less = "lt"
+    greater = "gt"
+    less_equal = "le"
+    greater_equal = "ge"
 
 
 @dataclass
 class ConditionItem(BaseItem):
-    pv: str = ''
+    pv: str = ""
     value: Any = 1
     operator: ConditionOperator = ConditionOperator.equal
 
@@ -167,7 +161,7 @@ class ActionItem(BaseItem):
 
 @dataclass
 class SetPVActionItem(ActionItem):
-    pv: str = ''
+    pv: str = ""
     value: Any = 1
 
     termination_check: ConditionItem = field(default_factory=ConditionItem)
@@ -177,8 +171,9 @@ class SetPVActionItem(ActionItem):
         wait_for_tick_lock = Lock()
 
         def work_func(comp_condition, volatile_status):
-            py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
-                                      f"from node: {self.name}")
+            py_trees.console.logdebug(
+                f"WAITING FOR INIT {os.getpid()} " f"from node: {self.name}"
+            )
             wait_for_tick.wait()
 
             # Set to running
@@ -187,8 +182,7 @@ class SetPVActionItem(ActionItem):
             # While termination_check is not True
             while not comp_condition():  # TODO check work_gate.is_set()
                 py_trees.console.logdebug(
-                    f"CALLING CAGET FROM {os.getpid()} from node: "
-                    f"{self.name}"
+                    f"CALLING CAGET FROM {os.getpid()} from node: " f"{self.name}"
                 )
                 value = caget(self.termination_check.pv)
 
@@ -224,7 +218,7 @@ class SetPVActionItem(ActionItem):
 
 @dataclass
 class IncPVActionItem(ActionItem):
-    pv: str = ''
+    pv: str = ""
     increment: float = 1
 
     termination_check: ConditionItem = field(default_factory=ConditionItem)
@@ -235,8 +229,9 @@ class IncPVActionItem(ActionItem):
         wait_for_tick_lock = Lock()
 
         def work_func(comp_condition, volatile_status):
-            py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
-                                      f"from node: {self.name}")
+            py_trees.console.logdebug(
+                f"WAITING FOR INIT {os.getpid()} " f"from node: {self.name}"
+            )
             wait_for_tick.wait()
 
             # Set to running
@@ -245,8 +240,7 @@ class IncPVActionItem(ActionItem):
             # While termination_check is not True
             while not comp_condition():  # TODO check work_gate.is_set()
                 py_trees.console.logdebug(
-                    f"CALLING CAGET FROM {os.getpid()} from node: "
-                    f"{self.name}"
+                    f"CALLING CAGET FROM {os.getpid()} from node: " f"{self.name}"
                 )
                 value = caget(self.pv)
 
@@ -289,10 +283,6 @@ class CheckAndDoItem(BaseItem):
         check_node = self.check.get_tree()
         do_node = self.do.get_tree()
 
-        node = CheckAndDo(
-            name=self.name,
-            check=check_node,
-            do=do_node
-        )
+        node = CheckAndDo(name=self.name, check=check_node, do=do_node)
 
         return node

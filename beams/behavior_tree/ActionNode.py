@@ -59,8 +59,10 @@ class ActionNode(py_trees.behaviour.Behaviour):
 
     def update(self) -> py_trees.common.Status:
         """Increment the counter, monitor and decide on a new status."""
-        self.logger.debug(f"Getting tick on {self.name}. "
-                          f"Status: {self.__volatile_status__.get_value()}")
+        self.logger.debug(
+            f"Getting tick on {self.name}. "
+            f"Status: {self.__volatile_status__.get_value()}"
+        )
 
         # This does the interprocess communcication between this thread which is
         # getting ticked and the work_proc thread which is doing work

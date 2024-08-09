@@ -3,7 +3,7 @@
 ### behavior_tree
 Defines the lowest level elements that comrpise behavior trees. </br>
 See [Behavior Trees in AI and Robotics](https://arxiv.org/pdf/\1709.00084.pdf) fore a *much* more in depth exploration of BTs.</br>
-This implementation uses the [py_trees](https://py-trees.readthedocs.io/en/devel/) library. 
+This implementation uses the [py_trees](https://py-trees.readthedocs.io/en/devel/) library.
 ###### Components
 * Action Node : leaf node that launches action for execution
 * Condition Node: leaf node that evaluates condition
@@ -11,7 +11,7 @@ This implementation uses the [py_trees](https://py-trees.readthedocs.io/en/devel
 * Volatile Status: mechanism to make BT statuses processes safe in python
 ### sequencer
 Defines sequencer engine that can be seen as the main object of this program. The sequencer will launch processes that handle remote procedure calls from clients, parse messages into trees that represent the explicit desired handling of requested command, and tick the tree itself.
-This module uses [GRPC](https://grpc.io/) to facilitate RPC calls. 
+This module uses [GRPC](https://grpc.io/) to facilitate RPC calls.
 ###### Components
 * Sequencer : main object, launches child threads to field GRPC server, parse messages into trees, and tick ensuing trees
 * SequenceServer : defines GRPC interactions

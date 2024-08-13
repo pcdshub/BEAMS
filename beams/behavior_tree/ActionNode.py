@@ -1,33 +1,38 @@
 import atexit
 import os
 from multiprocessing import Event, Lock
+from typing import Callable, Any, Optional, Union
 
 import py_trees
 from epics.multiproc import CAProcess
 
+from beams.behavior_tree.ActionWorker import ActionWorker
 from beams.behavior_tree.VolatileStatus import VolatileStatus
 
 
 class ActionNode(py_trees.behaviour.Behaviour):
     def __init__(
         self,
-        name,
-        work_func,
-        completion_condition,
+        name: str,
+        work_func: Callable[[Any], None],
+        completion_condition: Callable[[Any], bool],
         work_gate=Event(),
         work_lock=Lock(),
         **kwargs,
     ):  # TODO: can add failure condition argument...
         super(ActionNode, self).__init__(name)
-        self.work_func = work_func
-        self.comp_condition = completion_condition
         # print(type(self.status))
         self.__volatile_status__ = VolatileStatus(self.status)
-        self.additional_args = kwargs
-        self.logger.debug("%s.__init__()" % (self.__class__.__name__))
-
+        # TODO may want to instantiate these locally and then decorate the passed work function with them
         self.work_gate = work_gate
         self.lock = work_lock
+        self.worker = ActionWorker(proc_name=name,
+                                   volatile_status=self.__volatile_status__,
+                                   work_func=work_func,
+                                   comp_cond=completion_condition,
+                                   stop_func=None
+                                   )  # TODO: some standard notion of stop function could be valuable
+        self.logger.debug("%s.__init__()" % (self.__class__.__name__))
 
     def setup(self, **kwargs: int) -> None:
         """Kickstart the separate process this behaviour will work with.
@@ -39,14 +44,10 @@ class ActionNode(py_trees.behaviour.Behaviour):
         )
 
         # Having this in setup means the workthread should always be running.
-        self.work_proc = CAProcess(
-            target=self.work_func,
-            args=(self.comp_condition, self.__volatile_status__),
-            kwargs=self.additional_args,
-        )
-        self.work_proc.start()
+        print("LAUNCHING JAWN")
+        self.worker.start_work()
         atexit.register(
-            self.work_proc.terminate
+            self.worker.stop_work
         )  # TODO(josh): make sure this cleans up resources when it dies
 
     def initialise(self) -> None:
@@ -84,17 +85,18 @@ class ActionNode(py_trees.behaviour.Behaviour):
 
         return new_status
 
-    def terminate(self, new_status: py_trees.common.Status) -> None:
-        """Nothing to clean up in this example."""
-        print(f"TERMINATE CALLED ON {self.name}, pid: {os.getpid()}")
-        if self.work_proc.is_alive():
-            print(f"The process is still alive on {os.getpid()}")
-            self.work_proc.terminate()
-            self.logger.debug(
-                py_trees.console.red
-                + "%s.terminate()[%s->%s]"
-                % (self.__class__.__name__, self.status, new_status)
-            )
+    # TODO: serious introspection about that we want to do here. 
+    # def terminate(self, new_status: py_trees.common.Status) -> None:
+    #     """Nothing to clean up in this example."""
+    #     print(f"TERMINATE CALLED ON {self.name}, pid: {os.getpid()}")
+    #     if self.work_proc.is_alive():
+    #         print(f"The process is still alive on {os.getpid()}")
+    #         self.work_proc.terminate()
+    #         self.logger.debug(
+    #             py_trees.console.red
+    #             + "%s.terminate()[%s->%s]"
+    #             % (self.__class__.__name__, self.status, new_status)
+    #         )
 
 
 if __name__ == "__main__":

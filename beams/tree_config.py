@@ -167,30 +167,37 @@ class SetPVActionItem(ActionItem):
     termination_check: ConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
+        # TODO: can I put these two lines in a decorator which action node uses on the function?
         wait_for_tick = Event()
         wait_for_tick_lock = Lock()
 
+<<<<<<< HEAD
         def work_func(comp_condition, volatile_status):
             py_trees.console.logdebug(
                 f"WAITING FOR INIT {os.getpid()} " f"from node: {self.name}"
             )
+=======
+        def work_func(self):
+            py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
+                                      f"from node: {self.name}")
+>>>>>>> 6d6518b (ENH: making doing work better)
             wait_for_tick.wait()
 
             # Set to running
             value = 0
 
             # While termination_check is not True
-            while not comp_condition():  # TODO check work_gate.is_set()
+            while not self.comp_condition():  # TODO check work_gate.is_set()
                 py_trees.console.logdebug(
                     f"CALLING CAGET FROM {os.getpid()} from node: " f"{self.name}"
                 )
                 value = caget(self.termination_check.pv)
 
-                if comp_condition():
-                    volatile_status.set_value(py_trees.common.Status.SUCCESS)
+                if self.comp_condition():
+                    self.volatile_status.set_value(py_trees.common.Status.SUCCESS)
                 py_trees.console.logdebug(
                     f"{self.name}: Value is {value}, BT Status: "
-                    f"{volatile_status.get_value()}"
+                    f"{self.volatile_status.get_value()}"
                 )
 
                 # specific caput logic to SetPVActionItem
@@ -198,10 +205,10 @@ class SetPVActionItem(ActionItem):
                 time.sleep(self.loop_period_sec)
 
             # one last check
-            if comp_condition():
-                volatile_status.set_value(py_trees.common.Status.SUCCESS)
+            if self.comp_condition():
+                self.volatile_status.set_value(py_trees.common.Status.SUCCESS)
             else:
-                volatile_status.set_value(py_trees.common.Status.FAILURE)
+                self.volatile_status.set_value(py_trees.common.Status.FAILURE)
 
         comp_cond = self.termination_check.get_condition_function()
 

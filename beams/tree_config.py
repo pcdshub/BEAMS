@@ -172,12 +172,16 @@ class SetPVActionItem(ActionItem):
         wait_for_tick_lock = Lock()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         def work_func(comp_condition, volatile_status):
             py_trees.console.logdebug(
                 f"WAITING FOR INIT {os.getpid()} " f"from node: {self.name}"
             )
 =======
         def work_func(self):
+=======
+        def work_func(myself, comp_condition, volatile_status):
+>>>>>>> b289496 (ENH: Successfully replumbed action node work to be facilliated by base)
             py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
                                       f"from node: {self.name}")
 >>>>>>> 6d6518b (ENH: making doing work better)
@@ -187,17 +191,17 @@ class SetPVActionItem(ActionItem):
             value = 0
 
             # While termination_check is not True
-            while not self.comp_condition():  # TODO check work_gate.is_set()
+            while not comp_condition():  # TODO check work_gate.is_set()
                 py_trees.console.logdebug(
                     f"CALLING CAGET FROM {os.getpid()} from node: " f"{self.name}"
                 )
                 value = caget(self.termination_check.pv)
 
-                if self.comp_condition():
-                    self.volatile_status.set_value(py_trees.common.Status.SUCCESS)
+                if comp_condition():
+                    volatile_status.set_value(py_trees.common.Status.SUCCESS)
                 py_trees.console.logdebug(
                     f"{self.name}: Value is {value}, BT Status: "
-                    f"{self.volatile_status.get_value()}"
+                    f"{volatile_status.get_value()}"
                 )
 
                 # specific caput logic to SetPVActionItem
@@ -205,10 +209,10 @@ class SetPVActionItem(ActionItem):
                 time.sleep(self.loop_period_sec)
 
             # one last check
-            if self.comp_condition():
-                self.volatile_status.set_value(py_trees.common.Status.SUCCESS)
+            if comp_condition():
+                volatile_status.set_value(py_trees.common.Status.SUCCESS)
             else:
-                self.volatile_status.set_value(py_trees.common.Status.FAILURE)
+                volatile_status.set_value(py_trees.common.Status.FAILURE)
 
         comp_cond = self.termination_check.get_condition_function()
 
@@ -235,10 +239,16 @@ class IncPVActionItem(ActionItem):
         wait_for_tick = Event()
         wait_for_tick_lock = Lock()
 
+<<<<<<< HEAD
         def work_func(comp_condition, volatile_status):
             py_trees.console.logdebug(
                 f"WAITING FOR INIT {os.getpid()} " f"from node: {self.name}"
             )
+=======
+        def work_func(myself, comp_condition, volatile_status):
+            py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
+                                      f"from node: {self.name}")
+>>>>>>> b289496 (ENH: Successfully replumbed action node work to be facilliated by base)
             wait_for_tick.wait()
 
             # Set to running

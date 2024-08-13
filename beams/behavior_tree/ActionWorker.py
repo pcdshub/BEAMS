@@ -1,3 +1,6 @@
+"""
+A worker specialized to execute ActionNode work functions
+"""
 from typing import Callable, Any, Optional
 
 from epics.multiproc import CAProcess
@@ -18,6 +21,5 @@ class ActionWorker(Worker):
                          work_func=work_func,
                          proc_type=CAProcess,
                          add_args=(comp_cond, volatile_status))
-        print(f"YO SELF: {self}")
         self.comp_condition = comp_cond
         self.__volatile_status__ = volatile_status

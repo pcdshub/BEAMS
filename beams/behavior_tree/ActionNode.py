@@ -44,7 +44,6 @@ class ActionNode(py_trees.behaviour.Behaviour):
         )
 
         # Having this in setup means the workthread should always be running.
-        print("LAUNCHING JAWN")
         self.worker.start_work()
         atexit.register(
             self.worker.stop_work

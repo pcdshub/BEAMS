@@ -6,29 +6,37 @@
 """
 import logging
 from multiprocessing import Process, Value
+from typing import Callable, Any, Optional, Union, List
+
+from epics.multiproc import CAProcess
 
 
-class Worker:
-    def __init__(self, proc_name, stop_func=None, work_func=None):
-        self.do_work = Value("i", False)
+class Worker():
+    def __init__(self, 
+                 proc_name: str, 
+                 stop_func: Optional[Callable[[None], None]] = None, 
+                 work_func: Optional[Callable[[Any], None]] = None,
+                 proc_type: Union[Process, CAProcess] = Process,
+                 add_args: List[Any] = None
+                 ):
+        self.do_work = Value('i', False)
         self.proc_name = proc_name
+        self.proc_type = proc_type
         # TODO: we may want to decorate work func so it prints proc id...
-        if work_func is None:
-            self.work_proc = Process(target=self.work_func, name=self.proc_name)
+        if (work_func is None):
+          self.work_proc = proc_type(target=self.work_func, name=self.proc_name)
         else:
-            self.work_func = work_func
-            self.work_proc = Process(
-                target=self.work_func, name=self.proc_name, args=(self,)
-            )
+          self.work_func = work_func
+          self.work_proc = proc_type(target=self.work_func, name=self.proc_name, args=(self, *add_args))
         self.stop_func = stop_func
 
     def start_work(self):
-        if self.do_work.value:
+        if (self.do_work.value):
             logging.error("Already working, not starting work")
             return
         self.do_work.value = True
         self.work_proc.start()
-        logging.info(f"Starting work on: {self.work_proc.pid}")
+        logging.debug(f"Starting work on: {self.work_proc.pid}")
 
     def stop_work(self):
         logging.info(f"Calling stop work on: {self.work_proc.pid}")
@@ -39,9 +47,9 @@ class Worker:
         if self.stop_func is not None:
             self.stop_func()
 
-        print("calling join")
+        logging.info("calling join")
         self.work_proc.join()
-        print("joined")
+        logging.info("joined")
 
     def work_func(self):
         """
@@ -55,6 +63,4 @@ class Worker:
 
     def set_work_func(self, work_func):
         self.work_func = work_func
-        self.work_proc = Process(
-            target=self.work_func, name=self.proc_name, args=(self,)
-        )
+        self.work_proc = self.proc_type(target=self.work_func, name=self.proc_name, args=(self,))

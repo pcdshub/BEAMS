@@ -33,8 +33,9 @@ def test_tree_obj_execution(request):
         py_trees.common.Status.SUCCESS,
         py_trees.common.Status.FAILURE,
     ):
-        tree.tick()
-        time.sleep(0.05)
+        for n in tree.root.tick():
+            print(n)
+            time.sleep(0.05)
 
     rel_val = caget("PERC:COMP")
     assert rel_val >= 100
@@ -56,10 +57,11 @@ def test_father_tree_execution(request):
         not in (py_trees.common.Status.SUCCESS, py_trees.common.Status.FAILURE)
         and ct < 50
     ):
-        ct += 1
-        print((tree.root.status, tree.root.status, ct))
-        tree.tick()
-        time.sleep(0.05)
+        for n in tree.root.tick():
+            ct += 1
+            print(n)
+            print((tree.root.status, tree.root.status, ct))
+            time.sleep(0.05)
 
     check_insert = caget("RET:INSERT")
 

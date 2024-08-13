@@ -35,16 +35,20 @@ class Worker():
             logging.error("Already working, not starting work")
             return
         self.do_work.value = True
+        print(self.work_func)
         self.work_proc.start()
         logging.debug(f"Starting work on: {self.work_proc.pid}")
 
     def stop_work(self):
         logging.info(f"Calling stop work on: {self.work_proc.pid}")
-        if not self.do_work.value:
+        if (not self.do_work.value):
             logging.error("Not working, not stopping work")
             return
         self.do_work.value = False
-        if self.stop_func is not None:
+        logging.info(f"Sending terminate signal to{self.work_proc.pid}")
+        # Send kill signal to work process. # TODO: the exact location of this is important. Reflect
+        self.work_proc.terminate()
+        if (self.stop_func is not None):
             self.stop_func()
 
         logging.info("calling join")

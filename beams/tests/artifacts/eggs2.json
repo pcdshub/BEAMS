@@ -10,7 +10,7 @@
             "name": "ret_find",
             "description": "",
             "check": {
-              "name": "",
+              "name": "ret_find_check",
               "description": "",
               "pv": "RET:FOUND",
               "value": 1,
@@ -18,9 +18,9 @@
             },
             "do": {
               "SetPVActionItem": {
-                "name": "",
+                "name": "ret_find_do",
                 "description": "",
-                "loop_period_sec": 1.0,
+                "loop_period_sec": 0.01,
                 "pv": "RET:FOUND",
                 "value": 1,
                 "termination_check": {

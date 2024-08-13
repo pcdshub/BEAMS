@@ -4,7 +4,7 @@
       "name": "self_test",
       "description": "",
       "check": {
-        "name": "",
+        "name": "self_test_check",
         "description": "",
         "pv": "PERC:COMP",
         "value": 100,
@@ -12,9 +12,9 @@
       },
       "do": {
         "IncPVActionItem": {
-          "name": "",
+          "name": "self_test_do",
           "description": "",
-          "loop_period_sec": 1.0,
+          "loop_period_sec": 0.01,
           "pv": "PERC:COMP",
           "increment": 10,
           "termination_check": {

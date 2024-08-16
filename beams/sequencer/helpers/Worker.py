@@ -17,7 +17,7 @@ class Worker():
                  stop_func: Optional[Callable[[None], None]] = None, 
                  work_func: Optional[Callable[[Any], None]] = None,
                  proc_type: Union[Process, CAProcess] = Process,
-                 add_args: List[Any] = None
+                 add_args: List[Any] = []
                  ):
         self.do_work = Value('i', False)
         self.proc_name = proc_name
@@ -27,7 +27,7 @@ class Worker():
           self.work_proc = proc_type(target=self.work_func, name=self.proc_name)
         else:
           self.work_func = work_func
-          self.work_proc = proc_type(target=self.work_func, name=self.proc_name, args=(self, *add_args))
+          self.work_proc = proc_type(target=self.work_func, name=self.proc_name, args=(self, *add_args,))
         self.stop_func = stop_func
 
     def start_work(self):
@@ -36,6 +36,7 @@ class Worker():
             return
         self.do_work.value = True
         print(self.work_func)
+        # breakpoint()
         self.work_proc.start()
         logging.debug(f"Starting work on: {self.work_proc.pid}")
 
@@ -46,8 +47,9 @@ class Worker():
             return
         self.do_work.value = False
         logging.info(f"Sending terminate signal to{self.work_proc.pid}")
-        # Send kill signal to work process. # TODO: the exact location of this is important. Reflect
-        self.work_proc.terminate()
+        # Send kill signal to work process. # TODO: the exact loc ation of this is important. Reflect
+        with self.do_work.get_lock():
+            self.work_proc.terminate()
         if (self.stop_func is not None):
             self.stop_func()
 

@@ -171,20 +171,9 @@ class SetPVActionItem(ActionItem):
         wait_for_tick = Event()
         wait_for_tick_lock = Lock()
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-        def work_func(comp_condition, volatile_status):
-            py_trees.console.logdebug(
-                f"WAITING FOR INIT {os.getpid()} " f"from node: {self.name}"
-            )
-=======
-        def work_func(self):
-=======
         def work_func(myself, comp_condition, volatile_status):
->>>>>>> b289496 (ENH: Successfully replumbed action node work to be facilliated by base)
             py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
                                       f"from node: {self.name}")
->>>>>>> 6d6518b (ENH: making doing work better)
             wait_for_tick.wait()
 
             # Set to running
@@ -239,16 +228,9 @@ class IncPVActionItem(ActionItem):
         wait_for_tick = Event()
         wait_for_tick_lock = Lock()
 
-<<<<<<< HEAD
-        def work_func(comp_condition, volatile_status):
-            py_trees.console.logdebug(
-                f"WAITING FOR INIT {os.getpid()} " f"from node: {self.name}"
-            )
-=======
         def work_func(myself, comp_condition, volatile_status):
             py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
                                       f"from node: {self.name}")
->>>>>>> b289496 (ENH: Successfully replumbed action node work to be facilliated by base)
             wait_for_tick.wait()
 
             # Set to running

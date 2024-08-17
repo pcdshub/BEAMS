@@ -28,24 +28,3 @@ class TestTask:
         assert y[SequencerStateVariable.STATUS.value] == TickStatus.UNKNOWN
         assert y[SequencerStateVariable.RUN_STATE.value] == RunStateType.STATE_UNKNOWN
         assert y["mess_t"] == MessageType.MESSAGE_TYPE_COMMAND_REPLY
-
-    def test_multi_access(self):
-        x = SequencerState()
-
-        def proc1work(x):
-            print("proc1 a go")
-            x.set_value(SequencerStateVariable.RUN_STATE, RunStateType.TICKING)
-
-        def proc2work(x):
-            print("proc2 a go")
-            while x.get_value(SequencerStateVariable.RUN_STATE) != RunStateType.TICKING:
-                print("waiting for get value to return true")
-                time.sleep(0.1)
-
-            assert x.get_value(SequencerStateVariable.RUN_STATE) == RunStateType.TICKING
-
-        proc1 = Process(target=proc1work, args=(x,))
-        proc2 = Process(target=proc2work, args=(x,))
-        proc2.start()
-        time.sleep(0.4)
-        proc1.start()

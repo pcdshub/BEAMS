@@ -48,8 +48,8 @@ class Worker():
         self.do_work.value = False
         logging.info(f"Sending terminate signal to{self.work_proc.pid}")
         # Send kill signal to work process. # TODO: the exact loc ation of this is important. Reflect
-        with self.do_work.get_lock():
-            self.work_proc.terminate()
+        # with self.do_work.get_lock():
+        self.work_proc.terminate()
         if (self.stop_func is not None):
             self.stop_func()
 

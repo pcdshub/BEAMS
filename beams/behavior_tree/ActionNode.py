@@ -20,7 +20,7 @@ class ActionNode(py_trees.behaviour.Behaviour):
         work_lock=Lock(),
         **kwargs,
     ):  # TODO: can add failure condition argument...
-        super(ActionNode, self).__init__(name)
+        super().__init__(name)
         # print(type(self.status))
         self.__volatile_status__ = VolatileStatus(self.status)
         # TODO may want to instantiate these locally and then decorate the passed work function with them
@@ -84,18 +84,13 @@ class ActionNode(py_trees.behaviour.Behaviour):
 
         return new_status
 
-    # TODO: serious introspection about that we want to do here. 
-    # def terminate(self, new_status: py_trees.common.Status) -> None:
-    #     """Nothing to clean up in this example."""
-    #     print(f"TERMINATE CALLED ON {self.name}, pid: {os.getpid()}")
-    #     if self.work_proc.is_alive():
-    #         print(f"The process is still alive on {os.getpid()}")
-    #         self.work_proc.terminate()
-    #         self.logger.debug(
-    #             py_trees.console.red
-    #             + "%s.terminate()[%s->%s]"
-    #             % (self.__class__.__name__, self.status, new_status)
-    #         )
+    def terminate(self, new_status: py_trees.common.Status) -> None:
+        """Nothing to clean up."""
+        self.logger.debug(
+            py_trees.console.red
+            + "%s.terminate()[%s->%s]"
+            % (self.__class__.__name__, self.status, new_status)
+        )
 
 
 if __name__ == "__main__":

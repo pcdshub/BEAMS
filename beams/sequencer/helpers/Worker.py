@@ -6,9 +6,7 @@
 """
 import logging
 from multiprocessing import Process, Value
-from typing import Callable, Any, Optional, Union, List
-
-from epics.multiproc import CAProcess
+from typing import Callable, Any, Optional, List
 
 
 class Worker():
@@ -16,7 +14,7 @@ class Worker():
                  proc_name: str, 
                  stop_func: Optional[Callable[[None], None]] = None, 
                  work_func: Optional[Callable[[Any], None]] = None,
-                 proc_type: Union[Process, CAProcess] = Process,
+                 proc_type: type[Process] = Process,
                  add_args: List[Any] = []
                  ):
         self.do_work = Value('i', False)
@@ -31,18 +29,16 @@ class Worker():
         self.stop_func = stop_func
 
     def start_work(self):
-        if (self.do_work.value):
+        if self.do_work.value:
             logging.error("Already working, not starting work")
             return
         self.do_work.value = True
-        print(self.work_func)
-        # breakpoint()
         self.work_proc.start()
         logging.debug(f"Starting work on: {self.work_proc.pid}")
 
     def stop_work(self):
         logging.info(f"Calling stop work on: {self.work_proc.pid}")
-        if (not self.do_work.value):
+        if not self.do_work.value:
             logging.error("Not working, not stopping work")
             return
         self.do_work.value = False

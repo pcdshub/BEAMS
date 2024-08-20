@@ -17,6 +17,9 @@ class TestTask:
         def work_func(self):
             while self.do_work.value or self.val.value < 100:
                 if self.val.value < 100:  # Note: value captured via closure
+                    # Note: even in python if a full bore loop captures a lock other Processes may not have time 
+                    # to acquire this shared resource; therefore the sleep is very strongly suggested if not needed
+                    # when using a lock
                     time.sleep(0.01)
                     with self.val.get_lock():
                         self.val.value += 10  # Note: value captured via closure

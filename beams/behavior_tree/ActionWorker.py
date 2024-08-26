@@ -21,5 +21,6 @@ class ActionWorker(Worker):
                          work_func=work_func,
                          proc_type=CAProcess,
                          add_args=(comp_cond, volatile_status))
-        self.comp_condition = comp_cond
-        self.__volatile_status__ = volatile_status
+
+    # Note: there may be a world where we define a common stop_func here in which case 
+    # the class may have maintain a reference to voltaile_status and or comp_cond

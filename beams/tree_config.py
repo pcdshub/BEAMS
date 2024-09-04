@@ -176,9 +176,6 @@ class SetPVActionItem(ActionItem):
                                       f"from node: {self.name}")
             wait_for_tick.wait()
 
-            # Set to running
-            value = 0
-
             # While termination_check is not True
             while not comp_condition():  # TODO check work_gate.is_set()
                 py_trees.console.logdebug(
@@ -232,9 +229,6 @@ class IncPVActionItem(ActionItem):
             py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
                                       f"from node: {self.name}")
             wait_for_tick.wait()
-
-            # Set to running
-            value = 0
 
             # While termination_check is not True
             while not comp_condition():  # TODO check work_gate.is_set()

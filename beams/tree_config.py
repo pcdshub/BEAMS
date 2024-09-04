@@ -171,33 +171,34 @@ class SetPVActionItem(ActionItem):
                       comp_condition: Callable[[Any], bool], 
                       volatile_status: VolatileStatus, 
                       wait_for_tick: Event()):
-            py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
-                                      f"from node: {self.name}")
-            wait_for_tick.wait()
+            while myself.do_work.value:
+                py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
+                                          f"from node: {self.name}")
+                wait_for_tick.wait()
 
-            # While termination_check is not True
-            while not comp_condition():  # TODO check work_gate.is_set()
-                py_trees.console.logdebug(
-                    f"CALLING CAGET FROM {os.getpid()} from node: " f"{self.name}"
-                )
-                value = caget(self.termination_check.pv)
+                # While termination_check is not True
+                while not comp_condition():  # TODO check work_gate.is_set()
+                    py_trees.console.logdebug(
+                        f"CALLING CAGET FROM {os.getpid()} from node: " f"{self.name}"
+                    )
+                    value = caget(self.termination_check.pv)
 
+                    if comp_condition():
+                        volatile_status.set_value(py_trees.common.Status.SUCCESS)
+                    py_trees.console.logdebug(
+                        f"{self.name}: Value is {value}, BT Status: "
+                        f"{volatile_status.get_value()}"
+                    )
+
+                    # specific caput logic to SetPVActionItem
+                    caput(self.pv, self.value)
+                    time.sleep(self.loop_period_sec)
+
+                # one last check
                 if comp_condition():
                     volatile_status.set_value(py_trees.common.Status.SUCCESS)
-                py_trees.console.logdebug(
-                    f"{self.name}: Value is {value}, BT Status: "
-                    f"{volatile_status.get_value()}"
-                )
-
-                # specific caput logic to SetPVActionItem
-                caput(self.pv, self.value)
-                time.sleep(self.loop_period_sec)
-
-            # one last check
-            if comp_condition():
-                volatile_status.set_value(py_trees.common.Status.SUCCESS)
-            else:
-                volatile_status.set_value(py_trees.common.Status.FAILURE)
+                else:
+                    volatile_status.set_value(py_trees.common.Status.FAILURE)
 
         comp_cond = self.termination_check.get_condition_function()
 
@@ -223,33 +224,34 @@ class IncPVActionItem(ActionItem):
               comp_condition: Callable[[Any], bool], 
               volatile_status: VolatileStatus, 
               wait_for_tick: Event()):
-            py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
-                                      f"from node: {self.name}")
-            wait_for_tick.wait()
+            while myself.do_work.value:
+                py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
+                                          f"from node: {self.name}")
+                wait_for_tick.wait()
 
-            # While termination_check is not True
-            while not comp_condition():  # TODO check work_gate.is_set()
-                py_trees.console.logdebug(
-                    f"CALLING CAGET FROM {os.getpid()} from node: " f"{self.name}"
-                )
-                value = caget(self.pv)
+                # While termination_check is not True
+                while not comp_condition():  # TODO check work_gate.is_set()
+                    py_trees.console.logdebug(
+                        f"CALLING CAGET FROM {os.getpid()} from node: " f"{self.name}"
+                    )
+                    value = caget(self.pv)
 
+                    if comp_condition():
+                        volatile_status.set_value(py_trees.common.Status.SUCCESS)
+                    py_trees.console.logdebug(
+                        f"{self.name}: Value is {value}, BT Status: "
+                        f"{volatile_status.get_value()}"
+                    )
+
+                    # specific caput logic to IncPVActionItem
+                    caput(self.pv, value + self.increment)
+                    time.sleep(self.loop_period_sec)
+
+                # one last check
                 if comp_condition():
                     volatile_status.set_value(py_trees.common.Status.SUCCESS)
-                py_trees.console.logdebug(
-                    f"{self.name}: Value is {value}, BT Status: "
-                    f"{volatile_status.get_value()}"
-                )
-
-                # specific caput logic to IncPVActionItem
-                caput(self.pv, value + self.increment)
-                time.sleep(self.loop_period_sec)
-
-            # one last check
-            if comp_condition():
-                volatile_status.set_value(py_trees.common.Status.SUCCESS)
-            else:
-                volatile_status.set_value(py_trees.common.Status.FAILURE)
+                else:
+                    volatile_status.set_value(py_trees.common.Status.FAILURE)
 
         comp_cond = self.termination_check.get_condition_function()
 

@@ -167,11 +167,10 @@ class SetPVActionItem(ActionItem):
     termination_check: ConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
-        # TODO: can I put these two lines in a decorator which action node uses on the function?
-        wait_for_tick = Event()
-        wait_for_tick_lock = Lock()
-
-        def work_func(myself, comp_condition, volatile_status):
+        def work_func(myself, 
+                      comp_condition: Callable[[Any], bool], 
+                      volatile_status: VolatileStatus, 
+                      wait_for_tick: Event()):
             py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
                                       f"from node: {self.name}")
             wait_for_tick.wait()
@@ -206,8 +205,6 @@ class SetPVActionItem(ActionItem):
             name=self.name,
             work_func=work_func,
             completion_condition=comp_cond,
-            work_gate=wait_for_tick,
-            work_lock=wait_for_tick_lock,
         )
 
         return node
@@ -222,10 +219,10 @@ class IncPVActionItem(ActionItem):
 
     # TODO: DRY this out a bit
     def get_tree(self) -> ActionNode:
-        wait_for_tick = Event()
-        wait_for_tick_lock = Lock()
-
-        def work_func(myself, comp_condition, volatile_status):
+        def work_func(myself, 
+              comp_condition: Callable[[Any], bool], 
+              volatile_status: VolatileStatus, 
+              wait_for_tick: Event()):
             py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
                                       f"from node: {self.name}")
             wait_for_tick.wait()
@@ -260,8 +257,6 @@ class IncPVActionItem(ActionItem):
             name=self.name,
             work_func=work_func,
             completion_condition=comp_cond,
-            work_gate=wait_for_tick,
-            work_lock=wait_for_tick_lock,
         )
 
         return node

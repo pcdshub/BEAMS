@@ -1,10 +1,12 @@
 import time
+from typing import Callable, Any
 from multiprocessing import Value
 
 import py_trees
 
 from beams.behavior_tree.ActionNode import ActionNode
 from beams.behavior_tree.ConditionNode import ConditionNode
+from beams.behavior_tree.VolatileStatus import VolatileStatus
 
 
 class TestTask:
@@ -13,7 +15,10 @@ class TestTask:
         # For test
         percentage_complete = Value("i", 0)
 
-        def thisjob(myself, comp_condition, volatile_status) -> None:
+        def thisjob(myself, 
+                    comp_condition: Callable[[Any], None], 
+                    volatile_status: VolatileStatus, 
+                    *args) -> None:
             volatile_status.set_value(py_trees.common.Status.RUNNING)
             while not comp_condition(percentage_complete.value):
                 py_trees.console.logdebug(f"yuh {percentage_complete.value}, {volatile_status.get_value()}")

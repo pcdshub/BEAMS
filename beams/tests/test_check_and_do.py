@@ -1,16 +1,20 @@
 import time
+from typing import Callable, Any
 from multiprocessing import Value
 
 import py_trees
 
-from beams.behavior_tree import ActionNode, CheckAndDo, ConditionNode
+from beams.behavior_tree import ActionNode, CheckAndDo, ConditionNode, VolatileStatus
 
 
 class TestTask:
     def test_check_and_do(self, capsys):
         percentage_complete = Value("i", 0)
 
-        def thisjob(myself, comp_condition, volatile_status) -> None:
+        def thisjob(myself, 
+                    comp_condition: Callable[[Any], None], 
+                    volatile_status: VolatileStatus,
+                    *args) -> None:
             # TODO: grabbing intended keyword argument. Josh's less than pythonic mechanism for closures
             volatile_status.set_value(py_trees.common.Status.RUNNING)
             while not comp_condition(percentage_complete.value):

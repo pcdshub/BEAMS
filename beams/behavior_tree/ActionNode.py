@@ -16,18 +16,17 @@ class ActionNode(py_trees.behaviour.Behaviour):
         name: str,
         work_func: Callable[[Any], None],
         completion_condition: Callable[[Any], bool],
-        work_gate=Event(),
-        work_lock=Lock(),
         **kwargs,
     ):  # TODO: can add failure condition argument...
         super().__init__(name)
-        # print(type(self.status))
-        self.__volatile_status__ = VolatileStatus(self.status)
-        # TODO may want to instantiate these locally and then decorate the passed work function with them
-        self.work_gate = work_gate
-        self.lock = work_lock
+
+        # Interprocess signalling mechanisms
+        self.__volatile_status__ = VolatileStatus(self.status) #  Shares BT Status by wrapping Value
+        self.work_gate = Event() #  Mechanism to avoid busy wait / signal node has been py_trees "initialized"
+
         self.worker = ActionWorker(proc_name=name,
                                    volatile_status=self.__volatile_status__,
+                                   wait_for_tick=self.work_gate,
                                    work_func=work_func,
                                    comp_cond=completion_condition,
                                    stop_func=None

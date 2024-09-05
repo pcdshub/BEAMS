@@ -6,26 +6,31 @@
 """
 import logging
 from multiprocessing import Process, Value
-from typing import Callable, Any, Optional, List
+from typing import Any, Callable, List, Optional
+
+logger = logging.getLogger(__name__)
 
 
 class Worker():
-    def __init__(self, 
-                 proc_name: str, 
-                 stop_func: Optional[Callable[[None], None]] = None, 
-                 work_func: Optional[Callable[[Any], None]] = None,
-                 proc_type: type[Process] = Process,
-                 add_args: List[Any] = []
-                 ):
+    def __init__(
+        self,
+        proc_name: str,
+        stop_func: Optional[Callable[[None], None]] = None,
+        work_func: Optional[Callable[[Any], None]] = None,
+        proc_type: type[Process] = Process,
+        add_args: Optional[List[Any]] = None,
+    ):
         self.do_work = Value('i', False)
         self.proc_name = proc_name
         self.proc_type = proc_type
+        self.add_args = add_args or []
         # TODO: we may want to decorate work func so it prints proc id...
         if (work_func is None):
           self.work_proc = proc_type(target=self.work_func, name=self.proc_name)
         else:
           self.work_func = work_func
-          self.work_proc = proc_type(target=self.work_func, name=self.proc_name, args=(self, *add_args,))
+          self.work_proc = proc_type(target=self.work_func, name=self.proc_name,
+                                     args=(*add_args,))
         self.stop_func = stop_func
 
     def start_work(self):
@@ -34,24 +39,24 @@ class Worker():
             return
         self.do_work.value = True
         self.work_proc.start()
-        logging.debug(f"Starting work on: {self.work_proc.pid}")
+        logger.debug("Starting work")
 
     def stop_work(self):
-        logging.info(f"Calling stop work on: {self.work_proc.pid}")
+        logger.info("Calling stop work on")
         if not self.do_work.value:
-            logging.error("Not working, not stopping work")
+            logger.error("Not working, not stopping work")
             return
         self.do_work.value = False
-        logging.info(f"Sending terminate signal to{self.work_proc.pid}")
-        # Send kill signal to work process. # TODO: the exact loc ation of this is important. Reflect
-        # with self.do_work.get_lock():
+        logger.info("Sending terminate signal to process")
+        # Send kill signal to work process. # TODO: the exact location of this
+        # is important. Reflect with self.do_work.get_lock():
         self.work_proc.terminate()
         if (self.stop_func is not None):
             self.stop_func()
 
-        logging.info("calling join")
+        logger.debug("Ending work, calling join")
         self.work_proc.join()
-        logging.info("joined")
+        logger.debug("Worker process joined")
 
     def work_func(self):
         """

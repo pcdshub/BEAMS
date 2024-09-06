@@ -35,7 +35,7 @@ class Worker():
 
     def start_work(self):
         if self.do_work.value:
-            logging.error("Already working, not starting work")
+            logger.error("Already working, not starting work")
             return
         self.do_work.value = True
         self.work_proc.start()

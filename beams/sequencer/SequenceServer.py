@@ -1,5 +1,4 @@
 import logging
-import os
 import time
 from concurrent import futures
 from multiprocessing import Semaphore
@@ -21,6 +20,9 @@ message_priority_dict = {
 }
 
 
+logger = logging.getLogger(__name__)
+
+
 class SequenceServer(SequencerServicer, Worker):
     def __init__(self, sequencer_state):
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=10)
@@ -36,12 +38,12 @@ class SequenceServer(SequencerServicer, Worker):
     def EnqueueCommand(self, request, context):
         mess_t = request.mess_t
         if mess_t in message_priority_dict.keys():
-            print(f"putting {request.seq_m.seq_t} of {mess_t} in queue")
+            logger.debug(f"putting {request.seq_m.seq_t} of {mess_t} in queue")
             self.message_queue.put(request, mess_t)
             time.sleep(0.1)
             self.message_ready_sem.release()
         else:
-            logging.error(
+            logger.error(
                 f"Message type {mess_t} is not prioritized in sequence servers priority dictionary"
             )
             # TODO: return this info to client via command reply
@@ -52,15 +54,15 @@ class SequenceServer(SequencerServicer, Worker):
         return CommandReply(**self.sequencer_state.get_command_reply())
 
     def work_func(self):
-        print(f"{self.proc_name} running on pid: {os.getpid()}")
+        logger.debug(f"{self.proc_name} running")
         port = "50051"
         add_SequencerServicer_to_server(self, self.server)
         self.server.add_insecure_port("[::]:" + port)
         self.server.start()
-        print("Server started, listening on " + port)
+        logger.debug("Server started, listening on " + port)
         while self.do_work.value:
             time.sleep(0.1)
-        print("exitted")
+        logger.debug("SequenceServer work_func exitted")
 
 
 if __name__ == "__main__":

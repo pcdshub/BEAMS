@@ -8,7 +8,6 @@ class SharedEnum:
     def __init__(self, enum):
         self.enum_val = enum
         self.enum_type = type(enum)
-        # print(self.enum_type)
         self.__safe_val__ = Value("i", enum.value)
 
     # return value as its enum type

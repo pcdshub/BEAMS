@@ -5,6 +5,7 @@ import logging
 
 import grpc
 
+from beams.logging import setup_logging
 from beams.sequencer.remote_calls.sequencer_pb2 import (AlterState, Empty,
                                                         GenericCommand,
                                                         MessageType,
@@ -12,6 +13,8 @@ from beams.sequencer.remote_calls.sequencer_pb2 import (AlterState, Empty,
                                                         SequenceCommand,
                                                         SequenceType)
 from beams.sequencer.remote_calls.sequencer_pb2_grpc import SequencerStub
+
+logger = logging.getLogger(__name__)
 
 
 def enumerate_choices(enum_type):
@@ -63,9 +66,7 @@ class SequencerClient:
 
     def run(self):
         def p_message_info(mtype, mvalue):
-            logging.debug(
-                f"Sending messafe of type {mtype} of value {mvalue}"
-            )
+            logger.debug(f"Sending message of type:({mtype}), value:({mvalue})")
 
         with grpc.insecure_channel(
             "localhost:50051"
@@ -91,7 +92,7 @@ class SequencerClient:
             elif self.args.sequence is not None:
                 mt = MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE
                 mess = args.sequence
-                print(f"Arg provided {args.sequence}")
+                logger.debug(f"Arg provided {args.sequence}")
                 mess_val = GenericCommand(
                     mess_t=mt, seq_m=SequenceCommand(mess_t=mt, seq_t=mess)
                 )
@@ -103,11 +104,13 @@ class SequencerClient:
                 p_message_info("HEARTBEAT", "HEARTBEAT")
                 response = stub.RequestHeartBeat(Empty())
 
-            logging.debug(response)
+            logger.debug(response)
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    # TODO: determine what we want here.  Does it have its own logging
+    # process and file?
+    setup_logging(logging.DEBUG)
     args = parse_arguments()
     client = SequencerClient(args)
     client.run()

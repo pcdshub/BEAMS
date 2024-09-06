@@ -30,7 +30,7 @@ class Worker():
         else:
           self.work_func = work_func
           self.work_proc = proc_type(target=self.work_func, name=self.proc_name,
-                                     args=(*add_args,))
+                                     args=(*self.add_args,))
         self.stop_func = stop_func
 
     def start_work(self):
@@ -67,7 +67,3 @@ class Worker():
         logging.info(f"Work thread: {self.work_proc.pid} exit")
         """
         raise NotImplementedError("Implement a work function in the child class!")
-
-    def set_work_func(self, work_func):
-        self.work_func = work_func
-        self.work_proc = self.proc_type(target=self.work_func, name=self.proc_name, args=(self,))

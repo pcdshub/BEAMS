@@ -7,7 +7,7 @@ from beams.logging import setup_logging
 
 
 @pytest.fixture(autouse=True)
-def logging_setup(caplog):
+def central_logging_setup(caplog):
     # Set pytest debugging level, and capture that output
     # Without this logging calls made after the test may fire after the listener
     # thread is closed.

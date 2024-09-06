@@ -137,7 +137,7 @@ def setup_logging(level: int = logging.INFO):
     """
     global LOGGER_THREAD
     if LOGGER_THREAD is not None:
-        logger.info("Logger already configured")
+        logger.debug("Logger already configured")
         return
 
     config = _read_logging_config()

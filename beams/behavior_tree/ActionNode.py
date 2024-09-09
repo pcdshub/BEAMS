@@ -59,7 +59,14 @@ class ActionNode(py_trees.behaviour.Behaviour):
         volatile_status.set_value(py_trees.common.Status.RUNNING)
         while not self.completion_condition():
             logger.debug(f"CALLING CAGET FROM from node ({self.name})")
-            status = self.work_func(self.completion_condition)
+            try:
+                status = self.work_func(self.completion_condition)
+            except Exception as ex:
+                volatile_status.set_value(py_trees.common.Status.FAILURE)
+                logger.error(f"Work function failed, setting node ({self.name}) "
+                             f"as FAILED. ({ex})")
+                break
+
             volatile_status.set_value(status)
             logger.debug(f"Setting node ({self.name}): {volatile_status.get_value()}")
 

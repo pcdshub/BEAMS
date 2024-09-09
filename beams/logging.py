@@ -145,11 +145,12 @@ def setup_logging(level: int = logging.INFO):
     if LOG_DIR is None:
         # Remove debug file from the config
         del config["handlers"]["debug"]
-        config["root"]["handlers"].remove("debug")
         config["loggers"]["beams"]["handlers"].remove("debug")
     else:
         config["handlers"]["debug"]["filename"] = str(get_log_filename())
 
+    # set console debug level, log files are always DEBUG
+    config["handlers"]["console"]["level"] = level
     logging.config.dictConfig(config)
 
     # setup main logger thread to listen to mp.Process loggers

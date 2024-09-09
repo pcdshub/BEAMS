@@ -36,7 +36,7 @@ class ActionNode(py_trees.behaviour.Behaviour):
             comp_cond=completion_condition,
             stop_func=None
         )  # TODO: some standard notion of stop function could be valuable
-        self.logger.debug("%s.__init__()" % (self.__class__.__name__))
+        logger.debug("%s.__init__()" % (self.__class__.__name__))
 
     def work_wrapper(
         self,

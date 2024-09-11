@@ -25,6 +25,7 @@ requirements:
     - grpcio-tools
     - py-trees
     - pyepics
+    - pyyaml
 
 test:
   imports:

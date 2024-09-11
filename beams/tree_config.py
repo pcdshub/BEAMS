@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import json
+import logging
 import operator
-import os
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from multiprocessing import Event, Lock
 from pathlib import Path
 from typing import Any, Callable, List, Optional
 
@@ -21,6 +20,8 @@ from beams.behavior_tree.ActionNode import ActionNode
 from beams.behavior_tree.CheckAndDo import CheckAndDo
 from beams.behavior_tree.ConditionNode import ConditionNode
 from beams.serialization import as_tagged_union
+
+logger = logging.getLogger(__name__)
 
 
 def get_tree_from_path(path: Path) -> py_trees.trees.BehaviourTree:
@@ -167,41 +168,23 @@ class SetPVActionItem(ActionItem):
     termination_check: ConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
-        # TODO: can I put these two lines in a decorator which action node uses on the function?
-        wait_for_tick = Event()
-        wait_for_tick_lock = Lock()
 
-        def work_func(myself, comp_condition, volatile_status):
-            py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
-                                      f"from node: {self.name}")
-            wait_for_tick.wait()
-
-            # Set to running
-            value = 0
-
-            # While termination_check is not True
-            while not comp_condition():  # TODO check work_gate.is_set()
-                py_trees.console.logdebug(
-                    f"CALLING CAGET FROM {os.getpid()} from node: " f"{self.name}"
-                )
+        def work_func(comp_condition: Callable[[], bool]):
+            try:
+                # Set to running
                 value = caget(self.termination_check.pv)
 
                 if comp_condition():
-                    volatile_status.set_value(py_trees.common.Status.SUCCESS)
-                py_trees.console.logdebug(
-                    f"{self.name}: Value is {value}, BT Status: "
-                    f"{volatile_status.get_value()}"
-                )
+                    return py_trees.common.Status.SUCCESS
+                logger.debug(f"{self.name}: Value is {value}")
 
                 # specific caput logic to SetPVActionItem
                 caput(self.pv, self.value)
                 time.sleep(self.loop_period_sec)
-
-            # one last check
-            if comp_condition():
-                volatile_status.set_value(py_trees.common.Status.SUCCESS)
-            else:
-                volatile_status.set_value(py_trees.common.Status.FAILURE)
+                return py_trees.common.Status.RUNNING
+            except Exception as ex:
+                logger.warning(f"{self.name}: work failed: {ex}")
+                return py_trees.common.Status.FAILURE
 
         comp_cond = self.termination_check.get_condition_function()
 
@@ -209,8 +192,6 @@ class SetPVActionItem(ActionItem):
             name=self.name,
             work_func=work_func,
             completion_condition=comp_cond,
-            work_gate=wait_for_tick,
-            work_lock=wait_for_tick_lock,
         )
 
         return node
@@ -223,42 +204,27 @@ class IncPVActionItem(ActionItem):
 
     termination_check: ConditionItem = field(default_factory=ConditionItem)
 
-    # TODO: DRY this out a bit
     def get_tree(self) -> ActionNode:
-        wait_for_tick = Event()
-        wait_for_tick_lock = Lock()
 
-        def work_func(myself, comp_condition, volatile_status):
-            py_trees.console.logdebug(f"WAITING FOR INIT {os.getpid()} "
-                                      f"from node: {self.name}")
-            wait_for_tick.wait()
-
-            # Set to running
-            value = 0
-
-            # While termination_check is not True
-            while not comp_condition():  # TODO check work_gate.is_set()
-                py_trees.console.logdebug(
-                    f"CALLING CAGET FROM {os.getpid()} from node: " f"{self.name}"
-                )
+        def work_func(comp_condition: Callable[[], bool]) -> py_trees.common.Status:
+            """
+            To be run inside of a while loop
+            Action node should take care of logging, reporting status
+            """
+            try:
                 value = caget(self.pv)
 
+                logging.debug(f"(wf) {self.name}: Value is {value}")
                 if comp_condition():
-                    volatile_status.set_value(py_trees.common.Status.SUCCESS)
-                py_trees.console.logdebug(
-                    f"{self.name}: Value is {value}, BT Status: "
-                    f"{volatile_status.get_value()}"
-                )
+                    return py_trees.common.Status.SUCCESS
 
                 # specific caput logic to IncPVActionItem
                 caput(self.pv, value + self.increment)
                 time.sleep(self.loop_period_sec)
-
-            # one last check
-            if comp_condition():
-                volatile_status.set_value(py_trees.common.Status.SUCCESS)
-            else:
-                volatile_status.set_value(py_trees.common.Status.FAILURE)
+                return py_trees.common.Status.RUNNING
+            except Exception as ex:
+                logger.warning(f"{self.name}: work failed: {ex}")
+                return py_trees.common.Status.FAILURE
 
         comp_cond = self.termination_check.get_condition_function()
 
@@ -266,8 +232,6 @@ class IncPVActionItem(ActionItem):
             name=self.name,
             work_func=work_func,
             completion_condition=comp_cond,
-            work_gate=wait_for_tick,
-            work_lock=wait_for_tick_lock,
         )
 
         return node

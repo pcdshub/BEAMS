@@ -1,0 +1,32 @@
+version: 1
+
+formatters:
+  # For the console:
+  custom:
+    (): 'logging.Formatter'
+    fmt: '%(levelname)-8s - PID %(process)d %(funcName)s %(message)s'
+  # For log files:
+  file:
+    (): 'logging.Formatter'
+    format: '%(asctime)s - PID %(process)d %(filename)18s: %(lineno)-3s %(funcName)-18s %(levelname)-8s %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: custom
+    stream: ext://sys.stdout
+
+  debug:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: file
+    maxBytes: 20971520 # 20MB
+    backupCount: 10
+    mode: a
+    delay: 0
+
+loggers:
+  beams:
+    handlers: [console, debug]

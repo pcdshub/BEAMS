@@ -7,6 +7,8 @@ from beams.sequencer.remote_calls.sequencer_pb2 import (MessageType,
                                                         SequenceType,
                                                         TickStatus)
 
+logger = logging.getLogger(__name__)
+
 
 class SequencerStateVariable(Enum):
     """
@@ -56,7 +58,7 @@ class SequencerState:
         current_tick_status: TickStatus,
         current_run_state: RunStateType,
     ) -> None:
-        logging.debug("Acquiring lock for 'set_all_values'")
+        logger.debug("Acquiring lock for 'set_all_values'")
         with self.__lock__:
             self.state_dictionary[
                 SequencerStateVariable.SEQUENCE

@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from multiprocessing import Event
@@ -11,6 +12,8 @@ from beams.sequencer.SequencerState import SequencerState
 from beams.sequencer.SequenceServer import SequenceServer
 from beams.tree_generator.TreeGenerator import GenerateTreeFromRequest
 
+logger = logging.getLogger(__name__)
+
 
 class Sequencer(Worker):
     def __init__(self):
@@ -20,31 +23,29 @@ class Sequencer(Worker):
         self.job_queue = Queue()
         self.job_ready = Event()
 
-    """
-  Parse messages into trees to be ticked.
-  Insert into the relevant place in the job_queue, set job_ready event
-  """
-
     def message_thread(self):
-        print(f"{self.proc_name} running on pid: {os.getpid()}")
+        """
+        Parse messages into trees to be ticked.
+        Insert into the relevant place in the job_queue, set job_ready event
+        """
+        logger.debug(f"{self.proc_name} running on pid: {os.getpid()}")
         while self.do_work.value:
             self.sequence_server.message_ready_sem.acquire()  # block untill we get something to work on
             request = self.sequence_server.message_queue.pop()
-            print(request)
+            logger.debug(f"request: {request}")
             job = GenerateTreeFromRequest(request)
-            print(job)
+            logger.debug(f"job: {job}")
             self.job_queue.put(job)
             self.job_ready.set()
 
-    """
-  Spawn all needed workthreads:
-  * GRPC Server
-  * Message Handler
-  Tick trees representing jobs to do in job_queue
-  """
-
     def work_func(self):
-        print(f"{self.proc_name} running on pid: {os.getpid()}")
+        """
+        Spawn all needed workthreads:
+        * GRPC Server
+        * Message Handler
+        Tick trees representing jobs to do in job_queue
+        """
+        logger.debug(f"{self.proc_name} running")
         # GRPC server object
         self.sequence_server = SequenceServer(self.state)
         self.sequence_server.start_work()  # TODO: move to work thread
@@ -55,20 +56,20 @@ class Sequencer(Worker):
         # Handle Work Queue
         while self.do_work.value:
             self.job_ready.wait()
-            print("ready for job")
+            logger.debug("Sequencer ready for job")
             # invoke the function build out the root of the tree
             job = self.job_queue.get()()
-            print(f"SUCC GET job root status: {job.root.status}")
+            logger.debug(f"SUCC GET job root status: {job.root.status}")
             while (
                 job.root.status != py_trees.common.Status.SUCCESS
                 and job.root.status != py_trees.common.Status.FAILURE
             ):
                 for n in job.root.tick():
-                    print(f"ticking: {n}")
+                    logger.debug(f"ticking: {n}")
                     time.sleep(0.5)
-                    print(f"status of tick: {n.status}")
+                    logger.debug(f"status of tick: {n.status}")
 
-            print(f"{job} done")
+            logger.debug(f"{job} done")
 
 
 if __name__ == "__main__":

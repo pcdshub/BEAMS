@@ -9,6 +9,8 @@ import logging
 import os
 from multiprocessing import Lock, Pipe, Value
 
+logger = logging.getLogger(__name__)
+
 
 class PriorityQueue:
     def __init__(self, priority_dict):
@@ -28,30 +30,30 @@ class PriorityQueue:
             raise KeyError(f"Priority Enum provided {prio_enum} not in priority_dict")
 
     def put(self, ent, prio_enum):
-        logging.debug(f"acquiring the put lock on {os.getpid()}")
+        logger.debug(f"acquiring the put lock on {os.getpid()}")
         with self.__lock__:
-            logging.debug("getting queue")
+            logger.debug("getting queue")
             q = self.recv_sock.recv()
-            logging.debug(f"got queue {q}, putting it in")
+            logger.debug(f"got queue {q}, putting it in")
             heapq.heappush(
                 q, (self.get_priority_int(prio_enum), self.entry_count.value, ent)
             )
-            logging.debug(f"q is now {q}")
+            logger.debug(f"q is now {q}")
             self.__queue__ = q  # kinda just for posterity
             self.entry_count.value += 1  # safe due to lock object
             self.send_sock.send(q)
-        logging.debug("lock released")
+        logger.debug("lock released")
 
     def pop(self):
-        logging.debug(f"acquiring the lock for pop on {os.getpid()}")
+        logger.debug(f"acquiring the lock for pop on {os.getpid()}")
         with self.__lock__:
-            logging.debug("getting queue")
+            logger.debug("getting queue")
             q = self.recv_sock.recv()
-            logging.debug(f"got queue {q}")
+            logger.debug(f"got queue {q}")
             val = heapq.heappop(q)
-            logging.debug(f"got val {val}")
+            logger.debug(f"got val {val}")
             self.send_sock.send(q)
             self.__queue__ = q
-            logging.debug(f"new queue {q}")
-        logging.debug("releasing lock for pop")
+            logger.debug(f"new queue {q}")
+        logger.debug("releasing lock for pop")
         return val[-1]

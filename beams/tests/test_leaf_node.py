@@ -1,56 +1,64 @@
+import logging
 import time
 from multiprocessing import Value
+from typing import Callable
 
-import py_trees
+from py_trees.common import Status
 
 from beams.behavior_tree.ActionNode import ActionNode
 from beams.behavior_tree.ConditionNode import ConditionNode
 
+logger = logging.getLogger(__name__)
 
-class TestTask:
-    def test_action_node(self, capsys):
-        py_trees.logging.level = py_trees.logging.Level.DEBUG
-        # For test
-        percentage_complete = Value("i", 0)
 
-        def thisjob(myself, comp_condition, volatile_status) -> None:
-            volatile_status.set_value(py_trees.common.Status.RUNNING)
-            while not comp_condition(percentage_complete.value):
-                py_trees.console.logdebug(f"yuh {percentage_complete.value}, {volatile_status.get_value()}")
-                percentage_complete.value += 10
-                if percentage_complete.value == 100:
-                  volatile_status.set_value(py_trees.common.Status.SUCCESS)
-                time.sleep(0.001)
+def test_action_node():
+    # For test
+    percentage_complete = Value("i", 0)
 
-        py_trees.logging.level = py_trees.logging.Level.DEBUG
-        comp_cond = lambda x: x == 100
-        action = ActionNode(name="action", 
-                            work_func=thisjob, 
-                            completion_condition=comp_cond)
-        action.setup()
-        for i in range(20):
-          time.sleep(0.01)
-          action.tick_once()
+    def work_func(comp_condition: Callable) -> Status:
+        percentage_complete.value += 10
+        if comp_condition():
+            return Status.SUCCESS
+        logger.debug(f"pct complete -> {percentage_complete.value}")
+        time.sleep(0.001)
+        return Status.RUNNING
 
-        assert percentage_complete.value == 100
+    def comp_cond():
+        return percentage_complete.value >= 100
 
-    def test_condition_node(self):
-        yuh = lambda: True
-        con = ConditionNode("con", yuh)
-        py_trees.logging.level = py_trees.logging.Level.DEBUG
-        con.setup()
-        for i in range(3):
-            con.tick_once()
-            time.sleep(0.01)
+    action = ActionNode(name="action", work_func=work_func,
+                        completion_condition=comp_cond)
+    action.setup()
+    for _ in range(20):
+        time.sleep(0.01)
+        action.tick_once()
+    assert percentage_complete.value == 100
 
-    def test_condition_node_with_arg(self):
-        def check(val):
-            True if val is True else False
 
-        value = False
-        con = ConditionNode("con", check, value)
-        py_trees.logging.level = py_trees.logging.Level.DEBUG
-        con.setup()
-        for i in range(3):
-            con.tick_once()
-            time.sleep(0.01)
+def test_condition_node():
+    def condition_fn():
+        return True
+
+    con = ConditionNode("con", condition_fn)
+    con.setup()
+    assert con.status == Status.INVALID
+    for _ in range(3):
+        con.tick_once()
+        time.sleep(0.01)
+
+    assert con.status == Status.SUCCESS
+
+
+def test_condition_node_with_arg():
+    def check(val):
+        return val
+
+    value = False
+    con = ConditionNode("con", check, value)
+    con.setup()
+    assert con.status == Status.INVALID
+    for _ in range(3):
+        con.tick_once()
+        time.sleep(0.01)
+
+    assert con.status == Status.FAILURE

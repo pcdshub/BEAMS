@@ -1,4 +1,5 @@
-pyepics
-py-trees
-grpcio-tools
 apischema
+grpcio-tools
+py-trees
+pyepics
+pyyaml

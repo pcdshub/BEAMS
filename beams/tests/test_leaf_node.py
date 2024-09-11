@@ -5,7 +5,7 @@ from typing import Callable
 
 from py_trees.common import Status
 
-from beams.behavior_tree.ActionNode import ActionNode
+from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
 from beams.behavior_tree.ConditionNode import ConditionNode
 
 logger = logging.getLogger(__name__)
@@ -15,6 +15,7 @@ def test_action_node():
     # For test
     percentage_complete = Value("i", 0)
 
+    @wrapped_action_work
     def work_func(comp_condition: Callable) -> Status:
         percentage_complete.value += 10
         if comp_condition():

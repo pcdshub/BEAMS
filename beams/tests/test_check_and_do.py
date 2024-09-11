@@ -5,7 +5,9 @@ from multiprocessing import Value
 import py_trees
 from py_trees.common import Status
 
-from beams.behavior_tree import ActionNode, CheckAndDo, ConditionNode
+from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
+from beams.behavior_tree.CheckAndDo import CheckAndDo
+from beams.behavior_tree.ConditionNode import ConditionNode
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +15,7 @@ logger = logging.getLogger(__name__)
 def test_check_and_do():
     percentage_complete = Value("i", 0)
 
+    @wrapped_action_work
     def thisjob(comp_condition) -> None:
         logger.debug(f"PERC COMP {percentage_complete.value}")
         percentage_complete.value += 10
@@ -24,7 +27,7 @@ def test_check_and_do():
     def comp_cond():
         return percentage_complete.value >= 100
 
-    action = ActionNode.ActionNode(
+    action = ActionNode(
         name="action",
         work_func=thisjob,
         completion_condition=comp_cond
@@ -33,9 +36,9 @@ def test_check_and_do():
     def check_fn(x: Value):
         return x.value == 100
 
-    check = ConditionNode.ConditionNode("check", check_fn, percentage_complete)
+    check = ConditionNode("check", check_fn, percentage_complete)
 
-    candd = CheckAndDo.CheckAndDo("yuhh", check, action)
+    candd = CheckAndDo("yuhh", check, action)
     candd.setup_with_descendants()
 
     while (

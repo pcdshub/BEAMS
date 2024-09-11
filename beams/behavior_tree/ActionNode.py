@@ -1,7 +1,7 @@
 import atexit
 import logging
 import os
-from multiprocessing import Event, Queue
+from multiprocessing import Event, Queue, Value
 from typing import Any, Callable
 
 import py_trees
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def wrapped_action_work(func):
     def work_wrapper(
-        work_self,
+        do_work: Value,
         name: str,
         work_gate: Event,
         volatile_status: VolatileStatus,
@@ -30,7 +30,7 @@ def wrapped_action_work(func):
         Runs a persistent while loop, in which the work func is called repeatedly
         """
         log_configurer(log_queue)
-        while (work_self.do_work.value):
+        while (do_work.value):
             logger.debug(f"WAITING FOR INIT from node: {name}")
             work_gate.wait()
             work_gate.clear()

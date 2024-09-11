@@ -24,14 +24,15 @@ class Worker():
         self.proc_name = proc_name
         self.proc_type = proc_type
         self.add_args = add_args or []
-        # TODO: we may want to decorate work func so it prints proc id...
+        # TODO: we may want to decorate work func so it prints proc id... This may be a case of wrapper_func as opposed to decorator
         if (work_func is None):
           self.work_proc = proc_type(target=self.work_func, name=self.proc_name)
         else:
           self.work_func = work_func
+          # Critical Note: This makes assumptions of the work_func signature in that it takes a Value argument in position 0
           self.work_proc = proc_type(target=self.work_func, 
                                      name=self.proc_name,
-                                     args=(self, *self.add_args,))
+                                     args=(self.do_work, *self.add_args,))
         self.stop_func = stop_func
 
     def start_work(self):

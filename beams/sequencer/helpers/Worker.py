@@ -29,8 +29,9 @@ class Worker():
           self.work_proc = proc_type(target=self.work_func, name=self.proc_name)
         else:
           self.work_func = work_func
-          self.work_proc = proc_type(target=self.work_func, name=self.proc_name,
-                                     args=(*self.add_args,))
+          self.work_proc = proc_type(target=self.work_func, 
+                                     name=self.proc_name,
+                                     args=(self, *self.add_args,))
         self.stop_func = stop_func
 
     def start_work(self):

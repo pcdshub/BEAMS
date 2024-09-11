@@ -18,7 +18,7 @@ from py_trees.behaviours import (CheckBlackboardVariableValue,
 from py_trees.common import ComparisonExpression, ParallelPolicy, Status
 from py_trees.composites import Parallel, Selector, Sequence
 
-from beams.behavior_tree.ActionNode import ActionNode
+from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
 from beams.behavior_tree.CheckAndDo import CheckAndDo
 from beams.behavior_tree.ConditionNode import ConditionNode
 from beams.serialization import as_tagged_union
@@ -188,10 +188,11 @@ class SetPVActionItem(BaseItem):
 
     def get_tree(self) -> ActionNode:
 
+        @wrapped_action_work
         def work_func(comp_condition: Callable[[], bool]):
             try:
                 # Set to running
-                value = caget(self.termination_check.pv)
+                value = caget(self.pv)
 
                 if comp_condition():
                     return py_trees.common.Status.SUCCESS
@@ -226,6 +227,7 @@ class IncPVActionItem(BaseItem):
 
     def get_tree(self) -> ActionNode:
 
+        @wrapped_action_work
         def work_func(comp_condition: Callable[[], bool]) -> py_trees.common.Status:
             """
             To be run inside of a while loop

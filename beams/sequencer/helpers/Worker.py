@@ -43,12 +43,12 @@ class Worker():
         logger.debug("Starting work")
 
     def stop_work(self):
-        logger.info("Calling stop work on")
+        logger.debug("Calling stop work on")
         if not self.do_work.value:
             logger.error("Not working, not stopping work")
             return
         self.do_work.value = False
-        logger.info("Sending terminate signal to process")
+        logger.debug("Sending terminate signal to process")
         # Send kill signal to work process. # TODO: the exact location of this
         # is important. Reflect with self.do_work.get_lock():
         self.work_proc.terminate()

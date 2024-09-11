@@ -1,3 +1,4 @@
+import time
 import atexit
 import logging
 import os
@@ -12,52 +13,55 @@ from beams.behavior_tree.VolatileStatus import VolatileStatus
 logger = logging.getLogger(__name__)
 
 
-def wrapped_action_work(func):
-    def work_wrapper(
-        do_work: Value,
-        name: str,
-        work_gate: Event,
-        volatile_status: VolatileStatus,
-        completion_condition: Callable[[Any], bool],
-        log_queue: Queue,
-        log_configurer: Callable) -> None:
-        """
-        Wrap self.work_func, and set up logging / status communication
-        InterProcess Communication performed by shared memory objects:
-        - volatile status
-        - logging queue
+def wrapped_action_work(loop_period_sec: float = 0.1):
+    def inner_decorator_generator(func):
+        def work_wrapper(
+            do_work: Value,
+            name: str,
+            work_gate: Event,
+            volatile_status: VolatileStatus,
+            completion_condition: Callable[[Any], bool],
+            log_queue: Queue,
+            log_configurer: Callable) -> None:
+            """
+            Wrap self.work_func, and set up logging / status communication
+            InterProcess Communication performed by shared memory objects:
+            - volatile status
+            - logging queue
 
-        Runs a persistent while loop, in which the work func is called repeatedly
-        """
-        log_configurer(log_queue)
-        while (do_work.value):
-            logger.debug(f"WAITING FOR INIT from node: {name}")
-            work_gate.wait()
-            work_gate.clear()
-            
-            # Set to running
-            volatile_status.set_value(py_trees.common.Status.RUNNING)
-            while not completion_condition():
-                logger.debug(f"CALLING CAGET FROM from node ({name})")
-                try:
-                    status = func(completion_condition)
-                except Exception as ex:
+            Runs a persistent while loop, in which the work func is called repeatedly
+            """
+            log_configurer(log_queue)
+            while (do_work.value):
+                logger.debug(f"WAITING FOR INIT from node: {name}")
+                work_gate.wait()
+                work_gate.clear()
+                
+                # Set to running
+                volatile_status.set_value(py_trees.common.Status.RUNNING)
+                while not completion_condition():
+                    logger.debug(f"CALLING CAGET FROM from node ({name})")
+                    try:
+                        status = func(completion_condition)
+                    except Exception as ex:
+                        volatile_status.set_value(py_trees.common.Status.FAILURE)
+                        logger.error(f"Work function failed, setting node ({name}) "
+                                     f"as FAILED. ({ex})")
+                        break
+
+                    volatile_status.set_value(status)
+                    logger.debug(f"Setting node ({name}): {volatile_status.get_value()}")
+                    time.sleep(loop_period_sec)
+
+                # one last check
+                if completion_condition():
+                    volatile_status.set_value(py_trees.common.Status.SUCCESS)
+                else:
                     volatile_status.set_value(py_trees.common.Status.FAILURE)
-                    logger.error(f"Work function failed, setting node ({name}) "
-                                 f"as FAILED. ({ex})")
-                    break
 
-                volatile_status.set_value(status)
-                logger.debug(f"Setting node ({name}): {volatile_status.get_value()}")
-
-            # one last check
-            if completion_condition():
-                volatile_status.set_value(py_trees.common.Status.SUCCESS)
-            else:
-                volatile_status.set_value(py_trees.common.Status.FAILURE)
-
-            logger.debug(f"Worker for node ({name}) completed.")
-    return work_wrapper
+                logger.debug(f"Worker for node ({name}) completed.")
+        return work_wrapper
+    return inner_decorator_generator
 
 
 class ActionNode(py_trees.behaviour.Behaviour):

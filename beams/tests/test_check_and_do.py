@@ -15,13 +15,12 @@ logger = logging.getLogger(__name__)
 def test_check_and_do():
     percentage_complete = Value("i", 0)
 
-    @wrapped_action_work
+    @wrapped_action_work(loop_period_sec=0.001)
     def thisjob(comp_condition) -> None:
         logger.debug(f"PERC COMP {percentage_complete.value}")
         percentage_complete.value += 10
         if comp_condition():
             return Status.SUCCESS
-        time.sleep(0.001)
         return Status.RUNNING
 
     def comp_cond():

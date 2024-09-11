@@ -165,11 +165,11 @@ class SetPVActionItem(BaseItem):
 
     def get_tree(self) -> ActionNode:
 
-        @wrapped_action_work
+        @wrapped_action_work(self.loop_period_sec)
         def work_func(comp_condition: Callable[[], bool]):
             try:
                 # Set to running
-                value = caget(self.pv)
+                value = caget(self.pv)  # double caget, this
 
                 if comp_condition():
                     return py_trees.common.Status.SUCCESS
@@ -177,7 +177,6 @@ class SetPVActionItem(BaseItem):
 
                 # specific caput logic to SetPVActionItem
                 caput(self.pv, self.value)
-                time.sleep(self.loop_period_sec)
                 return py_trees.common.Status.RUNNING
             except Exception as ex:
                 logger.warning(f"{self.name}: work failed: {ex}")
@@ -204,7 +203,7 @@ class IncPVActionItem(BaseItem):
 
     def get_tree(self) -> ActionNode:
 
-        @wrapped_action_work
+        @wrapped_action_work(self.loop_period_sec)
         def work_func(comp_condition: Callable[[], bool]) -> py_trees.common.Status:
             """
             To be run inside of a while loop
@@ -219,7 +218,6 @@ class IncPVActionItem(BaseItem):
 
                 # specific caput logic to IncPVActionItem
                 caput(self.pv, value + self.increment)
-                time.sleep(self.loop_period_sec)
                 return py_trees.common.Status.RUNNING
             except Exception as ex:
                 logger.warning(f"{self.name}: work failed: {ex}")

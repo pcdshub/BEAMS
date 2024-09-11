@@ -15,13 +15,12 @@ def test_action_node():
     # For test
     percentage_complete = Value("i", 0)
 
-    @wrapped_action_work
+    @wrapped_action_work(loop_period_sec=0.001)
     def work_func(comp_condition: Callable) -> Status:
         percentage_complete.value += 10
         if comp_condition():
             return Status.SUCCESS
         logger.debug(f"pct complete -> {percentage_complete.value}")
-        time.sleep(0.001)
         return Status.RUNNING
 
     def comp_cond():

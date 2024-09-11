@@ -2,7 +2,7 @@ import atexit
 import logging
 import os
 from multiprocessing import Event, Queue
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 import py_trees
 
@@ -12,35 +12,13 @@ from beams.behavior_tree.VolatileStatus import VolatileStatus
 logger = logging.getLogger(__name__)
 
 
-class ActionNode(py_trees.behaviour.Behaviour):
-    def __init__(
-        self,
-        name: str,
-        work_func: Callable[[Any], None],
-        completion_condition: Callable[[Any], bool],
-        work_gate: Optional[Event] = None,
-    ):
-        # TODO: can add failure condition argument...
-        super().__init__(name)
-        self.volatile_status = VolatileStatus(self.status)
-        # TODO: may want to instantiate these locally and then decorate
-        # the passed work function with them
-        self.work_gate = work_gate or Event()
-        self.completion_condition = completion_condition
-        self.work_func = work_func
-        logger.debug(f'creating worker from {os.getpid()}')
-        self.worker = ActionWorker(
-            proc_name=name,
-            volatile_status=self.volatile_status,
-            work_func=self.work_wrapper,
-            comp_cond=completion_condition,
-            stop_func=None
-        )  # TODO: some standard notion of stop function could be valuable
-        logger.debug("%s.__init__()" % (self.__class__.__name__))
-
+def wrapped_action_work(func):
     def work_wrapper(
-        self,
+        work_self,
+        name: str,
+        work_gate: Event,
         volatile_status: VolatileStatus,
+        completion_condition: Callable[[Any], bool],
         log_queue: Queue,
         log_configurer: Callable) -> None:
         """
@@ -52,31 +30,59 @@ class ActionNode(py_trees.behaviour.Behaviour):
         Runs a persistent while loop, in which the work func is called repeatedly
         """
         log_configurer(log_queue)
-        logger.debug(f"WAITING FOR INIT from node: {self.name}")
-        self.work_gate.wait()
+        logger.debug(f"WAITING FOR INIT from node: {name}")
+        work_gate.wait()
 
         # Set to running
         volatile_status.set_value(py_trees.common.Status.RUNNING)
-        while not self.completion_condition():
-            logger.debug(f"CALLING CAGET FROM from node ({self.name})")
+        while not completion_condition():
+            logger.debug(f"CALLING CAGET FROM from node ({name})")
             try:
-                status = self.work_func(self.completion_condition)
+                status = func(completion_condition)
             except Exception as ex:
                 volatile_status.set_value(py_trees.common.Status.FAILURE)
-                logger.error(f"Work function failed, setting node ({self.name}) "
+                logger.error(f"Work function failed, setting node ({name}) "
                              f"as FAILED. ({ex})")
                 break
 
             volatile_status.set_value(status)
-            logger.debug(f"Setting node ({self.name}): {volatile_status.get_value()}")
+            logger.debug(f"Setting node ({name}): {volatile_status.get_value()}")
 
         # one last check
-        if self.completion_condition():
+        if completion_condition():
             volatile_status.set_value(py_trees.common.Status.SUCCESS)
         else:
             volatile_status.set_value(py_trees.common.Status.FAILURE)
 
-        logger.debug(f"Worker for node ({self.name}) completed.")
+        logger.debug(f"Worker for node ({name}) completed.")
+    return work_wrapper
+
+
+class ActionNode(py_trees.behaviour.Behaviour):
+    def __init__(
+        self,
+        name: str,
+        work_func: Callable[[Any], None],
+        completion_condition: Callable[[Any], bool]
+    ):
+        # TODO: can add failure condition argument...
+        super().__init__(name)
+        self.volatile_status = VolatileStatus(self.status)
+        # TODO: may want to instantiate these locally and then decorate
+        # the passed work function with them
+        self.work_gate = Event()
+        self.completion_condition = completion_condition
+        self.work_func = work_func
+        logger.debug(f'creating worker from {os.getpid()}')
+        self.worker = ActionWorker(
+            proc_name=name,
+            volatile_status=self.volatile_status,
+            work_gate=self.work_gate,
+            work_func=self.work_func,
+            comp_cond=completion_condition,
+            stop_func=None
+        )  # TODO: some standard notion of stop function could be valuable
+        logger.debug("%s.__init__()" % (self.__class__.__name__))
 
     def setup(self, **kwargs: int) -> None:
         """Kickstart the separate process this behaviour will work with.

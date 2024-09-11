@@ -30,31 +30,33 @@ def wrapped_action_work(func):
         Runs a persistent while loop, in which the work func is called repeatedly
         """
         log_configurer(log_queue)
-        logger.debug(f"WAITING FOR INIT from node: {name}")
-        work_gate.wait()
+        while (work_self.do_work.value):
+            logger.debug(f"WAITING FOR INIT from node: {name}")
+            work_gate.wait()
+            work_gate.clear()
+            
+            # Set to running
+            volatile_status.set_value(py_trees.common.Status.RUNNING)
+            while not completion_condition():
+                logger.debug(f"CALLING CAGET FROM from node ({name})")
+                try:
+                    status = func(completion_condition)
+                except Exception as ex:
+                    volatile_status.set_value(py_trees.common.Status.FAILURE)
+                    logger.error(f"Work function failed, setting node ({name}) "
+                                 f"as FAILED. ({ex})")
+                    break
 
-        # Set to running
-        volatile_status.set_value(py_trees.common.Status.RUNNING)
-        while not completion_condition():
-            logger.debug(f"CALLING CAGET FROM from node ({name})")
-            try:
-                status = func(completion_condition)
-            except Exception as ex:
+                volatile_status.set_value(status)
+                logger.debug(f"Setting node ({name}): {volatile_status.get_value()}")
+
+            # one last check
+            if completion_condition():
+                volatile_status.set_value(py_trees.common.Status.SUCCESS)
+            else:
                 volatile_status.set_value(py_trees.common.Status.FAILURE)
-                logger.error(f"Work function failed, setting node ({name}) "
-                             f"as FAILED. ({ex})")
-                break
 
-            volatile_status.set_value(status)
-            logger.debug(f"Setting node ({name}): {volatile_status.get_value()}")
-
-        # one last check
-        if completion_condition():
-            volatile_status.set_value(py_trees.common.Status.SUCCESS)
-        else:
-            volatile_status.set_value(py_trees.common.Status.FAILURE)
-
-        logger.debug(f"Worker for node ({name}) completed.")
+            logger.debug(f"Worker for node ({name}) completed.")
     return work_wrapper
 
 

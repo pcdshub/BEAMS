@@ -1,5 +1,15 @@
 """
 A worker specialized to execute ActionNode work functions
+
+The primary utility of this "wrapper" class is to maintain the extensibility of the base Worker class. 
+This is done by using this class to enumerate the "add_args" required by an ActioNode work function 
+not required by work functions in general. The add_args are as follows:
+* proc_name: names spawned process *and* generated BT node
+* work_gate: IPC signalling mechanism to spawned work that py_trees initialise() has been called by parent
+* volatile_status: IPC signalling mechanism that contains multiproccesing safe BT status
+* comp_cond: the Evaluatable function that determines success or failure of BT node
+* LOGGER_QUEUE: instance of the logging queue 
+* worker_logging_configurer: utility functuon to register log queue with handler
 """
 from typing import Any, Callable, Optional
 from multiprocessing import Event

@@ -151,6 +151,7 @@ def setup_logging(level: int = logging.INFO):
 
     # set console debug level, log files are always DEBUG
     config["handlers"]["console"]["level"] = level
+    config["loggers"]["beams"]["level"] = level
     logging.config.dictConfig(config)
 
     # setup main logger thread to listen to mp.Process loggers

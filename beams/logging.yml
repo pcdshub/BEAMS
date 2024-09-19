@@ -1,4 +1,5 @@
 version: 1
+disable_existing_loggers: False
 
 formatters:
   # For the console:
@@ -29,4 +30,5 @@ handlers:
 
 loggers:
   beams:
+    level: INFO
     handlers: [console, debug]

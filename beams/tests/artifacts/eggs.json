@@ -11,19 +11,17 @@
         "operator": "ge"
       },
       "do": {
-        "IncPVActionItem": {
-          "name": "self_test_do",
+        "name": "self_test_do",
+        "description": "",
+        "pv": "PERC:COMP",
+        "increment": 10,
+        "loop_period_sec": 0.01,
+        "termination_check": {
+          "name": "",
           "description": "",
-          "loop_period_sec": 0.01,
           "pv": "PERC:COMP",
-          "increment": 10,
-          "termination_check": {
-            "name": "",
-            "description": "",
-            "pv": "PERC:COMP",
-            "value": 100,
-            "operator": "ge"
-          }
+          "value": 100,
+          "operator": "ge"
         }
       }
     }

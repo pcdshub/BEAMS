@@ -262,6 +262,26 @@ class PyTreesItem:
 
 
 @dataclass
+class SuccessItem(PyTreesItem, BaseItem):
+    pass
+
+
+@dataclass
+class FailureItem(PyTreesItem, BaseItem):
+    pass
+
+
+@dataclass
+class RunningItem(PyTreesItem, BaseItem):
+    pass
+
+
+@dataclass
+class DummyItem(PyTreesItem, BaseItem):
+    pass
+
+
+@dataclass
 class PeriodicItem(PyTreesItem, BaseItem):
     n: int = 1
 

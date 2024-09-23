@@ -1,0 +1,56 @@
+{
+  "root": {
+    "SequenceItem": {
+      "name": "Eternal Guard",
+      "description": "",
+      "memory": false,
+      "children": [
+        {
+          "StatusQueueItem": {
+            "name": "Condition 1",
+            "description": "",
+            "queue": [
+              "SUCCESS",
+              "FAILURE",
+              "SUCCESS"
+            ],
+            "eventually": "SUCCESS"
+          }
+        },
+        {
+          "StatusQueueItem": {
+            "name": "Condition 2",
+            "description": "",
+            "queue": [
+              "SUCCESS",
+              "SUCCESS",
+              "FAILURE"
+            ],
+            "eventually": "SUCCESS"
+          }
+        },
+        {
+          "SequenceItem": {
+            "name": "Task Sequence",
+            "description": "",
+            "memory": true,
+            "children": [
+              {
+                "SuccessItem": {
+                  "name": "Worker 1",
+                  "description": ""
+                }
+              },
+              {
+                "RunningItem": {
+                  "name": "Worker 2",
+                  "description": ""
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

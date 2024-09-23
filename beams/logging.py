@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Optional, Union
 
 import yaml
+from py_trees.behaviour import Behaviour
+from py_trees.visitors import VisitorBase
 
 LOGGER_QUEUE = mp.Queue(-1)
 LOGGER_THREAD: Optional[threading.Thread] = None
@@ -159,3 +161,22 @@ def setup_logging(level: int = logging.INFO):
         target=logger_thread, args=(LOGGER_QUEUE,), daemon=True
     )
     LOGGER_THREAD.start()
+
+
+class LoggingVisitor(VisitorBase):
+    """
+    logs feedback messages and behaviour status
+
+    Uses the beams logger rather than the py_trees logger
+    """
+
+    def __init__(self, print_status: bool = False):
+        self.print_status = print_status
+        super().__init__(full=False)
+
+    def run(self, behaviour: Behaviour) -> None:
+        out_msg = f"{behaviour.__class__.__name__}.run() [{behaviour.status}]"
+        if behaviour.feedback_message:
+            logger.debug(out_msg + f": [{behaviour.feedback_message}]")
+        else:
+            logger.debug(out_msg)

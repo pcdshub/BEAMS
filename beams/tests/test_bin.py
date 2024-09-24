@@ -51,7 +51,7 @@ RUN_ARGS = (
 @pytest.mark.parametrize("added_args", tuple(arg_variants(RUN_ARGS)))
 def test_run(added_args: tuple[str]):
     test_cfg = Path(__file__).parent / "artifacts" / "eternal_guard.json"
-    args = ["beams", "run", str(test_cfg)]
+    args = ["beams", "run", str(test_cfg), "-d", "0"]
     args.extend(added_args)
     print(args)
     with cli_args(args), restore_logging():

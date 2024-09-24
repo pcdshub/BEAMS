@@ -51,6 +51,7 @@ def snapshot_post_tick_handler(
 def main(
     filepath: str,
     tick_count: int,
+    tick_delay: float,
     interactive: bool,
     show_node_status: bool,
     show_tree: bool,
@@ -79,6 +80,6 @@ def main(
             if interactive:
                 read_single_keypress()
             else:
-                time.sleep(0.5)
+                time.sleep(tick_delay)
         except KeyboardInterrupt:
             break

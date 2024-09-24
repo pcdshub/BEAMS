@@ -36,6 +36,11 @@ def build_arg_parser(argparser=None):
         help="How many times to tick the tree. Values <=0 mean continuous ticking"
     )
     argparser.add_argument(
+        "-d", "--tick-delay",
+        dest="tick_delay", default=0.5, type=float,
+        help="Delay time (s) between each tick.  Ignored if interactive mode is enabled"
+    )
+    argparser.add_argument(
         "--show-node-status",
         action="store_true", dest="show_node_status", default=True,
         help="Show node status each time one is ticked"

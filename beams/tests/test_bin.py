@@ -42,8 +42,8 @@ def test_main_noargs():
 
 RUN_ARGS = (
     (("-t", "2"), ("--tick-count", "2"), ()),
-    (("--show-node-status",), ()),
-    (("--show-tree",), ()),
+    (("--hide-node-status",), ()),
+    (("--hide-tree",), ()),
     (("--show-blackboard",), ()),
 )
 

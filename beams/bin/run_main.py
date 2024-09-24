@@ -74,12 +74,20 @@ def main(
                 show_blackboard)
     )
     tree.setup()
-    for _ in range(tick_count):
-        try:
-            tree.tick()
-            if interactive:
-                read_single_keypress()
-            else:
+    if tick_count <= 0:
+        while True:
+            try:
+                tree.tick()
                 time.sleep(tick_delay)
-        except KeyboardInterrupt:
-            break
+            except KeyboardInterrupt:
+                break
+    else:
+        for _ in range(tick_count):
+            try:
+                tree.tick()
+                if interactive:
+                    read_single_keypress()
+                else:
+                    time.sleep(tick_delay)
+            except KeyboardInterrupt:
+                break

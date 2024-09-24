@@ -173,10 +173,22 @@ class LoggingVisitor(VisitorBase):
     def __init__(self, print_status: bool = False):
         self.print_status = print_status
         super().__init__(full=False)
+        stream_handler = [h for h in logging.getLogger("beams").handlers
+                          if h.name == "console"][0]
+        self.stream_handler_level = stream_handler.level or logging.DEBUG
 
     def run(self, behaviour: Behaviour) -> None:
+        """
+        Write node status to logging stream.
+        If print_status is requested and the console logger won't display, also
+        print to console
+        """
         out_msg = f"{behaviour.__class__.__name__}.run() [{behaviour.status}]"
         if behaviour.feedback_message:
             logger.debug(out_msg + f": [{behaviour.feedback_message}]")
+            if self.print_status and (self.stream_handler_level > logging.DEBUG):
+                print(out_msg + f": [{behaviour.feedback_message}]")
         else:
             logger.debug(out_msg)
+            if self.print_status and (self.stream_handler_level > logging.DEBUG):
+                print(out_msg)

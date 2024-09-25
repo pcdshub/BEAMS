@@ -78,7 +78,10 @@ def main(
         while True:
             try:
                 tree.tick()
-                time.sleep(tick_delay)
+                if interactive:
+                    read_single_keypress()
+                else:
+                    time.sleep(tick_delay)
             except KeyboardInterrupt:
                 break
     else:

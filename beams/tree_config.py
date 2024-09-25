@@ -169,7 +169,9 @@ class ConditionItem(BaseItem):
         op = getattr(operator, self.operator.value)
 
         def cond_func():
-            val = caget(self.pv)
+            # Note: this bakes EPICS into how Conditions work. 
+            # Further implictly now relies of type of "value" to determine whether to get as_string
+            val = caget(self.pv, as_string=isinstance(self.value, str))
             if val is None:
                 return False
 

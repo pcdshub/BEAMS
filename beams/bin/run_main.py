@@ -48,6 +48,14 @@ def snapshot_post_tick_handler(
         print(unicode_blackboard())
 
 
+def tick_tree(tree: BehaviourTree, interactive: bool, tick_delay: float):
+    tree.tick()
+    if interactive:
+        read_single_keypress()
+    else:
+        time.sleep(tick_delay)
+
+
 def main(
     filepath: str,
     tick_count: int,
@@ -77,20 +85,12 @@ def main(
     if tick_count <= 0:
         while True:
             try:
-                tree.tick()
-                if interactive:
-                    read_single_keypress()
-                else:
-                    time.sleep(tick_delay)
+                tick_tree(tree, interactive, tick_delay)
             except KeyboardInterrupt:
                 break
     else:
         for _ in range(tick_count):
             try:
-                tree.tick()
-                if interactive:
-                    read_single_keypress()
-                else:
-                    time.sleep(tick_delay)
+                tick_tree(tree, interactive, tick_delay)
             except KeyboardInterrupt:
                 break

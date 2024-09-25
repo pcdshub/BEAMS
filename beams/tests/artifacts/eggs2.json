@@ -17,19 +17,17 @@
               "operator": "ge"
             },
             "do": {
-              "SetPVActionItem": {
-                "name": "ret_find_do",
+              "name": "ret_find_do",
+              "description": "",
+              "pv": "RET:FOUND",
+              "value": 1,
+              "loop_period_sec": 0.01,
+              "termination_check": {
+                "name": "",
                 "description": "",
-                "loop_period_sec": 0.01,
                 "pv": "RET:FOUND",
                 "value": 1,
-                "termination_check": {
-                  "name": "",
-                  "description": "",
-                  "pv": "RET:FOUND",
-                  "value": 1,
-                  "operator": "ge"
-                }
+                "operator": "ge"
               }
             }
           }
@@ -46,19 +44,17 @@
               "operator": "ge"
             },
             "do": {
-              "SetPVActionItem": {
+              "name": "",
+              "description": "",
+              "pv": "RET:INSERT",
+              "value": 1,
+              "loop_period_sec": 1.0,
+              "termination_check": {
                 "name": "",
                 "description": "",
-                "loop_period_sec": 1.0,
                 "pv": "RET:INSERT",
                 "value": 1,
-                "termination_check": {
-                  "name": "",
-                  "description": "",
-                  "pv": "RET:INSERT",
-                  "value": 1,
-                  "operator": "ge"
-                }
+                "operator": "ge"
               }
             }
           }

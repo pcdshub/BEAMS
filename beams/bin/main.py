@@ -7,7 +7,7 @@ import importlib
 import logging
 
 import beams
-from beams.logging import setup_logging
+from beams.logging import configure_log_directory, setup_logging
 
 DESCRIPTION = __doc__
 
@@ -70,6 +70,12 @@ def main():
         type=str,
         help='Python logging level (e.g. DEBUG, INFO, WARNING)'
     )
+    top_parser.add_argument(
+        "--log-dir", dest="log_dir",
+        type=str,
+        default="",
+        help="directory to create log files.  If not provided, do not log to file."
+    )
 
     subparsers = top_parser.add_subparsers(help='Possible subcommands')
     for command_name, (build_func, main) in COMMANDS.items():
@@ -81,6 +87,9 @@ def main():
     kwargs = vars(args)
     log_level = kwargs.pop('log_level')
 
+    log_dir = kwargs.pop("log_dir")
+    if log_dir:
+        configure_log_directory(log_dir)
     setup_logging(log_level)
     logger = logging.getLogger("beams")
 

@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass, field, fields
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union, Protocol
 
 import py_trees
 from apischema import deserialize
@@ -107,19 +107,30 @@ class SelectorItem(BaseItem):
         return node
 
 
+class ImplementsSequence(Protocol):
+    name: str
+    description: str
+    memory: bool
+    children: List[BaseItem]
+
+
+def get_sequence_tree(seq_item: ImplementsSequence):
+    children = []
+    for child in seq_item.children:
+        children.append(child.get_tree())
+
+    node = Sequence(name=seq_item.name, memory=seq_item.memory, children=children)
+
+    return node
+
+
 @dataclass
 class SequenceItem(BaseItem):
     memory: bool = False
     children: List[BaseItem] = field(default_factory=list)
 
     def get_tree(self) -> Sequence:
-        children = []
-        for child in self.children:
-            children.append(child.get_tree())
-
-        node = Sequence(name=self.name, memory=self.memory, children=children)
-
-        return node
+        return get_sequence_tree(self)
 
 
 # Custom LCLS-built Behaviors (idioms)
@@ -156,12 +167,91 @@ class ConditionItem(BaseItem):
 
 
 @dataclass
+class SequenceConditionItem(BaseItem):
+    """
+    A sequence containing only condition items.
+
+    Suitable for use as an action item's termination_check.
+
+    The condition function evaluates to "True" if every child's condition item
+    also evaluates to "True".
+
+    When not used as a termination_check, this behaves exactly
+    like a normal Sequence Item.
+    """
+    memory: bool = False
+    children: List[ConditionItem] = field(default_factory=list)
+
+    def get_tree(self) -> Sequence:
+        return get_sequence_tree(self)
+
+    def get_condition_function(self) -> Callable[[], bool]:
+        child_funcs = [item.get_condition_function() for item in self.children]
+        
+        def cond_func():
+            """
+            Minimize network hits by failing at first issue
+            """
+            ok = True
+            for cf in child_funcs:
+                ok = ok and cf()
+                if not ok:
+                    break
+            return ok
+
+        return cond_func
+
+
+@dataclass
+class RangeConditionItem(BaseItem):
+    """
+    Shorthand for a sequence of two condition items, establishing a range.
+    """
+    memory: bool = False,
+    pv: str = ""
+    low_value: Any = 0
+    high_value: Any = 1,
+
+    def _generate_subconfig(self) -> SequenceConditionItem:
+        low = ConditionItem(
+            name=f"{self.name}_lower_bound",
+            description=f"Lower bound for {self.name} check",
+            pv=self.pv,
+            value=self.low_value,
+            operator=ConditionOperator.greater_equal,
+        )
+        high = ConditionItem(
+            name=f"{self.name}_upper_bound",
+            description=f"Upper bound for {self.name} check",
+            pv=self.pv,
+            value=self.high_value,
+            operator=ConditionOperator.less_equal,
+        )
+        range = SequenceConditionItem(
+            name=self.name,
+            description=self.description,
+            memory=self.memory,
+            children=[low, high],
+        )
+        return range
+
+    def get_tree(self) -> Sequence:
+        return self._generate_subconfig().get_tree()
+    
+    def get_condition_function(self) -> Callable[[], bool]:
+        return self._generate_subconfig().get_condition_function()
+
+
+AnyCondition = Union[ConditionItem, SequenceConditionItem, RangeConditionItem]
+
+
+@dataclass
 class SetPVActionItem(BaseItem):
     pv: str = ""
     value: Any = 1
     loop_period_sec: float = 1.0
 
-    termination_check: ConditionItem = field(default_factory=ConditionItem)
+    termination_check: AnyCondition = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
 
@@ -199,7 +289,7 @@ class IncPVActionItem(BaseItem):
     increment: float = 1
     loop_period_sec: float = 1.0
 
-    termination_check: ConditionItem = field(default_factory=ConditionItem)
+    termination_check: AnyCondition = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
 
@@ -236,8 +326,13 @@ class IncPVActionItem(BaseItem):
 
 @dataclass
 class CheckAndDoItem(BaseItem):
-    check: ConditionItem = field(default_factory=ConditionItem)
+    check: AnyCondition = field(default_factory=ConditionItem)
     do: Union[SetPVActionItem, IncPVActionItem] = field(default_factory=SetPVActionItem)
+
+    def __post_init__(self):
+        # Allow shorthand of not setting do.termination_check
+        if not self.do.termination_check.pv:
+            self.do.termination_check = self.check
 
     def get_tree(self) -> CheckAndDo:
         check_node = self.check.get_tree()

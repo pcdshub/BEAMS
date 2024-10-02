@@ -107,14 +107,7 @@ class SelectorItem(BaseItem):
         return node
 
 
-class ImplementsSequence(Protocol):
-    name: str
-    description: str
-    memory: bool
-    children: List[BaseItem]
-
-
-def get_sequence_tree(seq_item: ImplementsSequence):
+def get_sequence_tree(seq_item: AnySequenceItem):
     children = []
     for child in seq_item.children:
         children.append(child.get_tree())
@@ -180,7 +173,7 @@ class SequenceConditionItem(BaseItem):
     like a normal Sequence Item.
     """
     memory: bool = False
-    children: List[ConditionItem] = field(default_factory=list)
+    children: List[AnyConditionItem] = field(default_factory=list)
 
     def get_tree(self) -> Sequence:
         return get_sequence_tree(self)
@@ -242,16 +235,13 @@ class RangeConditionItem(BaseItem):
         return self._generate_subconfig().get_condition_function()
 
 
-AnyCondition = Union[ConditionItem, SequenceConditionItem, RangeConditionItem]
-
-
 @dataclass
 class SetPVActionItem(BaseItem):
     pv: str = ""
     value: Any = 1
     loop_period_sec: float = 1.0
 
-    termination_check: AnyCondition = field(default_factory=ConditionItem)
+    termination_check: AnyConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
 
@@ -289,7 +279,7 @@ class IncPVActionItem(BaseItem):
     increment: float = 1
     loop_period_sec: float = 1.0
 
-    termination_check: AnyCondition = field(default_factory=ConditionItem)
+    termination_check: AnyConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
 
@@ -326,7 +316,7 @@ class IncPVActionItem(BaseItem):
 
 @dataclass
 class CheckAndDoItem(BaseItem):
-    check: AnyCondition = field(default_factory=ConditionItem)
+    check: AnyConditionItem = field(default_factory=ConditionItem)
     do: Union[SetPVActionItem, IncPVActionItem] = field(default_factory=SetPVActionItem)
 
     def __post_init__(self):
@@ -456,3 +446,7 @@ class WaitForBlackboardVariableValueItem(BaseItem):
             operator=getattr(operator, self.check.operator.value)
         )
         return WaitForBlackboardVariableValue(name=self.name, check=comp_exp)
+
+
+AnyConditionItem = Union[ConditionItem, SequenceConditionItem, RangeConditionItem]
+AnySequenceItem = Union[SequenceItem, SequenceConditionItem]

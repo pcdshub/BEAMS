@@ -7,7 +7,7 @@ import time
 from dataclasses import dataclass, field, fields
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Union, Protocol
+from typing import Any, Callable, List, Optional, Union
 
 import py_trees
 from apischema import deserialize
@@ -180,7 +180,7 @@ class SequenceConditionItem(BaseItem):
 
     def get_condition_function(self) -> Callable[[], bool]:
         child_funcs = [item.get_condition_function() for item in self.children]
-        
+
         def cond_func():
             """
             Minimize network hits by failing at first issue
@@ -230,7 +230,7 @@ class RangeConditionItem(BaseItem):
 
     def get_tree(self) -> Sequence:
         return self._generate_subconfig().get_tree()
-    
+
     def get_condition_function(self) -> Callable[[], bool]:
         return self._generate_subconfig().get_condition_function()
 

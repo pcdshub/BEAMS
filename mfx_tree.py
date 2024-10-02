@@ -1,4 +1,7 @@
-from beams.tree_config import CheckAndDoItem, ConditionItem, SetPVActionItem, ConditionOperator, SequenceItem, SequenceConditionItem, RangeConditionItem, SelectorItem
+from beams.tree_config import (CheckAndDoItem, ConditionItem,
+                               ConditionOperator, RangeConditionItem,
+                               SelectorItem, SequenceConditionItem,
+                               SequenceItem, SetPVActionItem)
 
 # DG2 Stopper: remove
 check_dg2_stp_closed = ConditionItem(

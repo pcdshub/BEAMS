@@ -299,3 +299,21 @@ ensure_dg1_cam_running = SelectorItem(
     children=[check_dg1_cam_running, seq_dg1_acq_cycle],
 )
 # Skip stats for now
+
+
+# Full subtree top-level sequence
+dg1_prep = SequenceItem(
+    name="dg1_prep",
+    description="Prepare MFX for alignment to DG1",
+    children=[
+        dg2_stopper,
+        prefocus_remove,
+        transfocator_remove,
+        dg1_yag,
+        dg2_yag,
+        mfx_att,
+        slits_to_2mm,
+        prepare_mr1l4,
+        ensure_dg1_cam_running,
+    ],
+)

@@ -1,7 +1,10 @@
+from pathlib import Path
+
 from beams.tree_config import (CheckAndDoItem, ConditionItem,
                                ConditionOperator, RangeConditionItem,
                                SelectorItem, SequenceConditionItem,
-                               SequenceItem, SetPVActionItem)
+                               SequenceItem, SetPVActionItem,
+                               save_tree_to_path)
 
 # DG2 Stopper: remove
 check_dg2_stp_closed = ConditionItem(
@@ -317,3 +320,8 @@ dg1_prep = SequenceItem(
         ensure_dg1_cam_running,
     ],
 )
+
+
+def update_mfx_json():
+    path = Path(__file__).parent / "mfx_tree.json"
+    save_tree_to_path(path=path, root=dg1_prep)

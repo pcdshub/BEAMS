@@ -152,35 +152,135 @@ class BTSimIOC(PVGroup):
         name="MFX:DG2:PIM:GO",
         doc="Fake MFX:DG2:PIM:GO",
     )
-    mfx_lens_dia_01 = pvproperty(
-        value=1,
-        name="MFX:LENS:DIA:01:STATE",
-        doc="Fake MFX:LENS:DIA:01:STATE",
-    )
     mfx_lens_dia_01_remove = pvproperty(
         value=0,
         name="MFX:LENS:DIA:01:REMOVE",
         doc="Fake MFX:LENS:DIA:01:REMOVE",
     )
-    mfx_lens_dia_02 = pvproperty(
-        value=0,
-        name="MFX:LENS:DIA:02:STATE",
-        doc="Fake MFX:LENS:DIA:02:STATE",
+    mfx_lens_dia_01_state = pvproperty(
+        value=1,
+        name="MFX:LENS:DIA:01:STATE",
+        doc="Fake MFX:LENS:DIA:01:STATE",
     )
     mfx_lens_dia_02_remove = pvproperty(
         value=0,
         name="MFX:LENS:DIA:02:REMOVE",
         doc="Fake MFX:LENS:DIA:02:REMOVE",
     )
-    mfx_lens_dia_03 = pvproperty(
+    mfx_lens_dia_02_state = pvproperty(
         value=0,
-        name="MFX:LENS:DIA:03:STATE",
-        doc="Fake MFX:LENS:DIA:03:STATE",
+        name="MFX:LENS:DIA:02:STATE",
+        doc="Fake MFX:LENS:DIA:02:STATE",
     )
     mfx_lens_dia_03_remove = pvproperty(
         value=0,
         name="MFX:LENS:DIA:03:REMOVE",
         doc="Fake MFX:LENS:DIA:03:REMOVE",
+    )
+    mfx_lens_dia_03_state = pvproperty(
+        value=0,
+        name="MFX:LENS:DIA:03:STATE",
+        doc="Fake MFX:LENS:DIA:03:STATE",
+    )
+    mfx_lens_tfs_01_remove = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:01:REMOVE",
+        doc="Fake MFX:LENS:TFS:01:REMOVE",
+    )
+    mfx_lens_tfs_01_state = pvproperty(
+        value=1,
+        name="MFX:LENS:TFS:01:STATE",
+        doc="Fake MFX:LENS:TFS:01:STATE",
+    )
+    mfx_lens_tfs_02_remove = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:02:REMOVE",
+        doc="Fake MFX:LENS:TFS:02:REMOVE",
+    )
+    mfx_lens_tfs_02_state = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:02:STATE",
+        doc="Fake MFX:LENS:TFS:02:STATE",
+    )
+    mfx_lens_tfs_03_remove = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:03:REMOVE",
+        doc="Fake MFX:LENS:TFS:03:REMOVE",
+    )
+    mfx_lens_tfs_03_state = pvproperty(
+        value=1,
+        name="MFX:LENS:TFS:03:STATE",
+        doc="Fake MFX:LENS:TFS:03:STATE",
+    )
+    mfx_lens_tfs_04_remove = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:04:REMOVE",
+        doc="Fake MFX:LENS:TFS:04:REMOVE",
+    )
+    mfx_lens_tfs_04_state = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:04:STATE",
+        doc="Fake MFX:LENS:TFS:04:STATE",
+    )
+    mfx_lens_tfs_05_remove = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:05:REMOVE",
+        doc="Fake MFX:LENS:TFS:05:REMOVE",
+    )
+    mfx_lens_tfs_05_state = pvproperty(
+        value=1,
+        name="MFX:LENS:TFS:05:STATE",
+        doc="Fake MFX:LENS:TFS:05:STATE",
+    )
+    mfx_lens_tfs_06_remove = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:06:REMOVE",
+        doc="Fake MFX:LENS:TFS:06:REMOVE",
+    )
+    mfx_lens_tfs_06_state = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:06:STATE",
+        doc="Fake MFX:LENS:TFS:06:STATE",
+    )
+    mfx_lens_tfs_07_remove = pvproperty(
+        value=1,
+        name="MFX:LENS:TFS:07:REMOVE",
+        doc="Fake MFX:LENS:TFS:07:REMOVE",
+    )
+    mfx_lens_tfs_07_state = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:07:STATE",
+        doc="Fake MFX:LENS:TFS:07:STATE",
+    )
+    mfx_lens_tfs_08_remove = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:08:REMOVE",
+        doc="Fake MFX:LENS:TFS:08:REMOVE",
+    )
+    mfx_lens_tfs_08_state = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:08:STATE",
+        doc="Fake MFX:LENS:TFS:08:STATE",
+    )
+    mfx_lens_tfs_09_remove = pvproperty(
+        value=1,
+        name="MFX:LENS:TFS:09:REMOVE",
+        doc="Fake MFX:LENS:TFS:09:REMOVE",
+    )
+    mfx_lens_tfs_09_state = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:09:STATE",
+        doc="Fake MFX:LENS:TFS:09:STATE",
+    )
+    mfx_lens_tfs_10_remove = pvproperty(
+        value=0,
+        name="MFX:LENS:TFS:10:REMOVE",
+        doc="Fake MFX:LENS:TFS:10:REMOVE",
+    )
+    mfx_lens_tfs_10_state = pvproperty(
+        value=1,
+        name="MFX:LENS:TFS:10:STATE",
+        doc="Fake MFX:LENS:TFS:10:STATE",
     )
     mr1l4_homs_mms_pitch_rbv = pvproperty(
         value=833.4,

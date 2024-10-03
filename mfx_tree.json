@@ -57,7 +57,7 @@
                   "check": {
                     "name": "check_pfl1_out",
                     "description": "Check if lens is removed",
-                    "pv": "MFX:LENS:DIA:01",
+                    "pv": "MFX:LENS:DIA:01:STATE",
                     "value": 0,
                     "operator": "eq"
                   },
@@ -82,7 +82,7 @@
                   "check": {
                     "name": "check_pfl2_out",
                     "description": "Check if lens is removed",
-                    "pv": "MFX:LENS:DIA:02",
+                    "pv": "MFX:LENS:DIA:02:STATE",
                     "value": 0,
                     "operator": "eq"
                   },
@@ -107,7 +107,7 @@
                   "check": {
                     "name": "check_pfl3_out",
                     "description": "Check if lens is removed",
-                    "pv": "MFX:LENS:DIA:03",
+                    "pv": "MFX:LENS:DIA:03:STATE",
                     "value": 0,
                     "operator": "eq"
                   },
@@ -136,19 +136,19 @@
             "children": [
               {
                 "CheckAndDoItem": {
-                  "name": "cad_pfl1_remove",
+                  "name": "cad_tfs1_remove",
                   "description": "Ensure lens is removed",
                   "check": {
-                    "name": "check_pfl1_out",
+                    "name": "check_tfs1_out",
                     "description": "Check if lens is removed",
-                    "pv": "MFX:LENS:DIA:01",
+                    "pv": "MFX:LENS:TFS:01:STATE",
                     "value": 0,
                     "operator": "eq"
                   },
                   "do": {
-                    "name": "act_pfl1_remove",
+                    "name": "act_tfs1_remove",
                     "description": "Remove lens",
-                    "pv": "MFX:LENS:DIA:01:REMOVE",
+                    "pv": "MFX:LENS:TFS:01:REMOVE",
                     "value": 1,
                     "loop_period_sec": 1.0,
                     "termination_check": {
@@ -161,19 +161,19 @@
               },
               {
                 "CheckAndDoItem": {
-                  "name": "cad_pfl2_remove",
+                  "name": "cad_tfs2_remove",
                   "description": "Ensure lens is removed",
                   "check": {
-                    "name": "check_pfl2_out",
+                    "name": "check_tfs2_out",
                     "description": "Check if lens is removed",
-                    "pv": "MFX:LENS:DIA:02",
+                    "pv": "MFX:LENS:TFS:02:STATE",
                     "value": 0,
                     "operator": "eq"
                   },
                   "do": {
-                    "name": "act_pfl2_remove",
+                    "name": "act_tfs2_remove",
                     "description": "Remove lens",
-                    "pv": "MFX:LENS:DIA:02:REMOVE",
+                    "pv": "MFX:LENS:TFS:02:REMOVE",
                     "value": 1,
                     "loop_period_sec": 1.0,
                     "termination_check": {
@@ -186,19 +186,194 @@
               },
               {
                 "CheckAndDoItem": {
-                  "name": "cad_pfl3_remove",
+                  "name": "cad_tfs3_remove",
                   "description": "Ensure lens is removed",
                   "check": {
-                    "name": "check_pfl3_out",
+                    "name": "check_tfs3_out",
                     "description": "Check if lens is removed",
-                    "pv": "MFX:LENS:DIA:03",
+                    "pv": "MFX:LENS:TFS:03:STATE",
                     "value": 0,
                     "operator": "eq"
                   },
                   "do": {
-                    "name": "act_pfl3_remove",
+                    "name": "act_tfs3_remove",
                     "description": "Remove lens",
-                    "pv": "MFX:LENS:DIA:03:REMOVE",
+                    "pv": "MFX:LENS:TFS:03:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs4_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "name": "check_tfs4_out",
+                    "description": "Check if lens is removed",
+                    "pv": "MFX:LENS:TFS:04:STATE",
+                    "value": 0,
+                    "operator": "eq"
+                  },
+                  "do": {
+                    "name": "act_tfs4_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:04:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs5_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "name": "check_tfs5_out",
+                    "description": "Check if lens is removed",
+                    "pv": "MFX:LENS:TFS:05:STATE",
+                    "value": 0,
+                    "operator": "eq"
+                  },
+                  "do": {
+                    "name": "act_tfs5_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:05:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs6_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "name": "check_tfs6_out",
+                    "description": "Check if lens is removed",
+                    "pv": "MFX:LENS:TFS:06:STATE",
+                    "value": 0,
+                    "operator": "eq"
+                  },
+                  "do": {
+                    "name": "act_tfs6_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:06:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs7_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "name": "check_tfs7_out",
+                    "description": "Check if lens is removed",
+                    "pv": "MFX:LENS:TFS:07:STATE",
+                    "value": 0,
+                    "operator": "eq"
+                  },
+                  "do": {
+                    "name": "act_tfs7_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:07:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs8_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "name": "check_tfs8_out",
+                    "description": "Check if lens is removed",
+                    "pv": "MFX:LENS:TFS:08:STATE",
+                    "value": 0,
+                    "operator": "eq"
+                  },
+                  "do": {
+                    "name": "act_tfs8_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:08:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs9_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "name": "check_tfs9_out",
+                    "description": "Check if lens is removed",
+                    "pv": "MFX:LENS:TFS:09:STATE",
+                    "value": 0,
+                    "operator": "eq"
+                  },
+                  "do": {
+                    "name": "act_tfs9_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:09:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs10_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "name": "check_tfs10_out",
+                    "description": "Check if lens is removed",
+                    "pv": "MFX:LENS:TFS:10:STATE",
+                    "value": 0,
+                    "operator": "eq"
+                  },
+                  "do": {
+                    "name": "act_tfs10_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:10:REMOVE",
                     "value": 1,
                     "loop_period_sec": 1.0,
                     "termination_check": {

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Callable, List, Optional, Union
 
 import py_trees
-from apischema import deserialize
+from apischema import deserialize, serialize
 from epics import caget, caput
 from py_trees.behaviour import Behaviour
 from py_trees.behaviours import (CheckBlackboardVariableValue,
@@ -26,13 +26,21 @@ from beams.serialization import as_tagged_union
 logger = logging.getLogger(__name__)
 
 
-def get_tree_from_path(path: Path) -> py_trees.trees.BehaviourTree:
+def get_tree_from_path(path: Union[Path, str]) -> py_trees.trees.BehaviourTree:
     """Deserialize a json file, return the tree it specifies"""
     with open(path, "r") as fd:
         deser = json.load(fd)
         tree_item = deserialize(BehaviorTreeItem, deser)
 
     return tree_item.get_tree()
+
+
+def save_tree_to_path(path: Union[Path, str], root: BaseItem):
+    """Serialize a behavior tree node to a json file."""
+    ser = serialize(BehaviorTreeItem(root=root))
+
+    with open(path, "w") as fd:
+        json.dump(ser, fd, indent=2)
 
 
 @dataclass

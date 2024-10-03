@@ -272,9 +272,7 @@
                 "RangeConditionItem": {
                   "name": "check_mfx_att_range",
                   "description": "Check if mfx_att is near 10% transmission",
-                  "memory": [
-                    false
-                  ],
+                  "memory": false,
                   "pv": "MFX:ATT:COM:R_CUR",
                   "low_value": 0.08,
                   "high_value": 0.12
@@ -321,9 +319,7 @@
                         "termination_check": {
                           "name": "check_mfx_att_range",
                           "description": "Check if mfx_att is near 10% transmission",
-                          "memory": [
-                            false
-                          ],
+                          "memory": false,
                           "pv": "MFX:ATT:COM:R_CUR",
                           "low_value": 0.08,
                           "high_value": 0.12
@@ -349,9 +345,7 @@
                   "check": {
                     "name": "dg1_x_check",
                     "description": "Check if slit width is close to 2mm",
-                    "memory": [
-                      false
-                    ],
+                    "memory": false,
                     "pv": "MFX:DG1:JAWS:Actual_XWIDTH",
                     "low_value": 1.9,
                     "high_value": 2.1
@@ -377,9 +371,7 @@
                   "check": {
                     "name": "dg1_y_check",
                     "description": "Check if slit width is close to 2mm",
-                    "memory": [
-                      false
-                    ],
+                    "memory": false,
                     "pv": "MFX:DG1:JAWS:Actual_YWIDTH",
                     "low_value": 1.9,
                     "high_value": 2.1
@@ -405,9 +397,7 @@
                   "check": {
                     "name": "dg2_us_x_check",
                     "description": "Check if slit width is close to 2mm",
-                    "memory": [
-                      false
-                    ],
+                    "memory": false,
                     "pv": "MFX:DG2:JAWS:US:Actual_XWIDTH",
                     "low_value": 1.9,
                     "high_value": 2.1
@@ -433,9 +423,7 @@
                   "check": {
                     "name": "dg2_us_y_check",
                     "description": "Check if slit width is close to 2mm",
-                    "memory": [
-                      false
-                    ],
+                    "memory": false,
                     "pv": "MFX:DG2:JAWS:US:Actual_YWIDTH",
                     "low_value": 1.9,
                     "high_value": 2.1
@@ -461,9 +449,7 @@
                   "check": {
                     "name": "dg2_ms_x_check",
                     "description": "Check if slit width is close to 2mm",
-                    "memory": [
-                      false
-                    ],
+                    "memory": false,
                     "pv": "MFX:DG2:JAWS:MS:Actual_XWIDTH",
                     "low_value": 1.9,
                     "high_value": 2.1
@@ -489,9 +475,7 @@
                   "check": {
                     "name": "dg2_ms_y_check",
                     "description": "Check if slit width is close to 2mm",
-                    "memory": [
-                      false
-                    ],
+                    "memory": false,
                     "pv": "MFX:DG2:JAWS:MS:Actual_YWIDTH",
                     "low_value": 1.9,
                     "high_value": 2.1
@@ -517,9 +501,7 @@
                   "check": {
                     "name": "dg2_ds_x_check",
                     "description": "Check if slit width is close to 2mm",
-                    "memory": [
-                      false
-                    ],
+                    "memory": false,
                     "pv": "MFX:DG2:JAWS:DS:Actual_XWIDTH",
                     "low_value": 1.9,
                     "high_value": 2.1
@@ -545,9 +527,7 @@
                   "check": {
                     "name": "dg2_ds_y_check",
                     "description": "Check if slit width is close to 2mm",
-                    "memory": [
-                      false
-                    ],
+                    "memory": false,
                     "pv": "MFX:DG2:JAWS:DS:Actual_YWIDTH",
                     "low_value": 1.9,
                     "high_value": 2.1
@@ -607,9 +587,7 @@
                   "check": {
                     "name": "check_mr1l4_pointing",
                     "description": "Check if mr1l4 is pointing generally towards MFX",
-                    "memory": [
-                      false
-                    ],
+                    "memory": false,
                     "pv": "MR1L4:HOMS:MMS:PITCH.RBV",
                     "low_value": -549,
                     "high_value": -539

@@ -210,7 +210,7 @@ class RangeConditionItem(BaseItem):
     """
     Shorthand for a sequence of two condition items, establishing a range.
     """
-    memory: bool = False,
+    memory: bool = False
     pv: str = ""
     low_value: Any = 0
     high_value: Any = 1,

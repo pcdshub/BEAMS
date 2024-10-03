@@ -37,25 +37,9 @@
               "value": 2,
               "loop_period_sec": 1.0,
               "termination_check": {
-                "name": "check_dg2_stp_in",
-                "description": "Check that dg2 stopper is at the closed switch but not at the open switch.",
-                "memory": false,
-                "children": [
-                  {
-                    "name": "check_dg2_stp_closed",
-                    "description": "Check that dg2 stopper is at closed switch.",
-                    "pv": "HFX:DG2:STP:01:CLOSE",
-                    "value": 1,
-                    "operator": "eq"
-                  },
-                  {
-                    "name": "check_dg2_stp_not_open",
-                    "description": "Check that dg2 stopper is not at open switch.",
-                    "pv": "HFX:DG2:STP:01:OPEN",
-                    "value": 0,
-                    "operator": "eq"
-                  }
-                ]
+                "name": "",
+                "description": "",
+                "copy_from": "previous check"
               }
             }
           }
@@ -84,11 +68,9 @@
                     "value": 1,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "check_pfl1_out",
-                      "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:DIA:01",
-                      "value": 0,
-                      "operator": "eq"
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -111,11 +93,9 @@
                     "value": 1,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "check_pfl2_out",
-                      "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:DIA:02",
-                      "value": 0,
-                      "operator": "eq"
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -138,11 +118,9 @@
                     "value": 1,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "check_pfl3_out",
-                      "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:DIA:03",
-                      "value": 0,
-                      "operator": "eq"
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -174,11 +152,9 @@
                     "value": 1,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "check_pfl1_out",
-                      "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:DIA:01",
-                      "value": 0,
-                      "operator": "eq"
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -201,11 +177,9 @@
                     "value": 1,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "check_pfl2_out",
-                      "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:DIA:02",
-                      "value": 0,
-                      "operator": "eq"
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -228,11 +202,9 @@
                     "value": 1,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "check_pfl3_out",
-                      "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:DIA:03",
-                      "value": 0,
-                      "operator": "eq"
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -258,11 +230,9 @@
               "value": "YAG",
               "loop_period_sec": 1.0,
               "termination_check": {
-                "name": "check_dg1_yag_in",
-                "description": "Check if the dg1 yag is in",
-                "pv": "MFX:DG1:PIM",
-                "value": "YAG",
-                "operator": "eq"
+                "name": "",
+                "description": "",
+                "copy_from": "previous check"
               }
             }
           }
@@ -285,11 +255,9 @@
               "value": "YAG",
               "loop_period_sec": 1.0,
               "termination_check": {
-                "name": "check_dg2_yag_in",
-                "description": "Check if the dg2 yag is in",
-                "pv": "MFX:DG2:PIM",
-                "value": "YAG",
-                "operator": "eq"
+                "name": "",
+                "description": "",
+                "copy_from": "previous check"
               }
             }
           }
@@ -395,14 +363,9 @@
                     "value": 2,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "dg1_x_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": [
-                        false
-                      ],
-                      "pv": "MFX:DG1:JAWS:Actual_XWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -428,14 +391,9 @@
                     "value": 2,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "dg1_y_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": [
-                        false
-                      ],
-                      "pv": "MFX:DG1:JAWS:Actual_YWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -461,14 +419,9 @@
                     "value": 2,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "dg2_us_x_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": [
-                        false
-                      ],
-                      "pv": "MFX:DG2:JAWS:US:Actual_XWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -494,14 +447,9 @@
                     "value": 2,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "dg2_us_y_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": [
-                        false
-                      ],
-                      "pv": "MFX:DG2:JAWS:US:Actual_YWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -527,14 +475,9 @@
                     "value": 2,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "dg2_ms_x_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": [
-                        false
-                      ],
-                      "pv": "MFX:DG2:JAWS:MS:Actual_XWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -560,14 +503,9 @@
                     "value": 2,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "dg2_ms_y_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": [
-                        false
-                      ],
-                      "pv": "MFX:DG2:JAWS:MS:Actual_YWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -593,14 +531,9 @@
                     "value": 2,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "dg2_ds_x_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": [
-                        false
-                      ],
-                      "pv": "MFX:DG2:JAWS:DS:Actual_XWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -626,14 +559,9 @@
                     "value": 2,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "dg2_ds_y_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": [
-                        false
-                      ],
-                      "pv": "MFX:DG2:JAWS:DS:Actual_YWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -665,11 +593,9 @@
                     "value": "IN",
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "check_mr1l4_xstate",
-                      "description": "Check if mr1l4 is inserted",
-                      "pv": "MR1L4:HOMS:MMS:XUP:STATE:GET_RBV",
-                      "value": "IN",
-                      "operator": "eq"
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }
@@ -695,14 +621,9 @@
                     "value": -544,
                     "loop_period_sec": 1.0,
                     "termination_check": {
-                      "name": "check_mr1l4_pointing",
-                      "description": "Check if mr1l4 is pointing generally towards MFX",
-                      "memory": [
-                        false
-                      ],
-                      "pv": "MR1L4:HOMS:MMS:PITCH.RBV",
-                      "low_value": -549,
-                      "high_value": -539
+                      "name": "",
+                      "description": "",
+                      "copy_from": "previous check"
                     }
                   }
                 }

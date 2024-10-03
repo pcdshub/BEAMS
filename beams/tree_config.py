@@ -4,13 +4,14 @@ import json
 import logging
 import operator
 import time
+from copy import copy
 from dataclasses import dataclass, field, fields
 from enum import Enum
 from pathlib import Path
 from typing import Any, Callable, List, Optional, Union
 
 import py_trees
-from apischema import deserialize
+from apischema import deserialize, serialize
 from epics import caget, caput
 from py_trees.behaviour import Behaviour
 from py_trees.behaviours import (CheckBlackboardVariableValue,
@@ -26,13 +27,22 @@ from beams.serialization import as_tagged_union
 logger = logging.getLogger(__name__)
 
 
-def get_tree_from_path(path: Path) -> py_trees.trees.BehaviourTree:
+def get_tree_from_path(path: Union[Path, str]) -> py_trees.trees.BehaviourTree:
     """Deserialize a json file, return the tree it specifies"""
     with open(path, "r") as fd:
         deser = json.load(fd)
         tree_item = deserialize(BehaviorTreeItem, deser)
 
     return tree_item.get_tree()
+
+
+def save_tree_to_path(path: Union[Path, str], root: BaseItem):
+    """Serialize a behavior tree node to a json file."""
+    ser = serialize(BehaviorTreeItem(root=root))
+
+    with open(path, "w") as fd:
+        json.dump(ser, fd, indent=2)
+        fd.write("\n")
 
 
 @dataclass
@@ -107,19 +117,23 @@ class SelectorItem(BaseItem):
         return node
 
 
+def get_sequence_tree(seq_item: AnySequenceItem):
+    children = []
+    for child in seq_item.children:
+        children.append(child.get_tree())
+
+    node = Sequence(name=seq_item.name, memory=seq_item.memory, children=children)
+
+    return node
+
+
 @dataclass
 class SequenceItem(BaseItem):
     memory: bool = False
     children: List[BaseItem] = field(default_factory=list)
 
     def get_tree(self) -> Sequence:
-        children = []
-        for child in self.children:
-            children.append(child.get_tree())
-
-        node = Sequence(name=self.name, memory=self.memory, children=children)
-
-        return node
+        return get_sequence_tree(self)
 
 
 # Custom LCLS-built Behaviors (idioms)
@@ -156,23 +170,95 @@ class ConditionItem(BaseItem):
 
 
 @dataclass
+class SequenceConditionItem(BaseItem):
+    """
+    A sequence containing only condition items.
+
+    Suitable for use as an action item's termination_check.
+
+    The condition function evaluates to "True" if every child's condition item
+    also evaluates to "True".
+
+    When not used as a termination_check, this behaves exactly
+    like a normal Sequence Item.
+    """
+    memory: bool = False
+    children: List[AnyConditionItem] = field(default_factory=list)
+
+    def get_tree(self) -> Sequence:
+        return get_sequence_tree(self)
+
+    def get_condition_function(self) -> Callable[[], bool]:
+        child_funcs = [item.get_condition_function() for item in self.children]
+
+        def cond_func():
+            """
+            Minimize network hits by failing at first issue
+            """
+            ok = True
+            for cf in child_funcs:
+                ok = ok and cf()
+                if not ok:
+                    break
+            return ok
+
+        return cond_func
+
+
+@dataclass
+class RangeConditionItem(BaseItem):
+    """
+    Shorthand for a sequence of two condition items, establishing a range.
+    """
+    memory: bool = False
+    pv: str = ""
+    low_value: Any = 0
+    high_value: Any = 1,
+
+    def _generate_subconfig(self) -> SequenceConditionItem:
+        low = ConditionItem(
+            name=f"{self.name}_lower_bound",
+            description=f"Lower bound for {self.name} check",
+            pv=self.pv,
+            value=self.low_value,
+            operator=ConditionOperator.greater_equal,
+        )
+        high = ConditionItem(
+            name=f"{self.name}_upper_bound",
+            description=f"Upper bound for {self.name} check",
+            pv=self.pv,
+            value=self.high_value,
+            operator=ConditionOperator.less_equal,
+        )
+        range = SequenceConditionItem(
+            name=self.name,
+            description=self.description,
+            memory=self.memory,
+            children=[low, high],
+        )
+        return range
+
+    def get_tree(self) -> Sequence:
+        return self._generate_subconfig().get_tree()
+
+    def get_condition_function(self) -> Callable[[], bool]:
+        return self._generate_subconfig().get_condition_function()
+
+
+@dataclass
 class SetPVActionItem(BaseItem):
     pv: str = ""
     value: Any = 1
     loop_period_sec: float = 1.0
 
-    termination_check: ConditionItem = field(default_factory=ConditionItem)
+    termination_check: AnyConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
 
         def work_func(comp_condition: Callable[[], bool]):
             try:
-                # Set to running
-                value = caget(self.termination_check.pv)
-
                 if comp_condition():
                     return py_trees.common.Status.SUCCESS
-                logger.debug(f"{self.name}: Value is {value}")
 
                 # specific caput logic to SetPVActionItem
                 caput(self.pv, self.value)
@@ -199,7 +285,7 @@ class IncPVActionItem(BaseItem):
     increment: float = 1
     loop_period_sec: float = 1.0
 
-    termination_check: ConditionItem = field(default_factory=ConditionItem)
+    termination_check: AnyConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
 
@@ -236,16 +322,36 @@ class IncPVActionItem(BaseItem):
 
 @dataclass
 class CheckAndDoItem(BaseItem):
-    check: ConditionItem = field(default_factory=ConditionItem)
+    check: AnyConditionItem = field(default_factory=ConditionItem)
     do: Union[SetPVActionItem, IncPVActionItem] = field(default_factory=SetPVActionItem)
 
+    def __post_init__(self):
+        # Clearly indicate the intent for serialization
+        # If no termination check, use the check's check
+        if not self.do.termination_check.name:
+            self.do.termination_check = UseCheckConditionItem()
+
     def get_tree(self) -> CheckAndDo:
+        if isinstance(self.do.termination_check, UseCheckConditionItem):
+            active_do = copy(self.do)
+            active_do.termination_check = self.check
+        else:
+            active_do = self.do
+
         check_node = self.check.get_tree()
-        do_node = self.do.get_tree()
+        do_node = active_do.get_tree()
 
         node = CheckAndDo(name=self.name, check=check_node, do=do_node)
 
         return node
+
+
+@dataclass
+class UseCheckConditionItem(BaseItem):
+    """
+    Dummy item: indicates that check and do should use "check" as do's termination check.
+    """
+    copy_from: str = "previous check"
 
 
 # py_trees.behaviours Behaviour items
@@ -361,3 +467,7 @@ class WaitForBlackboardVariableValueItem(BaseItem):
             operator=getattr(operator, self.check.operator.value)
         )
         return WaitForBlackboardVariableValue(name=self.name, check=comp_exp)
+
+
+AnyConditionItem = Union[ConditionItem, SequenceConditionItem, RangeConditionItem, UseCheckConditionItem]
+AnySequenceItem = Union[SequenceItem, SequenceConditionItem]

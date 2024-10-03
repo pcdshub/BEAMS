@@ -104,7 +104,7 @@ for lens in range(10):
 transfocator_remove = SequenceItem(
     name="transfocator_remove",
     description="ensure all transfocator lenses are removed",
-    children=pfl_cads,
+    children=tfs_cads,
 )
 
 # Yags: insert

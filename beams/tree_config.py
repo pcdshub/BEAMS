@@ -257,12 +257,8 @@ class SetPVActionItem(BaseItem):
 
         def work_func(comp_condition: Callable[[], bool]):
             try:
-                # Set to running
-                value = caget(self.termination_check.pv)
-
                 if comp_condition():
                     return py_trees.common.Status.SUCCESS
-                logger.debug(f"{self.name}: Value is {value}")
 
                 # specific caput logic to SetPVActionItem
                 caput(self.pv, self.value)

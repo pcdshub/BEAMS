@@ -332,7 +332,7 @@ class CheckAndDoItem(BaseItem):
     def __post_init__(self):
         # Clearly indicate the intent for serialization
         # If no termination check, use the check's check
-        if self.do.termination_check.pv == "":
+        if not self.do.termination_check.name:
             self.do.termination_check = UseCheckConditionItem()
 
     def get_tree(self) -> CheckAndDo:

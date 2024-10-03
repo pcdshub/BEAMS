@@ -1,5 +1,6 @@
 apischema
 grpcio-tools
+jinja2
 py-trees
 pyepics
 pyyaml

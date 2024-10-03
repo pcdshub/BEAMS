@@ -49,7 +49,7 @@ for lens in range(3):
     pfl_check = ConditionItem(
         name=f"check_pfl{index}_out",
         description="Check if lens is removed",
-        pv=base_pv,
+        pv=state_pv,
         value=0,
         operator=ConditionOperator.equal,
     )
@@ -83,7 +83,7 @@ for lens in range(10):
     tfs_check = ConditionItem(
         name=f"check_tfs{index}_out",
         description="Check if lens is removed",
-        pv=base_pv,
+        pv=state_pv,
         value=0,
         operator=ConditionOperator.equal,
     )

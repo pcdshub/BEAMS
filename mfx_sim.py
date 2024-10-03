@@ -18,7 +18,7 @@ class BTSimIOC(PVGroup):
         doc="Fake HFX:DG2:STP:01:CMD",
     )
     hfx_dg2_stp_01_open = pvproperty(
-        value=0,
+        value=1,
         name="HFX:DG2:STP:01:OPEN",
         doc="Fake HFX:DG2:STP:01:OPEN",
     )
@@ -33,129 +33,129 @@ class BTSimIOC(PVGroup):
         doc="Fake MFX:ATT:COM:GO",
     )
     mfx_att_com_r_cur = pvproperty(
-        value=0,
+        value=1.0,
         name="MFX:ATT:COM:R_CUR",
         doc="Fake MFX:ATT:COM:R_CUR",
     )
     mfx_att_com_r_des = pvproperty(
-        value=0,
+        value=1.0,
         name="MFX:ATT:COM:R_DES",
         doc="Fake MFX:ATT:COM:R_DES",
     )
     mfx_dg1_jaws_actual_xwidth = pvproperty(
-        value=0,
+        value=5.0,
         name="MFX:DG1:JAWS:Actual_XWIDTH",
         doc="Fake MFX:DG1:JAWS:Actual_XWIDTH",
     )
     mfx_dg1_jaws_actual_ywidth = pvproperty(
-        value=0,
+        value=5.0,
         name="MFX:DG1:JAWS:Actual_YWIDTH",
         doc="Fake MFX:DG1:JAWS:Actual_YWIDTH",
     )
     mfx_dg1_jaws_xwid_req = pvproperty(
-        value=0,
+        value=5.0,
         name="MFX:DG1:JAWS:XWID_REQ",
         doc="Fake MFX:DG1:JAWS:XWID_REQ",
     )
     mfx_dg1_jaws_ywid_req = pvproperty(
-        value=0,
+        value=5.0,
         name="MFX:DG1:JAWS:YWID_REQ",
         doc="Fake MFX:DG1:JAWS:YWID_REQ",
     )
     mfx_dg1_p6740_acquire = pvproperty(
-        value=0,
+        value=1,
         name="MFX:DG1:P6740:Acquire",
         doc="Fake MFX:DG1:P6740:Acquire",
     )
     mfx_dg1_p6740_arrayrate_rbv = pvproperty(
-        value=0,
+        value=0.0,
         name="MFX:DG1:P6740:ArrayRate_RBV",
         doc="Fake MFX:DG1:P6740:ArrayRate_RBV",
     )
     mfx_dg1_pim = pvproperty(
-        value=0,
+        value="OUT",
         name="MFX:DG1:PIM",
         doc="Fake MFX:DG1:PIM",
     )
     mfx_dg1_pim_go = pvproperty(
-        value=0,
+        value="OUT",
         name="MFX:DG1:PIM:GO",
         doc="Fake MFX:DG1:PIM:GO",
     )
     mfx_dg2_jaws_ds_actual_xwidth = pvproperty(
-        value=0,
+        value=1.0,
         name="MFX:DG2:JAWS:DS:Actual_XWIDTH",
         doc="Fake MFX:DG2:JAWS:DS:Actual_XWIDTH",
     )
     mfx_dg2_jaws_ds_actual_ywidth = pvproperty(
-        value=0,
+        value=1.0,
         name="MFX:DG2:JAWS:DS:Actual_YWIDTH",
         doc="Fake MFX:DG2:JAWS:DS:Actual_YWIDTH",
     )
     mfx_dg2_jaws_ds_xwid_req = pvproperty(
-        value=0,
+        value=1.0,
         name="MFX:DG2:JAWS:DS:XWID_REQ",
         doc="Fake MFX:DG2:JAWS:DS:XWID_REQ",
     )
     mfx_dg2_jaws_ds_ywid_req = pvproperty(
-        value=0,
+        value=1.0,
         name="MFX:DG2:JAWS:DS:YWID_REQ",
         doc="Fake MFX:DG2:JAWS:DS:YWID_REQ",
     )
     mfx_dg2_jaws_ms_actual_xwidth = pvproperty(
-        value=0,
+        value=0.5,
         name="MFX:DG2:JAWS:MS:Actual_XWIDTH",
         doc="Fake MFX:DG2:JAWS:MS:Actual_XWIDTH",
     )
     mfx_dg2_jaws_ms_actual_ywidth = pvproperty(
-        value=0,
+        value=0.5,
         name="MFX:DG2:JAWS:MS:Actual_YWIDTH",
         doc="Fake MFX:DG2:JAWS:MS:Actual_YWIDTH",
     )
     mfx_dg2_jaws_ms_xwid_req = pvproperty(
-        value=0,
+        value=0.5,
         name="MFX:DG2:JAWS:MS:XWID_REQ",
         doc="Fake MFX:DG2:JAWS:MS:XWID_REQ",
     )
     mfx_dg2_jaws_ms_ywid_req = pvproperty(
-        value=0,
+        value=0.5,
         name="MFX:DG2:JAWS:MS:YWID_REQ",
         doc="Fake MFX:DG2:JAWS:MS:YWID_REQ",
     )
     mfx_dg2_jaws_us_actual_xwidth = pvproperty(
-        value=0,
+        value=0.5,
         name="MFX:DG2:JAWS:US:Actual_XWIDTH",
         doc="Fake MFX:DG2:JAWS:US:Actual_XWIDTH",
     )
     mfx_dg2_jaws_us_actual_ywidth = pvproperty(
-        value=0,
+        value=0.5,
         name="MFX:DG2:JAWS:US:Actual_YWIDTH",
         doc="Fake MFX:DG2:JAWS:US:Actual_YWIDTH",
     )
     mfx_dg2_jaws_us_xwid_req = pvproperty(
-        value=0,
+        value=0.5,
         name="MFX:DG2:JAWS:US:XWID_REQ",
         doc="Fake MFX:DG2:JAWS:US:XWID_REQ",
     )
     mfx_dg2_jaws_us_ywid_req = pvproperty(
-        value=0,
+        value=0.5,
         name="MFX:DG2:JAWS:US:YWID_REQ",
         doc="Fake MFX:DG2:JAWS:US:YWID_REQ",
     )
     mfx_dg2_pim = pvproperty(
-        value=0,
+        value="OUT",
         name="MFX:DG2:PIM",
         doc="Fake MFX:DG2:PIM",
     )
     mfx_dg2_pim_go = pvproperty(
-        value=0,
+        value="OUT",
         name="MFX:DG2:PIM:GO",
         doc="Fake MFX:DG2:PIM:GO",
     )
     mfx_lens_dia_01 = pvproperty(
-        value=0,
-        name="MFX:LENS:DIA:01",
-        doc="Fake MFX:LENS:DIA:01",
+        value=1,
+        name="MFX:LENS:DIA:01:STATE",
+        doc="Fake MFX:LENS:DIA:01:STATE",
     )
     mfx_lens_dia_01_remove = pvproperty(
         value=0,
@@ -164,8 +164,8 @@ class BTSimIOC(PVGroup):
     )
     mfx_lens_dia_02 = pvproperty(
         value=0,
-        name="MFX:LENS:DIA:02",
-        doc="Fake MFX:LENS:DIA:02",
+        name="MFX:LENS:DIA:02:STATE",
+        doc="Fake MFX:LENS:DIA:02:STATE",
     )
     mfx_lens_dia_02_remove = pvproperty(
         value=0,
@@ -174,8 +174,8 @@ class BTSimIOC(PVGroup):
     )
     mfx_lens_dia_03 = pvproperty(
         value=0,
-        name="MFX:LENS:DIA:03",
-        doc="Fake MFX:LENS:DIA:03",
+        name="MFX:LENS:DIA:03:STATE",
+        doc="Fake MFX:LENS:DIA:03:STATE",
     )
     mfx_lens_dia_03_remove = pvproperty(
         value=0,
@@ -183,22 +183,22 @@ class BTSimIOC(PVGroup):
         doc="Fake MFX:LENS:DIA:03:REMOVE",
     )
     mr1l4_homs_mms_pitch_rbv = pvproperty(
-        value=0,
+        value=833.4,
         name="MR1L4:HOMS:MMS:PITCH.RBV",
         doc="Fake MR1L4:HOMS:MMS:PITCH.RBV",
     )
     mr1l4_homs_mms_pitch_val = pvproperty(
-        value=0,
+        value=833.4,
         name="MR1L4:HOMS:MMS:PITCH.VAL",
         doc="Fake MR1L4:HOMS:MMS:PITCH.VAL",
     )
     mr1l4_homs_mms_xup_state_get_rbv = pvproperty(
-        value=0,
+        value="OUT",
         name="MR1L4:HOMS:MMS:XUP:STATE:GET_RBV",
         doc="Fake MR1L4:HOMS:MMS:XUP:STATE:GET_RBV",
     )
     mr1l4_homs_mms_xup_state_set = pvproperty(
-        value=0,
+        value="OUT",
         name="MR1L4:HOMS:MMS:XUP:STATE:SET",
         doc="Fake MR1L4:HOMS:MMS:XUP:STATE:SET",
     )

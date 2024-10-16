@@ -44,21 +44,21 @@ class Worker():
         logger.debug("Starting work")
 
     def stop_work(self):
-        logger.debug("Calling stop work on")
+        logger.debug(f"Calling stop work on {self.proc_name}")
         if not self.do_work.value:
-            logger.error("Not working, not stopping work")
+            logger.error(f"Not working, not stopping work on {self.proc_name}")
             return
         self.do_work.value = False
-        logger.debug("Sending terminate signal to process")
+        logger.debug(f"Sending terminate signal to process {self.proc_name} : {self.work_proc.pid}")
         # Send kill signal to work process. # TODO: the exact location of this
         # is important. Reflect with self.do_work.get_lock():
         self.work_proc.terminate()
         if (self.stop_func is not None):
             self.stop_func()
 
-        logger.debug("Ending work, calling join")
+        logger.debug(f"Ending work, calling join on {self.proc_name}")
         self.work_proc.join()
-        logger.debug("Worker process joined")
+        logger.debug(f"Worker process joined from {self.proc_name}" )
 
     def work_func(self):
         """

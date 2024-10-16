@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
-from enum import StrEnum, auto
+from enum import Enum
 from textwrap import dedent
 from caproto.server import PVGroup, ioc_arg_parser, pvproperty, run
 
 
-class TargetState(StrEnum):
-    UNKOWN = auto()
-    OUT = auto()
-    YAG = auto()
-    DIAMOND = auto()
-    RETICLE = auto()
+class TargetState(str, Enum):
+    UNKOWN = "UNKOWN"
+    OUT = "OUT"
+    YAG = "YAG"
+    DIAMOND = "DIAMOND"
+    RETICLE = "RETICLE"
 
 
-class FilterWheelValue(StrEnum):
-    UNKOWN = auto()
-    T1 = auto()
-    T5 = auto()
-    T10 = auto()
-    T25 = auto()
-    T50 = auto()
-    T100 = auto()
+class FilterWheelValue(str, Enum):
+    UNKOWN = "UNKOWN"
+    T1 = "T1"
+    T5 = "T5"
+    T10 = "T10"
+    T25 = "T25"
+    T50 = "T50"
+    T100 = "T100"
 
 
 class MockIML20(PVGroup):

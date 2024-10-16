@@ -16,7 +16,7 @@ def test_check_and_do():
     percentage_complete = Value("i", 0)
 
     @wrapped_action_work(loop_period_sec=0.001)
-    def thisjob(comp_condition) -> None:
+    def thisjob(comp_condition) -> Status:
         logger.debug(f"PERC COMP {percentage_complete.value}")
         percentage_complete.value += 10
         if comp_condition():

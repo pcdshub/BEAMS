@@ -7,6 +7,7 @@ from typing import Any, Callable
 
 import py_trees
 
+from beams.typing_helper import Evaluatable, ActionNodeWorkFunction, ActionNodeWorkLoop
 from beams.behavior_tree.ActionWorker import ActionWorker
 from beams.behavior_tree.VolatileStatus import VolatileStatus
 
@@ -14,13 +15,13 @@ logger = logging.getLogger(__name__)
 
 
 def wrapped_action_work(loop_period_sec: float = 0.1):
-    def inner_decorator_generator(func):
+    def action_worker_work_function_generator(func: ActionNodeWorkFunction) -> ActionNodeWorkLoop:
         def work_wrapper(
             do_work: Value,
             name: str,
             work_gate: Event,
             volatile_status: VolatileStatus,
-            completion_condition: Callable[[Any], bool],
+            completion_condition: Evaluatable,
             log_queue: Queue,
             log_configurer: Callable) -> None:
             """
@@ -61,15 +62,15 @@ def wrapped_action_work(loop_period_sec: float = 0.1):
 
                 logger.debug(f"Worker for node ({name}) completed.")
         return work_wrapper
-    return inner_decorator_generator
+    return action_worker_work_function_generator
 
 
 class ActionNode(py_trees.behaviour.Behaviour):
     def __init__(
         self,
         name: str,
-        work_func: Callable[[Any], None],
-        completion_condition: Callable[[Any], bool]
+        work_func: ActionNodeWorkLoop,
+        completion_condition: Evaluatable
     ):
         # TODO: can add failure condition argument...
         super().__init__(name)

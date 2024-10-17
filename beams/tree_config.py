@@ -4,6 +4,7 @@ import json
 import logging
 import operator
 import time
+from copy import copy
 from dataclasses import dataclass, field, fields
 from enum import Enum
 from pathlib import Path
@@ -239,13 +240,33 @@ class CheckAndDoItem(BaseItem):
     check: ConditionItem = field(default_factory=ConditionItem)
     do: Union[SetPVActionItem, IncPVActionItem] = field(default_factory=SetPVActionItem)
 
+    def __post_init__(self):
+        # Clearly indicate the intent for serialization
+        # If no termination check, use the check's check
+        if not self.do.termination_check.name:
+            self.do.termination_check = UseCheckConditionItem()
+
     def get_tree(self) -> CheckAndDo:
+        if isinstance(self.do.termination_check, UseCheckConditionItem):
+            active_do = copy(self.do)
+            active_do.termination_check = self.check
+        else:
+            active_do = self.do
+
         check_node = self.check.get_tree()
-        do_node = self.do.get_tree()
+        do_node = active_do.get_tree()
 
         node = CheckAndDo(name=self.name, check=check_node, do=do_node)
 
         return node
+
+
+@dataclass
+class UseCheckConditionItem(BaseItem):
+    """
+    Dummy item: indicates that check and do should use "check" as do's termination check.
+    """
+    copy_from: str = "previous check"
 
 
 # py_trees.behaviours Behaviour items

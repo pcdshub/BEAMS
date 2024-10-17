@@ -28,9 +28,11 @@ def main(
 def walk_dict_pvs(tree_dict: dict) -> Iterator[str]:
     for key, value in tree_dict.items():
         if key == "pv" and value:
-            yield value
+            yield str(value)
         elif isinstance(value, dict):
             yield from walk_dict_pvs(value)
         elif isinstance(value, list):
-            for subdict in value:
-                yield from walk_dict_pvs(subdict)
+            for subitem in value:
+                # Don't try to handle nested lists etc.
+                if isinstance(subitem, dict):
+                    yield from walk_dict_pvs(subitem)

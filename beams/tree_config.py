@@ -156,6 +156,46 @@ class ConditionItem(BaseItem):
 
 
 @dataclass
+class RangeConditionItem(BaseItem):
+    """
+    Shorthand for a sequence of two condition items, establishing a range.
+    """
+    memory: bool = False
+    pv: str = ""
+    low_value: Any = 0
+    high_value: Any = 1,
+
+    def _generate_subconfig(self) -> SequenceConditionItem:
+        low = ConditionItem(
+            name=f"{self.name}_lower_bound",
+            description=f"Lower bound for {self.name} check",
+            pv=self.pv,
+            value=self.low_value,
+            operator=ConditionOperator.greater_equal,
+        )
+        high = ConditionItem(
+            name=f"{self.name}_upper_bound",
+            description=f"Upper bound for {self.name} check",
+            pv=self.pv,
+            value=self.high_value,
+            operator=ConditionOperator.less_equal,
+        )
+        range = SequenceConditionItem(
+            name=self.name,
+            description=self.description,
+            memory=self.memory,
+            children=[low, high],
+        )
+        return range
+
+    def get_tree(self) -> Sequence:
+        return self._generate_subconfig().get_tree()
+
+    def get_condition_function(self) -> Callable[[], bool]:
+        return self._generate_subconfig().get_condition_function()
+
+
+@dataclass
 class SetPVActionItem(BaseItem):
     pv: str = ""
     value: Any = 1

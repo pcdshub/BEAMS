@@ -1,0 +1,27 @@
+from textwrap import dedent
+
+from caproto.server import PVGroup, ioc_arg_parser, pvproperty, run
+
+
+class BTSimIOC(PVGroup):
+    """
+    An IOC to replicate the PVs used by your behavior tree.
+    """
+{% for pvname in all_pvnames %}
+    {{ pvname.lower().replace(":","_").replace(".","_") }} = pvproperty(
+        value=0,
+        name="{{ pvname }}",
+        doc="Fake {{ pvname }}",
+    )
+{% endfor %}
+
+
+if __name__ == '__main__':
+    # Default is 5064, switch to 5066 to avoid conflict with prod
+    # Set this in terminal before you run your tree too to connect to this sim
+    os.environ["EPICS_CA_SERVER_PORT"] = "5066"
+    ioc_options, run_options = ioc_arg_parser(
+        default_prefix='',
+        desc=dedent(BTSimIOC.__doc__))
+    ioc = BTSimIOC(**ioc_options)
+    run(ioc.pvdb, **run_options)

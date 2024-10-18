@@ -32,12 +32,14 @@ class TestTask:
     def test_inline_instantation(self):
         val = Value("i", 10)
 
-        def work_func(myself):
-            while val.value < 100:
-                time.sleep(0.01)
-                with val.get_lock():
-                    if val.value < 100:  # Note: value captured via closure
-                        val.value += 10
+        def work_func(do_work):
+            while (do_work.value):
+                time.sleep(0.1)
+                while val.value < 100:
+                    time.sleep(0.01)
+                    with val.get_lock():
+                        if val.value < 100:  # Note: value captured via closure
+                            val.value += 10
 
         a = Worker("test_worker", work_func=work_func)
         a.start_work()

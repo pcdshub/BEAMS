@@ -3,7 +3,7 @@ import atexit
 import logging
 import os
 from multiprocessing import Event, Queue, Value
-from typing import Any, Callable
+from typing import Callable
 
 import py_trees
 

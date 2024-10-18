@@ -3,11 +3,10 @@ from __future__ import annotations
 import json
 import logging
 import operator
-import time
 from dataclasses import dataclass, field, fields
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, List, Optional, Union
 
 import py_trees
 from apischema import deserialize
@@ -18,10 +17,11 @@ from py_trees.behaviours import (CheckBlackboardVariableValue,
 from py_trees.common import ComparisonExpression, ParallelPolicy, Status
 from py_trees.composites import Parallel, Selector, Sequence
 
-from beams.behavior_tree.ActionNode import ActionNode
+from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
 from beams.behavior_tree.CheckAndDo import CheckAndDo
 from beams.behavior_tree.ConditionNode import ConditionNode
 from beams.serialization import as_tagged_union
+from beams.typing_helper import Evaluatable
 
 logger = logging.getLogger(__name__)
 
@@ -142,11 +142,13 @@ class ConditionItem(BaseItem):
         cond_func = self.get_condition_function()
         return ConditionNode(self.name, cond_func)
 
-    def get_condition_function(self) -> Callable[[], bool]:
+    def get_condition_function(self) -> Evaluatable:
         op = getattr(operator, self.operator.value)
 
         def cond_func():
-            val = caget(self.pv)
+            # Note: this bakes EPICS into how Conditions work.
+            # Further implictly now relies of type of "value" to determine whether to get as_string
+            val = caget(self.pv, as_string=isinstance(self.value, str))
             if val is None:
                 return False
 
@@ -165,10 +167,11 @@ class SetPVActionItem(BaseItem):
 
     def get_tree(self) -> ActionNode:
 
-        def work_func(comp_condition: Callable[[], bool]):
+        @wrapped_action_work(self.loop_period_sec)
+        def work_func(comp_condition: Evaluatable) -> py_trees.common.Status:
             try:
                 # Set to running
-                value = caget(self.termination_check.pv)
+                value = caget(self.pv)  # double caget, this
 
                 if comp_condition():
                     return py_trees.common.Status.SUCCESS
@@ -176,7 +179,6 @@ class SetPVActionItem(BaseItem):
 
                 # specific caput logic to SetPVActionItem
                 caput(self.pv, self.value)
-                time.sleep(self.loop_period_sec)
                 return py_trees.common.Status.RUNNING
             except Exception as ex:
                 logger.warning(f"{self.name}: work failed: {ex}")
@@ -203,7 +205,8 @@ class IncPVActionItem(BaseItem):
 
     def get_tree(self) -> ActionNode:
 
-        def work_func(comp_condition: Callable[[], bool]) -> py_trees.common.Status:
+        @wrapped_action_work(self.loop_period_sec)
+        def work_func(comp_condition: Evaluatable) -> py_trees.common.Status:
             """
             To be run inside of a while loop
             Action node should take care of logging, reporting status
@@ -217,7 +220,6 @@ class IncPVActionItem(BaseItem):
 
                 # specific caput logic to IncPVActionItem
                 caput(self.pv, value + self.increment)
-                time.sleep(self.loop_period_sec)
                 return py_trees.common.Status.RUNNING
             except Exception as ex:
                 logger.warning(f"{self.name}: work failed: {ex}")

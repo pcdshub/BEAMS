@@ -24,13 +24,15 @@ class Worker():
         self.proc_name = proc_name
         self.proc_type = proc_type
         self.add_args = add_args or []
-        # TODO: we may want to decorate work func so it prints proc id...
+        # TODO: we may want to decorate work func so it prints proc id... This may be a case of wrapper_func as opposed to decorator
         if (work_func is None):
           self.work_proc = proc_type(target=self.work_func, name=self.proc_name)
         else:
           self.work_func = work_func
-          self.work_proc = proc_type(target=self.work_func, name=self.proc_name,
-                                     args=(*self.add_args,))
+          # Critical Note: This makes assumptions of the work_func signature in that it takes a Value argument in position 0
+          self.work_proc = proc_type(target=self.work_func,
+                                     name=self.proc_name,
+                                     args=(self.do_work, *self.add_args,))
         self.stop_func = stop_func
 
     def start_work(self):
@@ -42,21 +44,21 @@ class Worker():
         logger.debug("Starting work")
 
     def stop_work(self):
-        logger.info("Calling stop work on")
+        logger.debug(f"Calling stop work on {self.proc_name}")
         if not self.do_work.value:
-            logger.error("Not working, not stopping work")
+            logger.error(f"Not working, not stopping work on {self.proc_name}")
             return
         self.do_work.value = False
-        logger.info("Sending terminate signal to process")
+        logger.debug(f"Sending terminate signal to process {self.proc_name} : {self.work_proc.pid}")
         # Send kill signal to work process. # TODO: the exact location of this
         # is important. Reflect with self.do_work.get_lock():
         self.work_proc.terminate()
         if (self.stop_func is not None):
             self.stop_func()
 
-        logger.debug("Ending work, calling join")
+        logger.debug(f"Ending work, calling join on {self.proc_name}")
         self.work_proc.join()
-        logger.debug("Worker process joined")
+        logger.debug(f"Worker process joined from {self.proc_name}")
 
     def work_func(self):
         """

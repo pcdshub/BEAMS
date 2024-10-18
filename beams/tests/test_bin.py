@@ -3,7 +3,10 @@ import itertools
 import logging
 from pathlib import Path
 
+import caproto.server
+import caproto.server.server
 import pytest
+from caproto.server import PVGroup, pvproperty
 
 from beams.bin.main import main
 from beams.tests.conftest import cli_args, restore_logging
@@ -56,3 +59,35 @@ def test_run(added_args: tuple[str]):
     print(args)
     with cli_args(args), restore_logging():
         main()
+
+
+def test_gen_test_ioc(capsys: pytest.CaptureFixture, monkeypatch: pytest.MonkeyPatch):
+    test_cfg = Path(__file__).parent / "artifacts" / "eggs.json"
+    args = ["beams", "gen_test_ioc", str(test_cfg)]
+    with cli_args(args), restore_logging():
+        main()
+    result = capsys.readouterr()
+    code = result.out
+    assert isinstance(code, str)
+    logger.debug(f"Generated file:\n{code}")
+    inner_globals = {}
+    run_called = 0
+
+    def mock_run(*args, **kwargs):
+        nonlocal run_called
+        run_called += 1
+
+    # Paranoia: stop run from running if the generated file tries to run
+    monkeypatch.setattr(caproto.server, "run", mock_run)
+    monkeypatch.setattr(caproto.server.server, "run", mock_run)
+    exec(code, inner_globals)
+    BTSimIOC = inner_globals["BTSimIOC"]
+    assert issubclass(BTSimIOC, PVGroup)
+    assert isinstance(BTSimIOC.perc_comp, pvproperty)
+    assert BTSimIOC.perc_comp.pvspec.name == "PERC:COMP"
+
+    ioc = BTSimIOC(prefix="TST:")
+    assert "TST:PERC:COMP" in ioc.pvdb
+
+    # We essentially did an import, no run should have happened
+    assert not run_called

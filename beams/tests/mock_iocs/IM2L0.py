@@ -25,9 +25,14 @@ class FilterWheelValue(str, Enum):
 
 class MockIML20(PVGroup):
     """
-    An IOC with three uncoupled read/writable PVs.
+    # An IOC with three uncoupled read/writable PVs.
 
-    Scalar PVs
+    # Scalar PVs:
+        * IM2L0:XTES:CLZ.RBV - Zoom motor percentage of actuation
+        * IM2L0:XTES:CLF.RBV - Focus motor percentage of actuation
+    * Enum PVs:
+        * IM2L0:XTES:MMS:STATE:GET_RBV - enumerated state of imager target
+        * IM2L0:XTES:MFW:GET_RBV - enumerated state of filter wheel "actuation"
     ----------
     """
 
@@ -48,7 +53,7 @@ class MockIML20(PVGroup):
         name="CLF.RBV",
         value=0,
         dtype=float,
-        doc="Represents percentage of zoom actuated by zoom motor",
+        doc="Represents percentage of focus actuated by focus motor",
     )
     im2l0_filter_wheel = pvproperty(
         name="MFW:GET_RBV",

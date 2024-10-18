@@ -6,7 +6,8 @@ from caproto.tests.conftest import run_example_ioc
 from epics import caget
 
 from beams.behavior_tree.CheckAndDo import CheckAndDo
-from beams.tree_config import get_tree_from_path
+from beams.tree_config import (CheckAndDoItem, get_tree_from_path,
+                               save_tree_item_to_path)
 
 
 def test_tree_obj_ser():
@@ -66,3 +67,12 @@ def test_father_tree_execution(request):
     check_insert = caget("RET:INSERT")
 
     assert check_insert == 1
+
+
+def test_save_tree_item_round_trip(tmp_path: Path):
+    filepath = tmp_path / "temp_egg.json"
+    item = CheckAndDoItem(name="test_save_tree_item_round_trip")
+    save_tree_item_to_path(path=filepath, root=item)
+    loaded_tree = get_tree_from_path(path=filepath)
+    assert isinstance(loaded_tree.root, CheckAndDo)
+    assert loaded_tree.root.name == item.name

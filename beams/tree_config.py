@@ -194,7 +194,7 @@ class SetPVActionItem(BaseItem):
         def work_func(comp_condition: Evaluatable) -> py_trees.common.Status:
             try:
                 # Set to running
-                value = caget(self.pv)  # double caget, this
+                value = caget(self.pv)  # double caget, this is uneeded as currently the comp_condition has caget baked in
 
                 if comp_condition():
                     return py_trees.common.Status.SUCCESS

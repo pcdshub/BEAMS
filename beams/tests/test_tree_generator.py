@@ -68,6 +68,7 @@ def test_father_tree_execution(request):
 
     assert check_insert == 1
 
+
 def test_save_tree_item_round_trip(tmp_path: Path):
     filepath = tmp_path / "temp_egg.json"
     item = CheckAndDoItem(name="test_save_tree_item_round_trip")
@@ -75,6 +76,7 @@ def test_save_tree_item_round_trip(tmp_path: Path):
     loaded_tree = get_tree_from_path(path=filepath)
     assert isinstance(loaded_tree.root, CheckAndDo)
     assert loaded_tree.root.name == item.name
+
 
 def test_stop_hitting_yourself(request):
     run_example_ioc(

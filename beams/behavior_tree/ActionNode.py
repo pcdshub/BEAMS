@@ -1,15 +1,16 @@
-import time
 import atexit
 import logging
 import os
+import time
 from multiprocessing import Event, Queue, Value
 from typing import Callable
 
 import py_trees
 
-from beams.typing_helper import Evaluatable, ActionNodeWorkFunction, ActionNodeWorkLoop
 from beams.behavior_tree.ActionWorker import ActionWorker
 from beams.behavior_tree.VolatileStatus import VolatileStatus
+from beams.typing_helper import (ActionNodeWorkFunction, ActionNodeWorkLoop,
+                                 Evaluatable)
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ def wrapped_action_work(loop_period_sec: float = 0.1):
                 logger.debug(f"WAITING FOR INIT from node: {name}")
                 work_gate.wait()
                 work_gate.clear()
-                
+
                 # Set to running
                 volatile_status.set_value(py_trees.common.Status.RUNNING)
                 while not completion_condition():

@@ -17,11 +17,11 @@ from py_trees.behaviours import (CheckBlackboardVariableValue,
 from py_trees.common import ComparisonExpression, ParallelPolicy, Status
 from py_trees.composites import Parallel, Selector, Sequence
 
-from beams.typing_helper import Evaluatable
 from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
 from beams.behavior_tree.CheckAndDo import CheckAndDo
 from beams.behavior_tree.ConditionNode import ConditionNode
 from beams.serialization import as_tagged_union
+from beams.typing_helper import Evaluatable
 
 logger = logging.getLogger(__name__)
 
@@ -169,7 +169,7 @@ class ConditionItem(BaseItem):
         op = getattr(operator, self.operator.value)
 
         def cond_func():
-            # Note: this bakes EPICS into how Conditions work. 
+            # Note: this bakes EPICS into how Conditions work.
             # Further implictly now relies of type of "value" to determine whether to get as_string
             val = caget(self.pv, as_string=isinstance(self.value, str))
             if val is None:

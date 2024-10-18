@@ -30,7 +30,7 @@ class Worker():
         else:
           self.work_func = work_func
           # Critical Note: This makes assumptions of the work_func signature in that it takes a Value argument in position 0
-          self.work_proc = proc_type(target=self.work_func, 
+          self.work_proc = proc_type(target=self.work_func,
                                      name=self.proc_name,
                                      args=(self.do_work, *self.add_args,))
         self.stop_func = stop_func
@@ -58,7 +58,7 @@ class Worker():
 
         logger.debug(f"Ending work, calling join on {self.proc_name}")
         self.work_proc.join()
-        logger.debug(f"Worker process joined from {self.proc_name}" )
+        logger.debug(f"Worker process joined from {self.proc_name}")
 
     def work_func(self):
         """

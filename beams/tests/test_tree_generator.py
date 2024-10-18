@@ -103,7 +103,7 @@ def test_stop_hitting_yourself(request):
 
     ct = 0
     while (
-        ct == 0  # simulate a constantly monitoring tree 
+        ct == 0  # simulate a constantly monitoring tree
         or
         tree.root.status
         not in (py_trees.common.Status.SUCCESS, py_trees.common.Status.FAILURE)

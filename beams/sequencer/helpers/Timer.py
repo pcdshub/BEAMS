@@ -3,16 +3,16 @@ import time
 
 class Timer():
     def __init__(self,
-                 name: str, 
+                 name: str,
                  timer_period_seconds: float,
-                 auto_start: bool = False, 
+                 auto_start: bool = False,
                  is_periodic: bool = False):
         self.name = name
         self.timer_period_seconds = timer_period_seconds
         self.is_periodic = is_periodic
         self.auto_start = auto_start
         if (self.auto_start):
-            self.timer_start_time = time.time()
+            self.timer_start_time = time.monotonic()
         else:
             self.timer_start_time = -1
 

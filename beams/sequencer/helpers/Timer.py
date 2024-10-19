@@ -3,9 +3,9 @@ import time
 
 class Timer():
     def __init__(self,
-                 name: str, 
+                 name: str,
                  timer_period_seconds: float,
-                 auto_start: bool = False, 
+                 auto_start: bool = False,
                  is_periodic: bool = False):
         self.name = name
         self.timer_period_seconds = timer_period_seconds

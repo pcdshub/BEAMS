@@ -13,19 +13,18 @@ not required by work functions in general. The add_args are as follows:
 """
 import logging
 import time
-from multiprocessing import Event, Value, Queue
+from multiprocessing import Event, Queue, Value
 from typing import Callable, Optional
 
-from epics.multiproc import CAProcess
-
 import py_trees
+from epics.multiproc import CAProcess
 
 from beams.behavior_tree.VolatileStatus import VolatileStatus
 from beams.logging import LOGGER_QUEUE, worker_logging_configurer
+from beams.sequencer.helpers.Timer import Timer
+from beams.sequencer.helpers.Worker import Worker
 from beams.typing_helper import (ActionNodeWorkFunction, ActionNodeWorkLoop,
                                  Evaluatable)
-from beams.sequencer.helpers.Worker import Worker
-from beams.sequencer.helpers.Timer import Timer
 
 logger = logging.getLogger(__name__)
 

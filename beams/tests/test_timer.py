@@ -1,5 +1,7 @@
 import time
+
 import pytest
+
 from beams.sequencer.helpers.Timer import Timer
 
 

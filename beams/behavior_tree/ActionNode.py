@@ -5,7 +5,8 @@ from multiprocessing import Event
 
 import py_trees
 
-from beams.behavior_tree.ActionWorker import ActionWorker, wrapped_action_work  # the latter is grabbed as a pas through
+from beams.behavior_tree.ActionWorker import wrapped_action_work  # noqa: F401
+from beams.behavior_tree.ActionWorker import ActionWorker
 from beams.behavior_tree.VolatileStatus import VolatileStatus
 from beams.typing_helper import ActionNodeWorkLoop, Evaluatable
 

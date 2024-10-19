@@ -13,19 +13,18 @@ not required by work functions in general. The add_args are as follows:
 """
 import logging
 import time
-from multiprocessing import Event, Value, Queue
+from multiprocessing import Event, Queue, Value
 from typing import Callable, Optional
 
-from epics.multiproc import CAProcess
-
 import py_trees
+from epics.multiproc import CAProcess
 
 from beams.behavior_tree.VolatileStatus import VolatileStatus
 from beams.logging import LOGGER_QUEUE, worker_logging_configurer
+from beams.sequencer.helpers.Timer import Timer
+from beams.sequencer.helpers.Worker import Worker
 from beams.typing_helper import (ActionNodeWorkFunction, ActionNodeWorkLoop,
                                  Evaluatable)
-from beams.sequencer.helpers.Worker import Worker
-from beams.sequencer.helpers.Timer import Timer
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +50,7 @@ def wrapped_action_work(loop_period_sec: float = 0.1, work_function_timeout_peri
             log_configurer(log_queue)
             work_loop_timeout_timer = Timer(name=name,
                                             timer_period_seconds=work_function_timeout_period_sec,
-                                            auto_start=False,
-                                            is_periodic=True)
+                                            auto_start=False)
             while (do_work.value):
                 logger.debug(f"WAITING FOR INIT from node: {name}")
                 work_gate.wait()

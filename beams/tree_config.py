@@ -20,6 +20,7 @@ from py_trees.composites import Parallel, Selector, Sequence
 from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
 from beams.behavior_tree.CheckAndDo import CheckAndDo
 from beams.behavior_tree.ConditionNode import ConditionNode
+from beams.sequencer.helpers.Timer import Timer
 from beams.serialization import as_tagged_union
 from beams.typing_helper import Evaluatable
 
@@ -200,6 +201,12 @@ class ConditionItem(BaseConditionItem):
         return cond_func
 
 
+class CaputParadigm(str, Enum):
+    AT_LOOP_FREQUENCY = "AT_LOOP_FREQUENCY"
+    ONCE = "ONCE"
+    EVERY_SECOND = "EVERY_SECOND"
+
+
 @dataclass
 class SequenceConditionItem(BaseSequenceItem, BaseConditionItem):
     """
@@ -237,23 +244,48 @@ class SetPVActionItem(BaseItem):
     pv: str = ""
     value: Any = 1
     loop_period_sec: float = 1.0
+    caput_paradigm: CaputParadigm = CaputParadigm.AT_LOOP_FREQUENCY
 
     termination_check: BaseConditionItem = field(default_factory=ConditionItem)
+
+    def __post_init__(self):
+        is_timer_periodic = True
+        timer_period = 1
+        if (self.caput_paradigm == CaputParadigm.ONCE):
+            is_timer_periodic = False
+        if (self.caput_paradigm == CaputParadigm.AT_LOOP_FREQUENCY):
+            timer_period = self.loop_period_sec
+        if (self.caput_paradigm == CaputParadigm.EVERY_SECOND):
+            timer_period = 1
+
+        self.work_frequency_timer = Timer(name=f"{self.name}_caput_timer",
+                                          timer_period_seconds=timer_period,
+                                          auto_start=False,
+                                          is_periodic=is_timer_periodic)
+        self.do_once = False
 
     def get_tree(self) -> ActionNode:
 
         @wrapped_action_work(self.loop_period_sec)
         def work_func(comp_condition: Evaluatable) -> py_trees.common.Status:
             try:
+                if not self.do_once:
+                    self.work_frequency_timer.start_timer()
+                    self.do_once = True
+
                 # Set to running
-                value = caget(self.pv)  # double caget, this is uneeded as currently the comp_condition has caget baked in
+                value = caget(self.pv, as_string=isinstance(self.value, str))  # double caget, this is uneeded as currently the comp_condition has caget 
 
                 if comp_condition():
+                    self.do_once = False
                     return py_trees.common.Status.SUCCESS
                 logger.debug(f"{self.name}: Value is {value}")
 
                 # specific caput logic to SetPVActionItem
-                caput(self.pv, self.value)
+                if (not self.work_frequency_timer.is_elapsed()):
+                    caput(self.pv, self.value)
+                    logger.debug(f"{self.name} CAPUTTING")
+
                 return py_trees.common.Status.RUNNING
             except Exception as ex:
                 logger.warning(f"{self.name}: work failed: {ex}")

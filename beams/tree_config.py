@@ -274,7 +274,7 @@ class SetPVActionItem(BaseItem):
                     self.do_once = True
 
                 # Set to running
-                value = caget(self.pv, as_string=isinstance(self.value, str))  # double caget, this is uneeded as currently the comp_condition has caget 
+                value = caget(self.pv, as_string=isinstance(self.value, str))  # double caget, this is uneeded as currently the comp_condition has caget
 
                 if comp_condition():
                     self.do_once = False

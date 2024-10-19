@@ -35,6 +35,35 @@ def test_action_node():
     assert percentage_complete.value == 100
 
 
+def test_action_node_timeout():
+    # For test
+    percentage_complete = Value("i", 0)
+
+    @wrapped_action_work(loop_period_sec=0.001, work_function_timeout_period_sec=.002)
+    def work_func(comp_condition: Callable) -> Status:
+        percentage_complete.value += 10
+        if comp_condition():
+            return Status.SUCCESS
+        logger.debug(f"pct complete -> {percentage_complete.value}")
+        return Status.RUNNING
+
+    def comp_cond():
+        return percentage_complete.value >= 100
+
+    action = ActionNode(name="action", work_func=work_func,
+                        completion_condition=comp_cond)
+    action.setup()
+
+    while action.status not in (
+        Status.SUCCESS,
+        Status.FAILURE,
+    ):
+        time.sleep(0.01)
+        action.tick_once()
+    assert action.status == Status.FAILURE
+    assert percentage_complete.value != 100
+
+
 def test_condition_node():
     def condition_fn():
         return True

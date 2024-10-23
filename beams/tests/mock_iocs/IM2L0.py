@@ -5,12 +5,12 @@ from textwrap import dedent
 from caproto.server import PVGroup, ioc_arg_parser, pvproperty, run
 
 
-class TargetState(str, Enum):
-    UNKOWN = "UNKOWN"
-    OUT = "OUT"
-    YAG = "YAG"
-    DIAMOND = "DIAMOND"
-    RETICLE = "RETICLE"
+class TargetState(Enum):
+    UNKOWN = 0
+    OUT = 1
+    YAG = 2
+    DIAMOND = 3
+    RETICLE = 4
 
 
 class FilterWheelValue(str, Enum):
@@ -38,9 +38,9 @@ class MockIML20(PVGroup):
 
     im2l0_target = pvproperty(
         name="MMS:STATE:GET_RBV",
-        value=f"{TargetState.UNKOWN.value.upper()}",
+        value=f"{TargetState.UNKOWN.value}",
         dtype=str,
-        doc=f"Represents state of simulated imager target. Options {[i.upper() for i in TargetState]}",
+        doc=f"Represents state of simulated imager target. Options {[i for i in TargetState]}",
         max_length=10,
     )
     im2l0_zoom_motor = pvproperty(

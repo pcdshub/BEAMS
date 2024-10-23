@@ -19,7 +19,7 @@
             "do": {
               "name": "set_reticule_state_to_out",
               "description": "",
-              "pv": "IM2L0:XTES:MMS:STATE:GET_RBV",
+              "pv": "IM2L0:XTES:MMS:STATE:SET",
               "value": "OUT",
               "loop_period_sec": 0.01,
               "caput_paradigm": "EVERY_SECOND",

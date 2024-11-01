@@ -45,6 +45,7 @@ def _get_generic_name_factory(cls: type, *args: type):
 
 
 generic_name = type_name(_get_generic_name_factory)
+tagged_union_cache = set()
 
 
 def as_tagged_union(cls: Cls) -> Cls:
@@ -135,4 +136,9 @@ def as_tagged_union(cls: Cls) -> Cls:
 
     deserializer(lazy=deserialization, target=cls)
     serializer(lazy=serialization, source=cls)
+    tagged_union_cache.add(cls)
     return cls
+
+
+def is_tagged_union(cls) -> bool:
+    return cls in tagged_union_cache

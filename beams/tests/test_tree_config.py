@@ -16,7 +16,7 @@ from py_trees.composites import Parallel, Selector, Sequence
 from beams.behavior_tree.ActionNode import ActionNode
 from beams.behavior_tree.CheckAndDo import CheckAndDo
 from beams.behavior_tree.ConditionNode import ConditionNode
-from beams.serialization import get_all_subclasses
+from beams.serialization import get_all_subclasses, is_tagged_union
 from beams.tree_config import (BaseConditionItem, BaseItem,
                                BlackboardToStatusItem, CheckAndDoItem,
                                CheckBlackboardVariableExistsItem,
@@ -86,7 +86,7 @@ def test_item_serialize_roundtrip(item_class: type[BaseItem]):
 def test_item_serialize_roundtrip_union_singles(item_class: type[BaseItem], attr: str, expand: type[BaseItem]):
     count = 0
     for cls in get_all_subclasses(expand):
-        if cls.__name__.startswith("Base"):
+        if is_tagged_union(cls):
             continue
         item = item_class(**{attr: cls()})
         ser = apischema.serialize(item_class, item)
@@ -107,7 +107,7 @@ def test_item_serialize_roundtrip_union_singles(item_class: type[BaseItem], attr
     ]
 )
 def test_item_serailize_roundtrip_union_sublists(item_class: type[BaseItem], attr: str, expand: type[BaseItem]):
-    options = [cls for cls in get_all_subclasses(expand) if not cls.__name__.startswith("Base")]
+    options = [cls for cls in get_all_subclasses(expand) if not is_tagged_union(cls)]
     combinations = []
     for size in (1, 2):
         for variant in combinations_with_replacement(options, size):

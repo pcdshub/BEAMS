@@ -21,13 +21,13 @@ from beams.tree_config import (BaseConditionItem, BaseItem,
                                BlackboardToStatusItem, CheckAndDoItem,
                                CheckBlackboardVariableExistsItem,
                                CheckBlackboardVariableValueItem, ConditionItem,
-                               DummyItem, FailureItem, IncPVActionItem,
-                               ParallelItem, PeriodicItem, RunningItem,
-                               SelectorItem, SequenceConditionItem,
-                               SequenceItem, SetBlackboardVariableItem,
-                               SetPVActionItem, StatusQueueItem,
-                               SuccessEveryNItem, SuccessItem, TickCounterItem,
-                               UnsetBlackboardVariableItem,
+                               DummyConditionItem, DummyItem, FailureItem,
+                               IncPVActionItem, ParallelItem, PeriodicItem,
+                               RunningItem, SelectorItem,
+                               SequenceConditionItem, SequenceItem,
+                               SetBlackboardVariableItem, SetPVActionItem,
+                               StatusQueueItem, SuccessEveryNItem, SuccessItem,
+                               TickCounterItem, UnsetBlackboardVariableItem,
                                WaitForBlackboardVariableItem,
                                WaitForBlackboardVariableValueItem)
 
@@ -39,6 +39,7 @@ ITEM_TO_BEHAVIOUR = [
     (FailureItem, Failure),
     (RunningItem, Running),
     (DummyItem, Dummy),
+    (DummyConditionItem, ConditionNode),
     (ConditionItem, ConditionNode),
     (SequenceConditionItem, Sequence),
     (SetPVActionItem, ActionNode),
@@ -120,3 +121,19 @@ def test_item_serailize_roundtrip_union_sublists(item_class: type[BaseItem], att
         count += 1
     # If all subclasses skip assert item == deser, we should also have an error
     assert count > 0
+
+
+def test_sequence_condition_item_condition_function():
+    item = SequenceConditionItem(
+        name="mega_dummy",
+        children=[
+            DummyConditionItem(),
+            DummyConditionItem(),
+            DummyConditionItem(),
+        ]
+    )
+    cond_func = item.get_condition_function()
+    for variant in combinations_with_replacement((True, False), 3):
+        for idx in range(3):
+            item.children[idx].result = variant[idx]
+        assert cond_func() == all(variant)

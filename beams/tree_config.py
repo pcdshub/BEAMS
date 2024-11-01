@@ -170,6 +170,16 @@ class BaseConditionItem(BaseItem):
 
 
 @dataclass
+class DummyConditionItem(BaseConditionItem):
+    result: bool = True
+
+    def get_condition_function(self) -> Evaluatable:
+        def cond_func():
+            return self.result
+        return cond_func
+
+
+@dataclass
 class ConditionItem(BaseConditionItem):
     pv: str = ""
     value: Any = 1

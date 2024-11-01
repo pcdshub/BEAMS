@@ -19,6 +19,8 @@ Bugfixes
 Maintenance
 -----------
 - Regenerate json eggs
+- Make test suite caproto iocs run on localhost only and on an alternate port to reduce
+  the likelihood of interference to and from a prod controls system.
 
 Contributors
 ------------

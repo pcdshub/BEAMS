@@ -10,11 +10,13 @@
             "name": "reticle_state_out",
             "description": "",
             "check": {
-              "name": "check_reticule_state",
-              "description": "",
-              "pv": "IM2L0:XTES:MMS:STATE:GET_RBV",
-              "value": "OUT",
-              "operator": "eq"
+              "ConditionItem": {
+                "name": "check_reticule_state",
+                "description": "",
+                "pv": "IM2L0:XTES:MMS:STATE:GET_RBV",
+                "value": "OUT",
+                "operator": "eq"
+              }
             },
             "do": {
               "name": "set_reticule_state_to_out",
@@ -23,11 +25,13 @@
               "value": "OUT",
               "loop_period_sec": 0.01,
               "termination_check": {
-                "name": "check_reticule_state",
-                "description": "",
-                "pv": "IM2L0:XTES:MMS:STATE:GET_RBV",
-                "value": "OUT",
-                "operator": "eq"
+                "ConditionItem": {
+                  "name": "check_reticule_state",
+                  "description": "",
+                  "pv": "IM2L0:XTES:MMS:STATE:GET_RBV",
+                  "value": "OUT",
+                  "operator": "eq"
+                }
               }
             }
           }
@@ -37,11 +41,13 @@
             "name": "zoom_motor",
             "description": "",
             "check": {
-              "name": "check_zoom_motor",
-              "description": "",
-              "pv": "IM2L0:XTES:CLZ.RBV",
-              "value": 25,
-              "operator": "eq"
+              "ConditionItem": {
+                "name": "check_zoom_motor",
+                "description": "",
+                "pv": "IM2L0:XTES:CLZ.RBV",
+                "value": 25,
+                "operator": "eq"
+              }
             },
             "do": {
               "name": "set_zoom_motor",
@@ -50,11 +56,13 @@
               "value": 25,
               "loop_period_sec": 0.01,
               "termination_check": {
-                "name": "check_zoom_motor",
-                "description": "",
-                "pv": "IM2L0:XTES:CLZ.RBV",
-                "value": 25,
-                "operator": "eq"
+                "ConditionItem": {
+                  "name": "check_zoom_motor",
+                  "description": "",
+                  "pv": "IM2L0:XTES:CLZ.RBV",
+                  "value": 25,
+                  "operator": "eq"
+                }
               }
             }
           }
@@ -64,11 +72,13 @@
             "name": "focus_motor",
             "description": "",
             "check": {
-              "name": "check_focus_motor",
-              "description": "",
-              "pv": "IM2L0:XTES:CLF.RBV",
-              "value": 50,
-              "operator": "eq"
+              "ConditionItem": {
+                "name": "check_focus_motor",
+                "description": "",
+                "pv": "IM2L0:XTES:CLF.RBV",
+                "value": 50,
+                "operator": "eq"
+              }
             },
             "do": {
               "name": "set_focus_motor",
@@ -77,11 +87,13 @@
               "value": 50,
               "loop_period_sec": 0.01,
               "termination_check": {
-                "name": "check_focus_motor",
-                "description": "",
-                "pv": "IM2L0:XTES:CLF.RBV",
-                "value": 50,
-                "operator": "eq"
+                  "ConditionItem": {
+                  "name": "check_focus_motor",
+                  "description": "",
+                  "pv": "IM2L0:XTES:CLF.RBV",
+                  "value": 50,
+                  "operator": "eq"
+                }
               }
             }
           }

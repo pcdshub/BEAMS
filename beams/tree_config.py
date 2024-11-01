@@ -205,7 +205,7 @@ class SequenceConditionItem(BaseSequenceItem, BaseConditionItem):
     """
     children: List[BaseConditionItem] = field(default_factory=list)
 
-    def get_condition_function(self) -> Callable[[], bool]:
+    def get_condition_function(self) -> Evaluatable:
         child_funcs = [item.get_condition_function() for item in self.children]
 
         def cond_func():

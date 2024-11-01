@@ -107,23 +107,25 @@ class SelectorItem(BaseItem):
         return node
 
 
-def get_sequence_tree(seq_item: AnySequenceItem):
-    children = []
-    for child in seq_item.children:
-        children.append(child.get_tree())
-
-    node = Sequence(name=seq_item.name, memory=seq_item.memory, children=children)
-
-    return node
-
-
+@as_tagged_union
 @dataclass
-class SequenceItem(BaseItem):
+class BaseSequenceItem(BaseItem):
     memory: bool = False
     children: List[BaseItem] = field(default_factory=list)
 
     def get_tree(self) -> Sequence:
-        return get_sequence_tree(self)
+        children = []
+        for child in self.children:
+            children.append(child.get_tree())
+
+        node = Sequence(name=self.name, memory=self.memory, children=children)
+
+        return node
+
+
+@dataclass
+class SequenceItem(BaseSequenceItem):
+    ...
 
 
 # Custom LCLS-built Behaviors (idioms)
@@ -136,15 +138,19 @@ class ConditionOperator(Enum):
     greater_equal = "ge"
 
 
+@as_tagged_union
 @dataclass
-class ConditionItem(BaseItem):
-    pv: str = ""
-    value: Any = 1
-    operator: ConditionOperator = ConditionOperator.equal
-
+class BaseConditionItem(BaseItem):
     def get_tree(self) -> ConditionNode:
         cond_func = self.get_condition_function()
         return ConditionNode(self.name, cond_func)
+
+
+@dataclass
+class ConditionItem(BaseConditionItem):
+    pv: str = ""
+    value: Any = 1
+    operator: ConditionOperator = ConditionOperator.equal
 
     def get_condition_function(self) -> Callable[[], bool]:
         op = getattr(operator, self.operator.value)
@@ -160,7 +166,7 @@ class ConditionItem(BaseItem):
 
 
 @dataclass
-class SequenceConditionItem(BaseItem):
+class SequenceConditionItem(BaseSequenceItem, BaseConditionItem):
     """
     A sequence containing only condition items.
 
@@ -172,11 +178,7 @@ class SequenceConditionItem(BaseItem):
     When not used as a termination_check, this behaves exactly
     like a normal Sequence Item.
     """
-    memory: bool = False
-    children: List[AnyConditionItem] = field(default_factory=list)
-
-    def get_tree(self) -> Sequence:
-        return get_sequence_tree(self)
+    children: List[BaseConditionItem] = field(default_factory=list)
 
     def get_condition_function(self) -> Callable[[], bool]:
         child_funcs = [item.get_condition_function() for item in self.children]
@@ -201,7 +203,7 @@ class SetPVActionItem(BaseItem):
     value: Any = 1
     loop_period_sec: float = 1.0
 
-    termination_check: AnyConditionItem = field(default_factory=ConditionItem)
+    termination_check: BaseConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
 
@@ -239,7 +241,7 @@ class IncPVActionItem(BaseItem):
     increment: float = 1
     loop_period_sec: float = 1.0
 
-    termination_check: AnyConditionItem = field(default_factory=ConditionItem)
+    termination_check: BaseConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
 
@@ -276,7 +278,7 @@ class IncPVActionItem(BaseItem):
 
 @dataclass
 class CheckAndDoItem(BaseItem):
-    check: AnyConditionItem = field(default_factory=ConditionItem)
+    check: BaseConditionItem = field(default_factory=ConditionItem)
     do: Union[SetPVActionItem, IncPVActionItem] = field(default_factory=SetPVActionItem)
 
     def get_tree(self) -> CheckAndDo:
@@ -286,12 +288,6 @@ class CheckAndDoItem(BaseItem):
         node = CheckAndDo(name=self.name, check=check_node, do=do_node)
 
         return node
-
-
-# Condition items implement "get_condition_function"
-AnyConditionItem = Union[ConditionItem, SequenceConditionItem]
-# Sequence items have a "children" list attribute containing items and return a "Sequence" BT node on get_tree
-AnySequenceItem = Union[SequenceItem, SequenceConditionItem]
 
 
 # py_trees.behaviours Behaviour items

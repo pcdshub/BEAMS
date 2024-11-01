@@ -4,11 +4,13 @@
       "name": "self_test",
       "description": "",
       "check": {
-        "name": "self_test_check",
-        "description": "",
-        "pv": "PERC:COMP",
-        "value": 100,
-        "operator": "ge"
+        "ConditionItem": {
+          "name": "self_test_check",
+          "description": "",
+          "pv": "PERC:COMP",
+          "value": 100,
+          "operator": "ge"
+        }
       },
       "do": {
         "name": "self_test_do",
@@ -17,11 +19,13 @@
         "increment": 10,
         "loop_period_sec": 0.01,
         "termination_check": {
-          "name": "",
-          "description": "",
-          "pv": "PERC:COMP",
-          "value": 100,
-          "operator": "ge"
+          "ConditionItem": {
+            "name": "",
+            "description": "",
+            "pv": "PERC:COMP",
+            "value": 100,
+            "operator": "ge"
+          }
         }
       }
     }

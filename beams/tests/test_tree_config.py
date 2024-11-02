@@ -1,4 +1,4 @@
-from itertools import combinations_with_replacement
+from itertools import combinations, combinations_with_replacement
 
 import apischema
 import pytest
@@ -108,19 +108,15 @@ def test_item_serialize_roundtrip_union_singles(item_class: type[BaseItem], attr
 )
 def test_item_serailize_roundtrip_union_sublists(item_class: type[BaseItem], attr: str, expand: type[BaseItem]):
     options = [cls for cls in get_all_subclasses(expand) if not is_tagged_union(cls)]
-    combinations = []
-    for size in (1, 2):
-        for variant in combinations_with_replacement(options, size):
-            combinations.append(variant)
-    count = 0
-    for tuple_of_cls in combinations:
+    combos = [tuple(options)]
+    for size in range(3):
+        for variant in combinations(options, size + 1):
+            combos.append(variant)
+    for tuple_of_cls in combos:
         item = item_class(**{attr: [cls() for cls in tuple_of_cls]})
         ser = apischema.serialize(item_class, item)
         deser = apischema.deserialize(item_class, ser)
         assert item == deser
-        count += 1
-    # If all subclasses skip assert item == deser, we should also have an error
-    assert count > 0
 
 
 def test_sequence_condition_item_condition_function():

@@ -87,7 +87,7 @@
               "value": 50,
               "loop_period_sec": 0.01,
               "termination_check": {
-                  "ConditionItem": {
+                "ConditionItem": {
                   "name": "check_focus_motor",
                   "description": "",
                   "pv": "IM2L0:XTES:CLF.RBV",

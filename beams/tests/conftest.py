@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from contextlib import contextmanager
 from copy import copy
@@ -19,6 +20,15 @@ def central_logging_setup(caplog):
     setup_logging(logging.DEBUG)
     # Set py_trees logging level (not our library)
     py_trees.logging.level = py_trees.logging.Level.DEBUG
+
+
+@pytest.fixture(autouse=True)
+def ca_env_vars():
+    # Pick a non-standard port to avoid collisions with same-named prod PVs
+    os.environ["EPICS_CA_SERVER_PORT"] = "5066"
+    # Only broadcast and get on local if
+    os.environ["EPICS_CA_AUTO_ADDR_LIST"] = "NO"
+    os.environ["EPICS_CA_ADDR_LIST"] = "localhost"
 
 
 @contextmanager

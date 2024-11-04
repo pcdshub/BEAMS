@@ -8,10 +8,10 @@ from copy import copy
 from dataclasses import dataclass, field, fields
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, List, Optional, Union
 
 import py_trees
-from apischema import deserialize
+from apischema import deserialize, serialize
 from epics import caget, caput
 from py_trees.behaviour import Behaviour
 from py_trees.behaviours import (CheckBlackboardVariableValue,
@@ -19,21 +19,45 @@ from py_trees.behaviours import (CheckBlackboardVariableValue,
 from py_trees.common import ComparisonExpression, ParallelPolicy, Status
 from py_trees.composites import Parallel, Selector, Sequence
 
-from beams.behavior_tree.ActionNode import ActionNode
+from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
 from beams.behavior_tree.CheckAndDo import CheckAndDo
 from beams.behavior_tree.ConditionNode import ConditionNode
 from beams.serialization import as_tagged_union
+from beams.typing_helper import Evaluatable
 
 logger = logging.getLogger(__name__)
 
 
 def get_tree_from_path(path: Path) -> py_trees.trees.BehaviourTree:
-    """Deserialize a json file, return the tree it specifies"""
+    """
+    Deserialize a json file, return the tree it specifies.
+
+    This can be used internally to conveniently and consistently load
+    serialized json files as ready-to-run behavior trees.
+    """
     with open(path, "r") as fd:
         deser = json.load(fd)
         tree_item = deserialize(BehaviorTreeItem, deser)
 
     return tree_item.get_tree()
+
+
+def save_tree_item_to_path(path: Union[Path, str], root: BaseItem):
+    """
+    Serialize a behavior tree item to a json file.
+
+    This can be used to generate serialized trees from python scripts.
+    The user needs to create various interwoven tree items, pick the
+    correct item to be the root node, and then use this function to
+    save the serialized file.
+
+    These files are ready to be consumed by get_tree_from_path.
+    """
+    ser = serialize(BehaviorTreeItem(root=root))
+
+    with open(path, "w") as fd:
+        json.dump(ser, fd, indent=2)
+        fd.write("\n")
 
 
 @dataclass
@@ -108,8 +132,9 @@ class SelectorItem(BaseItem):
         return node
 
 
+@as_tagged_union
 @dataclass
-class SequenceItem(BaseItem):
+class BaseSequenceItem(BaseItem):
     memory: bool = False
     children: List[BaseItem] = field(default_factory=list)
 
@@ -123,6 +148,11 @@ class SequenceItem(BaseItem):
         return node
 
 
+@dataclass
+class SequenceItem(BaseSequenceItem):
+    ...
+
+
 # Custom LCLS-built Behaviors (idioms)
 class ConditionOperator(Enum):
     equal = "eq"
@@ -133,25 +163,73 @@ class ConditionOperator(Enum):
     greater_equal = "ge"
 
 
+@as_tagged_union
 @dataclass
-class ConditionItem(BaseItem):
-    pv: str = ""
-    value: Any = 1
-    operator: ConditionOperator = ConditionOperator.equal
-
+class BaseConditionItem(BaseItem):
     def get_tree(self) -> ConditionNode:
         cond_func = self.get_condition_function()
         return ConditionNode(self.name, cond_func)
 
-    def get_condition_function(self) -> Callable[[], bool]:
+
+@dataclass
+class DummyConditionItem(BaseConditionItem):
+    result: bool = True
+
+    def get_condition_function(self) -> Evaluatable:
+        def cond_func():
+            return self.result
+        return cond_func
+
+
+@dataclass
+class ConditionItem(BaseConditionItem):
+    pv: str = ""
+    value: Any = 1
+    operator: ConditionOperator = ConditionOperator.equal
+
+    def get_condition_function(self) -> Evaluatable:
         op = getattr(operator, self.operator.value)
 
         def cond_func():
-            val = caget(self.pv)
+            # Note: this bakes EPICS into how Conditions work.
+            # Further implictly now relies of type of "value" to determine whether to get as_string
+            val = caget(self.pv, as_string=isinstance(self.value, str))
             if val is None:
                 return False
 
             return op(val, self.value)
+
+        return cond_func
+
+
+@dataclass
+class SequenceConditionItem(BaseSequenceItem, BaseConditionItem):
+    """
+    A sequence containing only condition items.
+
+    Suitable for use as an action item's termination_check.
+
+    The condition function evaluates to "True" if every child's condition item
+    also evaluates to "True".
+
+    When not used as a termination_check, this behaves exactly
+    like a normal Sequence Item.
+    """
+    children: List[BaseConditionItem] = field(default_factory=list)
+
+    def get_condition_function(self) -> Evaluatable:
+        child_funcs = [item.get_condition_function() for item in self.children]
+
+        def cond_func():
+            """
+            Minimize network hits by failing at first issue
+            """
+            ok = True
+            for cf in child_funcs:
+                ok = ok and cf()
+                if not ok:
+                    break
+            return ok
 
         return cond_func
 
@@ -162,14 +240,15 @@ class SetPVActionItem(BaseItem):
     value: Any = 1
     loop_period_sec: float = 1.0
 
-    termination_check: ConditionItem = field(default_factory=ConditionItem)
+    termination_check: BaseConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
 
-        def work_func(comp_condition: Callable[[], bool]):
+        @wrapped_action_work(self.loop_period_sec)
+        def work_func(comp_condition: Evaluatable) -> py_trees.common.Status:
             try:
                 # Set to running
-                value = caget(self.termination_check.pv)
+                value = caget(self.pv)  # double caget, this is uneeded as currently the comp_condition has caget baked in
 
                 if comp_condition():
                     return py_trees.common.Status.SUCCESS
@@ -177,7 +256,6 @@ class SetPVActionItem(BaseItem):
 
                 # specific caput logic to SetPVActionItem
                 caput(self.pv, self.value)
-                time.sleep(self.loop_period_sec)
                 return py_trees.common.Status.RUNNING
             except Exception as ex:
                 logger.warning(f"{self.name}: work failed: {ex}")
@@ -200,11 +278,12 @@ class IncPVActionItem(BaseItem):
     increment: float = 1
     loop_period_sec: float = 1.0
 
-    termination_check: ConditionItem = field(default_factory=ConditionItem)
+    termination_check: BaseConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
 
-        def work_func(comp_condition: Callable[[], bool]) -> py_trees.common.Status:
+        @wrapped_action_work(self.loop_period_sec)
+        def work_func(comp_condition: Evaluatable) -> py_trees.common.Status:
             """
             To be run inside of a while loop
             Action node should take care of logging, reporting status
@@ -218,7 +297,6 @@ class IncPVActionItem(BaseItem):
 
                 # specific caput logic to IncPVActionItem
                 caput(self.pv, value + self.increment)
-                time.sleep(self.loop_period_sec)
                 return py_trees.common.Status.RUNNING
             except Exception as ex:
                 logger.warning(f"{self.name}: work failed: {ex}")
@@ -237,7 +315,7 @@ class IncPVActionItem(BaseItem):
 
 @dataclass
 class CheckAndDoItem(BaseItem):
-    check: ConditionItem = field(default_factory=ConditionItem)
+    check: BaseConditionItem = field(default_factory=ConditionItem)
     do: Union[SetPVActionItem, IncPVActionItem] = field(default_factory=SetPVActionItem)
 
     def __post_init__(self):

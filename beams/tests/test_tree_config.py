@@ -28,6 +28,7 @@ from beams.tree_config import (BaseConditionItem, BaseItem,
                                SetBlackboardVariableItem, SetPVActionItem,
                                StatusQueueItem, SuccessEveryNItem, SuccessItem,
                                TickCounterItem, UnsetBlackboardVariableItem,
+                               UseCheckConditionItem,
                                WaitForBlackboardVariableItem,
                                WaitForBlackboardVariableValueItem)
 
@@ -133,3 +134,34 @@ def test_sequence_condition_item_condition_function():
         for idx in range(3):
             item.children[idx].result = variant[idx]
         assert cond_func() == all(variant)
+
+
+def test_check_and_do_item_no_termination_check():
+    check = DummyConditionItem(name="dummy_check")
+    do = SetPVActionItem(name="dummy_do")
+    assert not isinstance(do.termination_check, UseCheckConditionItem)
+    item = CheckAndDoItem(
+        name="dummy_check_and_do",
+        check=check,
+        do=do,
+    )
+    assert isinstance(item.do.termination_check, UseCheckConditionItem)
+
+    ser = apischema.serialize(CheckAndDoItem, item)
+    deser = apischema.deserialize(CheckAndDoItem, ser)
+    assert item == deser
+
+    node = item.get_tree()
+    check_condition = node.check.condition
+    do_condition = node.do.completion_condition
+    # These should both run a copy of the dummy success check
+    assert check_condition()
+    assert do_condition()
+
+    check.result = False
+    node = item.get_tree()
+    check_condition = node.check.condition
+    do_condition = node.do.completion_condition
+    # These should both run a copy of the dummy fail check
+    assert not check_condition()
+    assert not do_condition()

@@ -25,12 +25,9 @@
               "value": 1,
               "loop_period_sec": 0.01,
               "termination_check": {
-                "ConditionItem": {
-                  "name": "",
-                  "description": "",
-                  "pv": "RET:FOUND",
-                  "value": 1,
-                  "operator": "ge"
+                "UseCheckConditionItem": {
+                  "name": "ret_find_do_termination_check",
+                  "description": "Use parent's check node: ret_find_check"
                 }
               }
             }
@@ -42,7 +39,7 @@
             "description": "",
             "check": {
               "ConditionItem": {
-                "name": "",
+                "name": "ret_insert_check",
                 "description": "",
                 "pv": "RET:INSERT",
                 "value": 1,
@@ -50,18 +47,15 @@
               }
             },
             "do": {
-              "name": "",
+              "name": "ret_insert_do",
               "description": "",
               "pv": "RET:INSERT",
               "value": 1,
               "loop_period_sec": 1.0,
               "termination_check": {
-                "ConditionItem": {
-                  "name": "",
-                  "description": "",
-                  "pv": "RET:INSERT",
-                  "value": 1,
-                  "operator": "ge"
+                "UseCheckConditionItem": {
+                  "name": "ret_insert_do_termination_check",
+                  "description": "Use parent's check node: ret_insert_check"
                 }
               }
             }

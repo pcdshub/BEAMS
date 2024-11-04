@@ -19,12 +19,9 @@
         "increment": 10,
         "loop_period_sec": 0.01,
         "termination_check": {
-          "ConditionItem": {
-            "name": "",
-            "description": "",
-            "pv": "PERC:COMP",
-            "value": 100,
-            "operator": "ge"
+          "UseCheckConditionItem": {
+            "name": "self_test_do_termination_check",
+            "description": "Use parent's check node: self_test_check"
           }
         }
       }

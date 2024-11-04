@@ -25,12 +25,9 @@
               "value": "OUT",
               "loop_period_sec": 0.01,
               "termination_check": {
-                "ConditionItem": {
-                  "name": "check_reticule_state",
-                  "description": "",
-                  "pv": "IM2L0:XTES:MMS:STATE:GET_RBV",
-                  "value": "OUT",
-                  "operator": "eq"
+                "UseCheckConditionItem": {
+                  "name": "set_reticule_state_to_out_termination_check",
+                  "description": "Use parent's check node: check_reticule_state"
                 }
               }
             }
@@ -56,12 +53,9 @@
               "value": 25,
               "loop_period_sec": 0.01,
               "termination_check": {
-                "ConditionItem": {
-                  "name": "check_zoom_motor",
-                  "description": "",
-                  "pv": "IM2L0:XTES:CLZ.RBV",
-                  "value": 25,
-                  "operator": "eq"
+                "UseCheckConditionItem": {
+                  "name": "set_zoom_motor_termination_check",
+                  "description": "Use parent's check node: check_zoom_motor"
                 }
               }
             }
@@ -87,12 +81,9 @@
               "value": 50,
               "loop_period_sec": 0.01,
               "termination_check": {
-                "ConditionItem": {
-                  "name": "check_focus_motor",
-                  "description": "",
-                  "pv": "IM2L0:XTES:CLF.RBV",
-                  "value": 50,
-                  "operator": "eq"
+                "UseCheckConditionItem": {
+                  "name": "set_focus_motor_termination_check",
+                  "description": "Use parent's check node: check_focus_motor"
                 }
               }
             }

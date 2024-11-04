@@ -116,7 +116,83 @@ def create_eternal_guard(write: bool = False):
     return root_item
 
 
+# im2l0 test
+def create_im2l0_test(write: bool = False):
+    im2l0 = SequenceItem(name="IM2L0_checker_outer")
+    check = ConditionItem(
+        name="check_reticule_state",
+        pv="IM2L0:XTES:MMS:STATE:GET_RBV",
+        value="OUT",
+        operator=ConditionOperator.equal
+    )
+    do = SetPVActionItem(
+        name="set_reticule_state_to_out",
+        loop_period_sec=0.01,
+        pv="IM2L0:XTES:MMS:STATE:GET_RBV",
+        value="OUT",
+        termination_check=ConditionItem(
+            name="check_reticule_state",
+            pv="IM2L0:XTES:MMS:STATE:GET_RBV",
+            value="OUT",
+            operator=ConditionOperator.equal
+        )
+    )
+    cnd1 = CheckAndDoItem(name="reticle_state_out", check=check, do=do)
+
+    check2 = ConditionItem(
+        name="check_zoom_motor",
+        pv="IM2L0:XTES:CLZ.RBV",
+        value=25,
+        operator=ConditionOperator.equal
+    )
+    do2 = SetPVActionItem(
+        name="set_zoom_motor",
+        loop_period_sec=0.01,
+        pv="IM2L0:XTES:CLZ.RBV",
+        value=25,
+        termination_check=ConditionItem(
+            name="check_zoom_motor",
+            pv="IM2L0:XTES:CLZ.RBV",
+            value=25,
+            operator=ConditionOperator.equal
+        )
+    )
+    cnd2 = CheckAndDoItem(name="zoom_motor", check=check2, do=do2)
+
+    check3 = ConditionItem(
+        name="check_focus_motor",
+        pv="IM2L0:XTES:CLF.RBV",
+        value=50,
+        operator=ConditionOperator.equal
+    )
+    do3 = SetPVActionItem(
+        name="set_focus_motor",
+        loop_period_sec=0.01,
+        pv="IM2L0:XTES:CLF.RBV",
+        value=50,
+        termination_check=ConditionItem(
+            name="check_focus_motor",
+            pv="IM2L0:XTES:CLF.RBV",
+            value=50,
+            operator=ConditionOperator.equal
+        )
+    )
+    cnd3 = CheckAndDoItem(name="focus_motor", check=check3, do=do3)
+
+    im2l0.children = [cnd1, cnd2, cnd3]
+    root_item = BehaviorTreeItem(root=im2l0)
+
+    if write:
+        with open(Path(__file__).parent / "im2l0_test.json", 'w') as fd:
+            ser = serialize(BehaviorTreeItem, root_item)
+            json.dump(ser, fd, indent=2)
+            fd.write('\n')
+
+    return root_item
+
+
 if __name__ == "__main__":
     create_egg_1(write=True)
     create_egg_2(write=True)
     create_eternal_guard(write=True)
+    create_im2l0_test(write=True)

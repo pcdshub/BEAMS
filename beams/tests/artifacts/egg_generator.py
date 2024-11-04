@@ -20,9 +20,7 @@ def create_egg_1(write: bool = False):
                           operator=ConditionOperator.greater_equal)
     do = IncPVActionItem(
         name='self_test_do', loop_period_sec=0.01, pv="PERC:COMP",
-        increment=10, termination_check=ConditionItem(
-            pv="PERC:COMP", value=100, operator=ConditionOperator.greater_equal
-        )
+        increment=10
     )
     cnd_test = CheckAndDoItem(name='self_test', check=check, do=do)
 
@@ -45,23 +43,17 @@ def create_egg_2(write: bool = False):
     check_item_1 = ConditionItem(name='ret_find_check', pv='RET:FOUND', value=1,
                                  operator=ConditionOperator.greater_equal)
     do_item_1 = SetPVActionItem(
-        name='ret_find_do', pv='RET:FOUND', value=1, loop_period_sec=0.01,
-        termination_check=ConditionItem(
-            pv="RET:FOUND", value=1, operator=ConditionOperator.greater_equal
-        )
+        name='ret_find_do', pv='RET:FOUND', value=1, loop_period_sec=0.01
     )
     cnd_1 = CheckAndDoItem(name='ret_find', check=check_item_1, do=do_item_1)
 
     seq.children.append(cnd_1)
 
     # CheckAndDo2
-    check2 = ConditionItem(pv="RET:INSERT", value=1,
+    check2 = ConditionItem(name="ret_insert_check", pv="RET:INSERT", value=1,
                            operator=ConditionOperator.greater_equal)
     do2 = SetPVActionItem(
-        pv="RET:INSERT", value=1,
-        termination_check=ConditionItem(
-            pv='RET:INSERT', value=1, operator=ConditionOperator.greater_equal
-        )
+        name="ret_insert_do", pv="RET:INSERT", value=1,
     )
     cnd_2 = CheckAndDoItem(name='ret_insert', check=check2, do=do2)
     seq.children.append(cnd_2)
@@ -130,12 +122,6 @@ def create_im2l0_test(write: bool = False):
         loop_period_sec=0.01,
         pv="IM2L0:XTES:MMS:STATE:GET_RBV",
         value="OUT",
-        termination_check=ConditionItem(
-            name="check_reticule_state",
-            pv="IM2L0:XTES:MMS:STATE:GET_RBV",
-            value="OUT",
-            operator=ConditionOperator.equal
-        )
     )
     cnd1 = CheckAndDoItem(name="reticle_state_out", check=check, do=do)
 
@@ -150,12 +136,6 @@ def create_im2l0_test(write: bool = False):
         loop_period_sec=0.01,
         pv="IM2L0:XTES:CLZ.RBV",
         value=25,
-        termination_check=ConditionItem(
-            name="check_zoom_motor",
-            pv="IM2L0:XTES:CLZ.RBV",
-            value=25,
-            operator=ConditionOperator.equal
-        )
     )
     cnd2 = CheckAndDoItem(name="zoom_motor", check=check2, do=do2)
 
@@ -170,12 +150,6 @@ def create_im2l0_test(write: bool = False):
         loop_period_sec=0.01,
         pv="IM2L0:XTES:CLF.RBV",
         value=50,
-        termination_check=ConditionItem(
-            name="check_focus_motor",
-            pv="IM2L0:XTES:CLF.RBV",
-            value=50,
-            operator=ConditionOperator.equal
-        )
     )
     cnd3 = CheckAndDoItem(name="focus_motor", check=check3, do=do3)
 

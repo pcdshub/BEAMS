@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import logging
 import operator
-import time
 from copy import copy
 from dataclasses import dataclass, field, fields
 from enum import Enum
@@ -320,9 +319,12 @@ class CheckAndDoItem(BaseItem):
 
     def __post_init__(self):
         # Clearly indicate the intent for serialization
-        # If no termination check, use the check's check
-        if not self.do.termination_check.name:
-            self.do.termination_check = UseCheckConditionItem()
+        # If termination check is the default default, create the dummy item instead
+        if self.do.termination_check == CheckAndDoItem().do.termination_check:
+            self.do.termination_check = UseCheckConditionItem(
+                name=f"{self.do.name}_termination_check",
+                description=f"Use parent's check node: {self.check.name}"
+            )
 
     def get_tree(self) -> CheckAndDo:
         if isinstance(self.do.termination_check, UseCheckConditionItem):
@@ -340,11 +342,13 @@ class CheckAndDoItem(BaseItem):
 
 
 @dataclass
-class UseCheckConditionItem(BaseItem):
+class UseCheckConditionItem(BaseConditionItem):
     """
     Dummy item: indicates that check and do should use "check" as do's termination check.
+
+    If used in any other context the tree will not be constructable.
     """
-    copy_from: str = "previous check"
+    ...
 
 
 # py_trees.behaviours Behaviour items

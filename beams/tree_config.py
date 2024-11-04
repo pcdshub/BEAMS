@@ -320,7 +320,7 @@ class CheckAndDoItem(BaseItem):
     def __post_init__(self):
         # Clearly indicate the intent for serialization
         # If termination check is the default default, create the dummy item instead
-        if self.do.termination_check == SetPVActionItem().termination_check:
+        if self.do.termination_check == ConditionItem():
             self.do.termination_check = UseCheckConditionItem(
                 name=f"{self.do.name}_termination_check",
                 description=f"Use parent's check node: {self.check.name}"

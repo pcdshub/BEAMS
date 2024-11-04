@@ -24,6 +24,7 @@
               "pv": "IM2L0:XTES:MMS:STATE:GET_RBV",
               "value": "OUT",
               "loop_period_sec": 0.01,
+              "caput_paradigm": "EVERY_SECOND",
               "termination_check": {
                 "ConditionItem": {
                   "name": "check_reticule_state",
@@ -55,6 +56,7 @@
               "pv": "IM2L0:XTES:CLZ.RBV",
               "value": 25,
               "loop_period_sec": 0.01,
+              "caput_paradigm": "EVERY_SECOND",
               "termination_check": {
                 "ConditionItem": {
                   "name": "check_zoom_motor",
@@ -86,6 +88,7 @@
               "pv": "IM2L0:XTES:CLF.RBV",
               "value": 50,
               "loop_period_sec": 0.01,
+              "caput_paradigm": "ONCE",
               "termination_check": {
                   "ConditionItem": {
                   "name": "check_focus_motor",

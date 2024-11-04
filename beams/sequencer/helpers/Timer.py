@@ -12,7 +12,7 @@ class Timer():
         self.is_periodic = is_periodic
         self.auto_start = auto_start
         if (self.auto_start):
-            self.timer_start_time = time.time()
+            self.timer_start_time = time.monotonic()
         else:
             self.timer_start_time = -1
 

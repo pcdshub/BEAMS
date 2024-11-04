@@ -10,11 +10,13 @@
             "name": "ret_find",
             "description": "",
             "check": {
-              "name": "ret_find_check",
-              "description": "",
-              "pv": "RET:FOUND",
-              "value": 1,
-              "operator": "ge"
+              "ConditionItem": {
+                "name": "ret_find_check",
+                "description": "",
+                "pv": "RET:FOUND",
+                "value": 1,
+                "operator": "ge"
+              }
             },
             "do": {
               "name": "ret_find_do",
@@ -23,11 +25,13 @@
               "value": 1,
               "loop_period_sec": 0.01,
               "termination_check": {
-                "name": "",
-                "description": "",
-                "pv": "RET:FOUND",
-                "value": 1,
-                "operator": "ge"
+                "ConditionItem": {
+                  "name": "",
+                  "description": "",
+                  "pv": "RET:FOUND",
+                  "value": 1,
+                  "operator": "ge"
+                }
               }
             }
           }
@@ -37,11 +41,13 @@
             "name": "ret_insert",
             "description": "",
             "check": {
-              "name": "",
-              "description": "",
-              "pv": "RET:INSERT",
-              "value": 1,
-              "operator": "ge"
+              "ConditionItem": {
+                "name": "",
+                "description": "",
+                "pv": "RET:INSERT",
+                "value": 1,
+                "operator": "ge"
+              }
             },
             "do": {
               "name": "",
@@ -50,11 +56,13 @@
               "value": 1,
               "loop_period_sec": 1.0,
               "termination_check": {
-                "name": "",
-                "description": "",
-                "pv": "RET:INSERT",
-                "value": 1,
-                "operator": "ge"
+                "ConditionItem": {
+                  "name": "",
+                  "description": "",
+                  "pv": "RET:INSERT",
+                  "value": 1,
+                  "operator": "ge"
+                }
               }
             }
           }

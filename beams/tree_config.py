@@ -130,8 +130,9 @@ class SelectorItem(BaseItem):
         return node
 
 
+@as_tagged_union
 @dataclass
-class SequenceItem(BaseItem):
+class BaseSequenceItem(BaseItem):
     memory: bool = False
     children: List[BaseItem] = field(default_factory=list)
 
@@ -145,6 +146,11 @@ class SequenceItem(BaseItem):
         return node
 
 
+@dataclass
+class SequenceItem(BaseSequenceItem):
+    ...
+
+
 # Custom LCLS-built Behaviors (idioms)
 class ConditionOperator(Enum):
     equal = "eq"
@@ -155,15 +161,29 @@ class ConditionOperator(Enum):
     greater_equal = "ge"
 
 
+@as_tagged_union
 @dataclass
-class ConditionItem(BaseItem):
-    pv: str = ""
-    value: Any = 1
-    operator: ConditionOperator = ConditionOperator.equal
-
+class BaseConditionItem(BaseItem):
     def get_tree(self) -> ConditionNode:
         cond_func = self.get_condition_function()
         return ConditionNode(self.name, cond_func)
+
+
+@dataclass
+class DummyConditionItem(BaseConditionItem):
+    result: bool = True
+
+    def get_condition_function(self) -> Evaluatable:
+        def cond_func():
+            return self.result
+        return cond_func
+
+
+@dataclass
+class ConditionItem(BaseConditionItem):
+    pv: str = ""
+    value: Any = 1
+    operator: ConditionOperator = ConditionOperator.equal
 
     def get_condition_function(self) -> Evaluatable:
         op = getattr(operator, self.operator.value)
@@ -181,12 +201,44 @@ class ConditionItem(BaseItem):
 
 
 @dataclass
+class SequenceConditionItem(BaseSequenceItem, BaseConditionItem):
+    """
+    A sequence containing only condition items.
+
+    Suitable for use as an action item's termination_check.
+
+    The condition function evaluates to "True" if every child's condition item
+    also evaluates to "True".
+
+    When not used as a termination_check, this behaves exactly
+    like a normal Sequence Item.
+    """
+    children: List[BaseConditionItem] = field(default_factory=list)
+
+    def get_condition_function(self) -> Evaluatable:
+        child_funcs = [item.get_condition_function() for item in self.children]
+
+        def cond_func():
+            """
+            Minimize network hits by failing at first issue
+            """
+            ok = True
+            for cf in child_funcs:
+                ok = ok and cf()
+                if not ok:
+                    break
+            return ok
+
+        return cond_func
+
+
+@dataclass
 class SetPVActionItem(BaseItem):
     pv: str = ""
     value: Any = 1
     loop_period_sec: float = 1.0
 
-    termination_check: ConditionItem = field(default_factory=ConditionItem)
+    termination_check: BaseConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
 
@@ -224,7 +276,7 @@ class IncPVActionItem(BaseItem):
     increment: float = 1
     loop_period_sec: float = 1.0
 
-    termination_check: ConditionItem = field(default_factory=ConditionItem)
+    termination_check: BaseConditionItem = field(default_factory=ConditionItem)
 
     def get_tree(self) -> ActionNode:
 
@@ -261,7 +313,7 @@ class IncPVActionItem(BaseItem):
 
 @dataclass
 class CheckAndDoItem(BaseItem):
-    check: ConditionItem = field(default_factory=ConditionItem)
+    check: BaseConditionItem = field(default_factory=ConditionItem)
     do: Union[SetPVActionItem, IncPVActionItem] = field(default_factory=SetPVActionItem)
 
     def get_tree(self) -> CheckAndDo:

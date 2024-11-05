@@ -8,10 +8,10 @@ from pathlib import Path
 import py_trees
 from apischema import serialize
 
-from beams.tree_config import (BehaviorTreeItem, CheckAndDoItem, ConditionItem,
-                               ConditionOperator, IncPVActionItem, RunningItem,
-                               SequenceItem, SetPVActionItem, StatusQueueItem,
-                               SuccessItem)
+from beams.tree_config.tree_config import (BehaviorTreeItem, CheckAndDoItem, ConditionItem,
+                                           ConditionOperator, IncPVActionItem, RunningItem,
+                                           SequenceItem, SetPVActionItem, StatusQueueItem,
+                                           SuccessItem)
 
 
 # egg 1

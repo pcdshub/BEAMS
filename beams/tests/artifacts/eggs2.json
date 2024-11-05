@@ -10,11 +10,20 @@
             "name": "ret_find",
             "description": "",
             "check": {
-              "ConditionItem": {
+              "BinaryConditionItem": {
                 "name": "ret_find_check",
                 "description": "",
-                "pv": "RET:FOUND",
-                "value": 1,
+                "target": {
+                  "PVTarget": {
+                    "pv_name": "RET:FOUND",
+                    "as_string": false
+                  }
+                },
+                "target_value": {
+                  "ValueTarget": {
+                    "value": 1
+                  }
+                },
                 "operator": "ge"
               }
             },
@@ -38,11 +47,20 @@
             "name": "ret_insert",
             "description": "",
             "check": {
-              "ConditionItem": {
+              "BinaryConditionItem": {
                 "name": "ret_insert_check",
                 "description": "",
-                "pv": "RET:INSERT",
-                "value": 1,
+                "target": {
+                  "PVTarget": {
+                    "pv_name": "RET:INSERT",
+                    "as_string": false
+                  }
+                },
+                "target_value": {
+                  "ValueTarget": {
+                    "value": 1
+                  }
+                },
                 "operator": "ge"
               }
             },

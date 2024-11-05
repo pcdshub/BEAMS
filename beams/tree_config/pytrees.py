@@ -1,12 +1,11 @@
+import operator
 from dataclasses import dataclass, field, fields
 from typing import Any, List, Optional, Union
-import operator
 
 import py_trees
-from py_trees.common import Status
-from py_trees.common import ComparisonExpression
 from py_trees.behaviours import (CheckBlackboardVariableValue,
                                  WaitForBlackboardVariableValue)
+from py_trees.common import ComparisonExpression, Status
 
 from beams.tree_config.base import BaseItem
 from beams.tree_config.condition import ConditionOperator

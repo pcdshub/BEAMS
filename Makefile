@@ -21,6 +21,10 @@ test:
 test_verbose:
 	@source venv/bin/activate && pytest --capture=tee-sys
 
+.PHONY: test_artifacts
+test_artifacts:
+	@python3 beams/tests/artifacts/egg_generator.py
+
 .PHONY: run_sequencer
 run_sequencer:
 	@source venv/bin/activate && python3 beams/sequencer/Sequencer.py

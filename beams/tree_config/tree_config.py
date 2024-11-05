@@ -2,23 +2,20 @@ from __future__ import annotations
 
 import json
 import logging
-import operator
 from copy import copy
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any, List, Union
 
 import py_trees
 from apischema import deserialize, serialize
 from epics import caget, caput
-from py_trees.behaviour import Behaviour
-from py_trees.common import ComparisonExpression, ParallelPolicy, Status
+from py_trees.common import ParallelPolicy
 from py_trees.composites import Parallel, Selector, Sequence
 
 from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
 from beams.behavior_tree.CheckAndDo import CheckAndDo
-from beams.behavior_tree.ConditionNode import ConditionNode
 from beams.serialization import as_tagged_union
 from beams.tree_config.base import BaseItem, BehaviorTreeItem
 from beams.tree_config.condition import BaseConditionItem, DummyConditionItem

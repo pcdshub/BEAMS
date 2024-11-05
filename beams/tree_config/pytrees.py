@@ -1,6 +1,6 @@
 import operator
 from dataclasses import dataclass, field, fields
-from typing import Any, List, Optional, Union
+from typing import Any, Optional
 
 import py_trees
 from py_trees.behaviours import (CheckBlackboardVariableValue,

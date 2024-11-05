@@ -11,10 +11,9 @@ import py_trees
 from apischema import deserialize, serialize
 
 from beams.behavior_tree.CheckAndDo import CheckAndDo
-
+from beams.tree_config.action import IncPVActionItem, SetPVActionItem
 from beams.tree_config.base import BaseItem, BehaviorTreeItem
 from beams.tree_config.condition import BaseConditionItem, DummyConditionItem
-from beams.tree_config.action import SetPVActionItem, IncPVActionItem
 
 logger = logging.getLogger(__name__)
 

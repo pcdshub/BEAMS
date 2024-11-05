@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from enum import Enum
 from textwrap import dedent
+from random import random
 
 from caproto.server import PVGroup, ioc_arg_parser, pvproperty, run
 
@@ -62,6 +63,11 @@ class MockIML20(PVGroup):
         doc=f"Represents filter wheel value. Options {[i.upper() for i in FilterWheelValue]}",
         max_length=10,
     )
+
+    @im2l0_zoom_motor.putter
+    async def im2l0_zoom_motor(self, instance, value):
+        noise = (0.5 - random()) * 0.2
+        return value + noise
 
 
 if __name__ == "__main__":

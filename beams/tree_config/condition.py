@@ -73,10 +73,13 @@ class BinaryConditionItem(BaseConditionItem):
 
 
 @dataclass
-class RangeConditionThing(BaseConditionItem):
-    llm: Target = field(default_factory=lambda: ValueTarget(0))
-    hlm: Target = field(default_factory=lambda: ValueTarget(0))
+class ThresholdConditionItem(BaseConditionItem):
+    lower_bound: Target = field(default_factory=lambda: ValueTarget(0))
+    upper_bound: Target = field(default_factory=lambda: ValueTarget(0))
     target: Target = field(default_factory=lambda: ValueTarget(0))
 
     def get_condition_function(self) -> Evaluatable:
-        return self.llm < self.target.get_value() < self.hlm
+        def cond_func():
+            return self.lower_bound.get_value() < self.target.get_value() < self.upper_bound.get_value()
+
+        return cond_func

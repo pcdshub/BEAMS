@@ -9,7 +9,7 @@ import py_trees
 from apischema import serialize
 
 from beams.tree_config.base import BehaviorTreeItem, PVTarget, ValueTarget
-from beams.tree_config.condition import BinaryConditionItem, ConditionOperator
+from beams.tree_config.condition import BinaryConditionItem, ConditionOperator, ThresholdConditionItem
 from beams.tree_config.py_trees import RunningItem, StatusQueueItem, SuccessItem
 from beams.tree_config.tree_config import (CheckAndDoItem, IncPVActionItem,
                                            SequenceItem, SetPVActionItem)
@@ -136,11 +136,11 @@ def create_im2l0_test(write: bool = False):
     )
     cnd1 = CheckAndDoItem(name="reticle_state_out", check=check, do=do)
 
-    check2 = BinaryConditionItem(
+    check2 = ThresholdConditionItem(
         name="check_zoom_motor",
         target=PVTarget(pv_name="IM2L0:XTES:CLZ.RBV"),
-        target_value=ValueTarget(value=25),
-        operator=ConditionOperator.equal
+        lower_bound=ValueTarget(value=24.8),
+        upper_bound=ValueTarget(value=25.2),
     )
     do2 = SetPVActionItem(
         name="set_zoom_motor",

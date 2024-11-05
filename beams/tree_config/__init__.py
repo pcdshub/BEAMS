@@ -23,7 +23,7 @@ __all__ = [
     "DummyConditionItem",
     "ConditionOperator",
     "BinaryConditionItem",
-    "RangeConditionThing",
+    "ThresholdConditionItem",
     "get_tree_from_path",
     "save_tree_item_to_path",
     "ParallelMode",
@@ -41,7 +41,7 @@ from .base import (BaseItem, BehaviorTreeItem, ExternalItem, PVTarget, Target,
                    ValueTarget)
 from .condition import (BaseConditionItem, BinaryConditionItem,
                         ConditionOperator, DummyConditionItem,
-                        RangeConditionThing)
+                        ThresholdConditionItem)
 from .py_trees import (BlackboardToStatusItem,
                        CheckBlackboardVariableExistsItem,
                        CheckBlackboardVariableValueItem, DummyItem, FailureItem,

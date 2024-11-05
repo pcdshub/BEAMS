@@ -1,14 +1,10 @@
 import operator
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, List, Optional, Union
-
-from apischema import deserialize, serialize
-from epics import caget, caput
 
 from beams.behavior_tree.ConditionNode import ConditionNode
 from beams.serialization import as_tagged_union
-from beams.tree_config.base import BaseItem, PVTarget, Target, ValueTarget
+from beams.tree_config.base import BaseItem, Target, ValueTarget
 from beams.typing_helper import Evaluatable
 
 

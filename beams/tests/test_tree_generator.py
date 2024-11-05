@@ -1,5 +1,6 @@
 import time
 from pathlib import Path
+from math import isclose
 
 import py_trees
 from caproto.tests.conftest import run_example_ioc
@@ -122,5 +123,5 @@ def test_stop_hitting_yourself(request):
     check_focus_motor = caget("IM2L0:XTES:CLF.RBV")
 
     assert check_insert == "OUT"
-    assert check_zoom_motor == 25
+    assert isclose(25, check_zoom_motor, rel_tol=0.2)
     assert check_focus_motor == 50

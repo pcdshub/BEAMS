@@ -20,10 +20,9 @@ from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
 from beams.behavior_tree.CheckAndDo import CheckAndDo
 from beams.behavior_tree.ConditionNode import ConditionNode
 from beams.serialization import as_tagged_union
-from beams.typing_helper import Evaluatable
-
 from beams.tree_config.base import BaseItem, BehaviorTreeItem
 from beams.tree_config.condition import BaseConditionItem, DummyConditionItem
+from beams.typing_helper import Evaluatable
 
 logger = logging.getLogger(__name__)
 

@@ -1,17 +1,15 @@
-from dataclasses import dataclass, field, fields
-from typing import Any, List, Optional, Union
-from enum import Enum
 import operator
+from dataclasses import dataclass, field, fields
+from enum import Enum
+from typing import Any, List, Optional, Union
 
 from apischema import deserialize, serialize
 from epics import caget, caput
 
-from beams.serialization import as_tagged_union
-from beams.typing_helper import Evaluatable
-
 from beams.behavior_tree.ConditionNode import ConditionNode
-
-from beams.tree_config.base import BaseItem, Target, ValueTarget, PVTarget
+from beams.serialization import as_tagged_union
+from beams.tree_config.base import BaseItem, PVTarget, Target, ValueTarget
+from beams.typing_helper import Evaluatable
 
 
 @dataclass
@@ -83,6 +81,6 @@ class RangeConditionThing(BaseConditionItem):
     llm: Target = field(default_factory=lambda: ValueTarget(0))
     hlm: Target = field(default_factory=lambda: ValueTarget(0))
     target: Target = field(default_factory=lambda: ValueTarget(0))
-    
+
     def get_condition_function(self) -> Evaluatable:
         return self.llm < self.target.get_value() < self.hlm

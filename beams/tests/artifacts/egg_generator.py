@@ -8,25 +8,24 @@ from pathlib import Path
 import py_trees
 from apischema import serialize
 
-from beams.tree_config.base import BehaviorTreeItem, ValueTarget, PVTarget
+from beams.tree_config.base import BehaviorTreeItem, PVTarget, ValueTarget
 from beams.tree_config.condition import BinaryConditionItem, ConditionOperator
 from beams.tree_config.pytrees import RunningItem, StatusQueueItem, SuccessItem
-from beams.tree_config.tree_config import (CheckAndDoItem,
-                                           IncPVActionItem,
+from beams.tree_config.tree_config import (CheckAndDoItem, IncPVActionItem,
                                            SequenceItem, SetPVActionItem)
 
 
 # egg 1
 def create_egg_1(write: bool = False):
     check = BinaryConditionItem(
-        name="self_test_check", 
-        target=PVTarget(pv_name="PERC:COMP"), 
-        target_value=ValueTarget(value=100), 
+        name="self_test_check",
+        target=PVTarget(pv_name="PERC:COMP"),
+        target_value=ValueTarget(value=100),
         operator=ConditionOperator.greater_equal)
 
     do = IncPVActionItem(
-        name='self_test_do', 
-        loop_period_sec=0.01, 
+        name='self_test_do',
+        loop_period_sec=0.01,
         pv="PERC:COMP",
         increment=10
     )
@@ -48,8 +47,8 @@ def create_egg_2(write: bool = False):
     seq = SequenceItem(name='fake_reticle')
 
     # Check and Do 1
-    check_item_1 = BinaryConditionItem(name='ret_find_check', 
-                                       target=PVTarget(pv_name='RET:FOUND'), 
+    check_item_1 = BinaryConditionItem(name='ret_find_check',
+                                       target=PVTarget(pv_name='RET:FOUND'),
                                        target_value=ValueTarget(value=1),
                                        operator=ConditionOperator.greater_equal)
     do_item_1 = SetPVActionItem(
@@ -61,7 +60,7 @@ def create_egg_2(write: bool = False):
 
     # CheckAndDo2
     check2 = BinaryConditionItem(name="ret_insert_check",
-                                 target=PVTarget(pv_name="RET:INSERT"), 
+                                 target=PVTarget(pv_name="RET:INSERT"),
                                  target_value=ValueTarget(value=1),
                                  operator=ConditionOperator.greater_equal)
     do2 = SetPVActionItem(

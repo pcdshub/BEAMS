@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field, fields
 from typing import Any, List, Optional, Union
 
-from epics import caget
 import py_trees
 from apischema import deserialize, serialize
+from epics import caget
 from py_trees.behaviour import Behaviour
 
 from beams.serialization import as_tagged_union
@@ -43,11 +43,11 @@ class ExternalItem(BaseItem):
 class Target:
     def get_value(self) -> Any:
         raise NotImplementedError
-    
+
     # def get_signal(self) -> ophyd.Signal:
     #     pass
 
- 
+
 @dataclass
 class ValueTarget(Target):
     value: Any
@@ -62,4 +62,4 @@ class PVTarget(Target):
     as_string: bool = False
 
     def get_value(self) -> Any:
-        return caget(self.pv_name)
+        return caget(self.pv_name, as_string=self.as_string)

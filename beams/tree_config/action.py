@@ -1,9 +1,9 @@
-from dataclasses import dataclass, field
 import logging
+from dataclasses import dataclass, field
 from typing import Any
 
-from epics import caget, caput
 import py_trees
+from epics import caget, caput
 
 from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
 from beams.tree_config.base import BaseItem

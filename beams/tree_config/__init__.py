@@ -45,14 +45,14 @@ __all__ = [
     "SequenceItem",
     "SequenceConditionItem"
 ]
+from .action import IncPVActionItem, SetPVActionItem
 from .base import (BaseItem, BehaviorTreeItem, ExternalItem, PVTarget, Target,
                    ValueTarget)
 from .condition import (BaseConditionItem, BinaryConditionItem,
                         ConditionOperator, DummyConditionItem,
                         ThresholdConditionItem)
-from .action import (IncPVActionItem, SetPVActionItem)
-from .interior import (ParallelMode, ParallelItem,
-                       SelectorItem, BaseSequenceItem, SequenceItem, SequenceConditionItem)
+from .interior import (BaseSequenceItem, ParallelItem, ParallelMode,
+                       SelectorItem, SequenceConditionItem, SequenceItem)
 from .py_trees import (BlackboardToStatusItem,
                        CheckBlackboardVariableExistsItem,
                        CheckBlackboardVariableValueItem, DummyItem,
@@ -62,6 +62,5 @@ from .py_trees import (BlackboardToStatusItem,
                        UnsetBlackboardVariableItem,
                        WaitForBlackboardVariableItem,
                        WaitForBlackboardVariableValueItem)
-from .tree_config import (CheckAndDoItem,
-                          UseCheckConditionItem, get_tree_from_path,
-                          save_tree_item_to_path)
+from .tree_config import (CheckAndDoItem, UseCheckConditionItem,
+                          get_tree_from_path, save_tree_item_to_path)

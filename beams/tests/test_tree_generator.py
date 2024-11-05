@@ -1,6 +1,6 @@
 import time
-from pathlib import Path
 from math import isclose
+from pathlib import Path
 
 import py_trees
 from caproto.tests.conftest import run_example_ioc

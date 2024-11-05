@@ -18,9 +18,9 @@ from beams.behavior_tree.CheckAndDo import CheckAndDo
 from beams.behavior_tree.ConditionNode import ConditionNode
 from beams.serialization import get_all_subclasses, is_tagged_union
 from beams.tree_config import (BaseConditionItem, BaseItem,
-                               BlackboardToStatusItem, CheckAndDoItem,
+                               BlackboardToStatusItem, CheckAndDoItem, UseCheckConditionItem,
                                CheckBlackboardVariableExistsItem,
-                               CheckBlackboardVariableValueItem, ConditionItem,
+                               CheckBlackboardVariableValueItem,
                                DummyConditionItem, DummyItem, FailureItem,
                                IncPVActionItem, ParallelItem, PeriodicItem,
                                RunningItem, SelectorItem,
@@ -28,7 +28,6 @@ from beams.tree_config import (BaseConditionItem, BaseItem,
                                SetBlackboardVariableItem, SetPVActionItem,
                                StatusQueueItem, SuccessEveryNItem, SuccessItem,
                                TickCounterItem, UnsetBlackboardVariableItem,
-                               UseCheckConditionItem,
                                WaitForBlackboardVariableItem,
                                WaitForBlackboardVariableValueItem)
 
@@ -41,7 +40,6 @@ ITEM_TO_BEHAVIOUR = [
     (RunningItem, Running),
     (DummyItem, Dummy),
     (DummyConditionItem, ConditionNode),
-    (ConditionItem, ConditionNode),
     (SequenceConditionItem, Sequence),
     (SetPVActionItem, ActionNode),
     (IncPVActionItem, ActionNode),
@@ -57,6 +55,10 @@ ITEM_TO_BEHAVIOUR = [
     (SetBlackboardVariableItem, SetBlackboardVariable),
     (CheckBlackboardVariableValueItem, CheckBlackboardVariableValue),
     (WaitForBlackboardVariableValueItem, WaitForBlackboardVariableValue),
+]
+
+NOT_IMPLEMENTED_BASE_ITEM = [
+    (BaseConditionItem, ConditionNode),
 ]
 
 

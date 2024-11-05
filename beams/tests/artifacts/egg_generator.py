@@ -10,7 +10,7 @@ from apischema import serialize
 
 from beams.tree_config.base import BehaviorTreeItem, PVTarget, ValueTarget
 from beams.tree_config.condition import BinaryConditionItem, ConditionOperator
-from beams.tree_config.pytrees import RunningItem, StatusQueueItem, SuccessItem
+from beams.tree_config.py_trees import RunningItem, StatusQueueItem, SuccessItem
 from beams.tree_config.tree_config import (CheckAndDoItem, IncPVActionItem,
                                            SequenceItem, SetPVActionItem)
 

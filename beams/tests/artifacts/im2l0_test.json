@@ -47,21 +47,25 @@
             "name": "zoom_motor",
             "description": "",
             "check": {
-              "BinaryConditionItem": {
+              "ThresholdConditionItem": {
                 "name": "check_zoom_motor",
                 "description": "",
+                "lower_bound": {
+                  "ValueTarget": {
+                    "value": 24.8
+                  }
+                },
+                "upper_bound": {
+                  "ValueTarget": {
+                    "value": 25.2
+                  }
+                },
                 "target": {
                   "PVTarget": {
                     "pv_name": "IM2L0:XTES:CLZ.RBV",
                     "as_string": false
                   }
-                },
-                "target_value": {
-                  "ValueTarget": {
-                    "value": 25
-                  }
-                },
-                "operator": "eq"
+                }
               }
             },
             "do": {

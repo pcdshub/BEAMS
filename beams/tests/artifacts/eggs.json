@@ -4,11 +4,20 @@
       "name": "self_test",
       "description": "",
       "check": {
-        "ConditionItem": {
+        "BinaryConditionItem": {
           "name": "self_test_check",
           "description": "",
-          "pv": "PERC:COMP",
-          "value": 100,
+          "target": {
+            "PVTarget": {
+              "pv_name": "PERC:COMP",
+              "as_string": false
+            }
+          },
+          "target_value": {
+            "ValueTarget": {
+              "value": 100
+            }
+          },
           "operator": "ge"
         }
       },

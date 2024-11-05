@@ -8,18 +8,26 @@ from pathlib import Path
 import py_trees
 from apischema import serialize
 
-from beams.tree_config.tree_config import (BehaviorTreeItem, CheckAndDoItem, ConditionItem,
-                                           ConditionOperator, IncPVActionItem, RunningItem,
-                                           SequenceItem, SetPVActionItem, StatusQueueItem,
-                                           SuccessItem)
+from beams.tree_config.base import BehaviorTreeItem, ValueTarget, PVTarget
+from beams.tree_config.condition import BinaryConditionItem, ConditionOperator
+from beams.tree_config.pytrees import RunningItem, StatusQueueItem, SuccessItem
+from beams.tree_config.tree_config import (CheckAndDoItem,
+                                           IncPVActionItem,
+                                           SequenceItem, SetPVActionItem)
 
 
 # egg 1
 def create_egg_1(write: bool = False):
-    check = ConditionItem(name="self_test_check", pv="PERC:COMP", value=100,
-                          operator=ConditionOperator.greater_equal)
+    check = BinaryConditionItem(
+        name="self_test_check", 
+        target=PVTarget(pv_name="PERC:COMP"), 
+        target_value=ValueTarget(value=100), 
+        operator=ConditionOperator.greater_equal)
+
     do = IncPVActionItem(
-        name='self_test_do', loop_period_sec=0.01, pv="PERC:COMP",
+        name='self_test_do', 
+        loop_period_sec=0.01, 
+        pv="PERC:COMP",
         increment=10
     )
     cnd_test = CheckAndDoItem(name='self_test', check=check, do=do)
@@ -40,8 +48,10 @@ def create_egg_2(write: bool = False):
     seq = SequenceItem(name='fake_reticle')
 
     # Check and Do 1
-    check_item_1 = ConditionItem(name='ret_find_check', pv='RET:FOUND', value=1,
-                                 operator=ConditionOperator.greater_equal)
+    check_item_1 = BinaryConditionItem(name='ret_find_check', 
+                                       target=PVTarget(pv_name='RET:FOUND'), 
+                                       target_value=ValueTarget(value=1),
+                                       operator=ConditionOperator.greater_equal)
     do_item_1 = SetPVActionItem(
         name='ret_find_do', pv='RET:FOUND', value=1, loop_period_sec=0.01
     )
@@ -50,8 +60,10 @@ def create_egg_2(write: bool = False):
     seq.children.append(cnd_1)
 
     # CheckAndDo2
-    check2 = ConditionItem(name="ret_insert_check", pv="RET:INSERT", value=1,
-                           operator=ConditionOperator.greater_equal)
+    check2 = BinaryConditionItem(name="ret_insert_check",
+                                 target=PVTarget(pv_name="RET:INSERT"), 
+                                 target_value=ValueTarget(value=1),
+                                 operator=ConditionOperator.greater_equal)
     do2 = SetPVActionItem(
         name="ret_insert_do", pv="RET:INSERT", value=1,
     )
@@ -111,10 +123,10 @@ def create_eternal_guard(write: bool = False):
 # im2l0 test
 def create_im2l0_test(write: bool = False):
     im2l0 = SequenceItem(name="IM2L0_checker_outer")
-    check = ConditionItem(
+    check = BinaryConditionItem(
         name="check_reticule_state",
-        pv="IM2L0:XTES:MMS:STATE:GET_RBV",
-        value="OUT",
+        target=PVTarget(pv_name="IM2L0:XTES:MMS:STATE:GET_RBV", as_string=True),
+        target_value=ValueTarget(value="OUT"),
         operator=ConditionOperator.equal
     )
     do = SetPVActionItem(
@@ -125,10 +137,10 @@ def create_im2l0_test(write: bool = False):
     )
     cnd1 = CheckAndDoItem(name="reticle_state_out", check=check, do=do)
 
-    check2 = ConditionItem(
+    check2 = BinaryConditionItem(
         name="check_zoom_motor",
-        pv="IM2L0:XTES:CLZ.RBV",
-        value=25,
+        target=PVTarget(pv_name="IM2L0:XTES:CLZ.RBV"),
+        target_value=ValueTarget(value=25),
         operator=ConditionOperator.equal
     )
     do2 = SetPVActionItem(
@@ -139,10 +151,10 @@ def create_im2l0_test(write: bool = False):
     )
     cnd2 = CheckAndDoItem(name="zoom_motor", check=check2, do=do2)
 
-    check3 = ConditionItem(
+    check3 = BinaryConditionItem(
         name="check_focus_motor",
-        pv="IM2L0:XTES:CLF.RBV",
-        value=50,
+        target=PVTarget(pv_name="IM2L0:XTES:CLF.RBV"),
+        target_value=ValueTarget(value=50),
         operator=ConditionOperator.equal
     )
     do3 = SetPVActionItem(

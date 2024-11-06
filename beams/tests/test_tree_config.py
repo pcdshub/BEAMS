@@ -17,22 +17,25 @@ from beams.behavior_tree.ActionNode import ActionNode
 from beams.behavior_tree.CheckAndDo import CheckAndDo
 from beams.behavior_tree.ConditionNode import ConditionNode
 from beams.serialization import get_all_subclasses, is_tagged_union
-
+from beams.tree_config.action import IncPVActionItem, SetPVActionItem
 from beams.tree_config.base import BaseItem
-from beams.tree_config.py_trees import (BlackboardToStatusItem, CheckBlackboardVariableExistsItem,
-                                        CheckBlackboardVariableValueItem, DummyItem, FailureItem,
-                                        PeriodicItem, RunningItem, SetBlackboardVariableItem,
-                                        StatusQueueItem, SuccessEveryNItem, SuccessItem,
-                                        TickCounterItem, UnsetBlackboardVariableItem, 
-                                        WaitForBlackboardVariableItem, WaitForBlackboardVariableValueItem)
-from beams.tree_config.condition import (BaseConditionItem, DummyConditionItem, 
-                                         BinaryConditionItem, BoundedConditionItem)
-from beams.tree_config.action import (IncPVActionItem, SetPVActionItem)
-from beams.tree_config.composite import (ParallelItem,  SelectorItem,
+from beams.tree_config.composite import (ParallelItem, SelectorItem,
                                          SequenceConditionItem, SequenceItem)
-
-from beams.tree_config.idiom import (CheckAndDoItem, UseCheckConditionItem)
-                              
+from beams.tree_config.condition import (BaseConditionItem,
+                                         BinaryConditionItem,
+                                         BoundedConditionItem,
+                                         DummyConditionItem)
+from beams.tree_config.idiom import CheckAndDoItem, UseCheckConditionItem
+from beams.tree_config.py_trees import (BlackboardToStatusItem,
+                                        CheckBlackboardVariableExistsItem,
+                                        CheckBlackboardVariableValueItem,
+                                        DummyItem, FailureItem, PeriodicItem,
+                                        RunningItem, SetBlackboardVariableItem,
+                                        StatusQueueItem, SuccessEveryNItem,
+                                        SuccessItem, TickCounterItem,
+                                        UnsetBlackboardVariableItem,
+                                        WaitForBlackboardVariableItem,
+                                        WaitForBlackboardVariableValueItem)
 
 ITEM_TO_BEHAVIOUR = [
     (ParallelItem, Parallel),

@@ -1,9 +1,9 @@
 import json
-from typing import Union
 from pathlib import Path
-from apischema import deserialize, serialize
+from typing import Union
 
 import py_trees
+from apischema import deserialize, serialize
 
 from beams.tree_config.base import BaseItem, BehaviorTreeItem
 

@@ -1,76 +1,11 @@
-
-__all__ = [
-    "BlackboardToStatusItem",
-    "CheckBlackboardVariableExistsItem",
-    "CheckBlackboardVariableValueItem",
-    "FailureItem", "PeriodicItem", "RunningItem",
-    "SetBlackboardVariableItem",
-    "StatusQueueItem",
-    "SuccessEveryNItem",
-    "SuccessItem", "FailureItem",
-    "TickCounterItem",
-    "UnsetBlackboardVariableItem",
-    "WaitForBlackboardVariableItem",
-    "WaitForBlackboardVariableValueItem",
-    "DummyItem",
-    "BaseItem",
-    "BehaviorTreeItem",
-    "ExternalItem",
-    "Target",
-    "PVTarget",
-    "ValueTarget",
-    "BaseConditionItem",
-    "DummyConditionItem",
-    "ConditionOperator",
-    "BinaryConditionItem",
-    "ThresholdConditionItem",
-    "get_tree_from_path",
-    "save_tree_item_to_path",
-    "ParallelMode",
-    "ParallelItem",
-    "SelectorItem",
-    "BaseSequenceItem",
-    "SequenceItem",
-    "SequenceConditionItem",
-    "SetPVActionItem",
-    "IncPVActionItem",
-    "CheckAndDoItem",
-    "UseCheckConditionItem",
-    "IncPVActionItem",
-    "SetPVActionItem",
-    "ParallelMode",
-    "ParallelItem",
-    "SelectorItem",
-    "BaseSequenceItem",
-    "SequenceItem",
-    "SequenceConditionItem"
-]
-from .action import IncPVActionItem, SetPVActionItem
-from .base import (BaseItem, BehaviorTreeItem, ExternalItem, PVTarget, Target,
-                   ValueTarget)
-from .condition import (BaseConditionItem, BinaryConditionItem,
-                        ConditionOperator, DummyConditionItem,
-                        ThresholdConditionItem)
-from .composite import (BaseSequenceItem, ParallelItem, ParallelMode,
-                        SelectorItem, SequenceConditionItem, SequenceItem)
-from .py_trees import (BlackboardToStatusItem,
-                       CheckBlackboardVariableExistsItem,
-                       CheckBlackboardVariableValueItem, DummyItem,
-                       FailureItem, PeriodicItem, RunningItem,
-                       SetBlackboardVariableItem, StatusQueueItem,
-                       SuccessEveryNItem, SuccessItem, TickCounterItem,
-                       UnsetBlackboardVariableItem,
-                       WaitForBlackboardVariableItem,
-                       WaitForBlackboardVariableValueItem)
-from .idiom import (CheckAndDoItem, UseCheckConditionItem)
-
-
 import json
 from typing import Union
 from pathlib import Path
 from apischema import deserialize, serialize
 
 import py_trees
+
+from beams.tree_config.base import BaseItem, BehaviorTreeItem
 
 
 def get_tree_from_path(path: Path) -> py_trees.trees.BehaviourTree:

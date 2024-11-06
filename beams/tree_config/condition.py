@@ -8,12 +8,6 @@ from beams.tree_config.base import BaseItem, Target, ValueTarget
 from beams.typing_helper import Evaluatable
 
 
-@dataclass
-class OphydTarget(Target):
-    device_name: str
-    component_path: list[str]
-
-
 @as_tagged_union
 @dataclass
 class BaseConditionItem(BaseItem):

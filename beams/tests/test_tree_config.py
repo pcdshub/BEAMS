@@ -17,20 +17,22 @@ from beams.behavior_tree.ActionNode import ActionNode
 from beams.behavior_tree.CheckAndDo import CheckAndDo
 from beams.behavior_tree.ConditionNode import ConditionNode
 from beams.serialization import get_all_subclasses, is_tagged_union
-from beams.tree_config import (BaseConditionItem, BaseItem,
-                               BlackboardToStatusItem, CheckAndDoItem,
-                               CheckBlackboardVariableExistsItem,
-                               CheckBlackboardVariableValueItem,
-                               DummyConditionItem, DummyItem, FailureItem,
-                               IncPVActionItem, ParallelItem, PeriodicItem,
-                               RunningItem, SelectorItem,
-                               SequenceConditionItem, SequenceItem,
-                               SetBlackboardVariableItem, SetPVActionItem,
-                               StatusQueueItem, SuccessEveryNItem, SuccessItem,
-                               TickCounterItem, UnsetBlackboardVariableItem,
-                               UseCheckConditionItem,
-                               WaitForBlackboardVariableItem,
-                               WaitForBlackboardVariableValueItem)
+
+from beams.tree_config.base import BaseItem
+from beams.tree_config.py_trees import (BlackboardToStatusItem, CheckBlackboardVariableExistsItem,
+                                        CheckBlackboardVariableValueItem, DummyItem, FailureItem,
+                                        PeriodicItem, RunningItem, SetBlackboardVariableItem,
+                                        StatusQueueItem, SuccessEveryNItem, SuccessItem,
+                                        TickCounterItem, UnsetBlackboardVariableItem, 
+                                        WaitForBlackboardVariableItem, WaitForBlackboardVariableValueItem)
+from beams.tree_config.condition import (BaseConditionItem, DummyConditionItem, 
+                                         BinaryConditionItem, ThresholdConditionItem)
+from beams.tree_config.action import (IncPVActionItem, SetPVActionItem)
+from beams.tree_config.composite import (ParallelItem,  SelectorItem,
+                                         SequenceConditionItem, SequenceItem)
+
+from beams.tree_config.idiom import (CheckAndDoItem, UseCheckConditionItem)
+                              
 
 ITEM_TO_BEHAVIOUR = [
     (ParallelItem, Parallel),
@@ -41,6 +43,8 @@ ITEM_TO_BEHAVIOUR = [
     (RunningItem, Running),
     (DummyItem, Dummy),
     (DummyConditionItem, ConditionNode),
+    (BinaryConditionItem, ConditionNode),
+    (ThresholdConditionItem, ConditionNode),
     (SequenceConditionItem, Sequence),
     (SetPVActionItem, ActionNode),
     (IncPVActionItem, ActionNode),

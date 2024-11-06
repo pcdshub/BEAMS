@@ -43,9 +43,6 @@ class Target:
     def get_value(self) -> Any:
         raise NotImplementedError
 
-    # def get_signal(self) -> ophyd.Signal:
-    #     pass
-
 
 @dataclass
 class ValueTarget(Target):
@@ -62,3 +59,9 @@ class PVTarget(Target):
 
     def get_value(self) -> Any:
         return caget(self.pv_name, as_string=self.as_string)
+
+
+@dataclass
+class OphydTarget(Target):
+    device_name: str
+    component_path: list[str]

@@ -13,14 +13,14 @@
               "BinaryConditionItem": {
                 "name": "check_reticule_state",
                 "description": "",
-                "target": {
-                  "PVTarget": {
+                "left_value": {
+                  "EPICSValue": {
                     "pv_name": "IM2L0:XTES:MMS:STATE:GET_RBV",
                     "as_string": true
                   }
                 },
-                "target_value": {
-                  "ValueTarget": {
+                "right_value": {
+                  "FixedValue": {
                     "value": "OUT"
                   }
                 },
@@ -47,21 +47,21 @@
             "name": "zoom_motor",
             "description": "",
             "check": {
-              "ThresholdConditionItem": {
+              "BoundedConditionItem": {
                 "name": "check_zoom_motor",
                 "description": "",
                 "lower_bound": {
-                  "ValueTarget": {
+                  "FixedValue": {
                     "value": 24.8
                   }
                 },
                 "upper_bound": {
-                  "ValueTarget": {
+                  "FixedValue": {
                     "value": 25.2
                   }
                 },
-                "target": {
-                  "PVTarget": {
+                "bounded_value": {
+                  "EPICSValue": {
                     "pv_name": "IM2L0:XTES:CLZ.RBV",
                     "as_string": false
                   }
@@ -91,14 +91,14 @@
               "BinaryConditionItem": {
                 "name": "check_focus_motor",
                 "description": "",
-                "target": {
-                  "PVTarget": {
+                "left_value": {
+                  "EPICSValue": {
                     "pv_name": "IM2L0:XTES:CLF.RBV",
                     "as_string": false
                   }
                 },
-                "target_value": {
-                  "ValueTarget": {
+                "right_value": {
+                  "FixedValue": {
                     "value": 50
                   }
                 },

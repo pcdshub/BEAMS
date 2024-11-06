@@ -13,7 +13,7 @@ from py_trees.trees import BehaviourTree
 from py_trees.visitors import SnapshotVisitor
 
 from beams.logging import LoggingVisitor
-from beams.tree_config.tree_config import get_tree_from_path
+from beams.tree_config import get_tree_from_path
 
 logger = logging.getLogger(__name__)
 

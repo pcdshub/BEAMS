@@ -6,9 +6,10 @@ import py_trees
 from caproto.tests.conftest import run_example_ioc
 from epics import caget, caput
 
+from beams.tree_config import (get_tree_from_path,
+                               save_tree_item_to_path)
 from beams.behavior_tree.CheckAndDo import CheckAndDo
-from beams.tree_config.tree_config import (CheckAndDoItem, get_tree_from_path,
-                                           save_tree_item_to_path)
+from beams.tree_config.idiom import CheckAndDoItem 
 
 
 def test_tree_obj_ser():

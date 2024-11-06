@@ -12,10 +12,9 @@ from beams.tree_config.base import BehaviorTreeItem, PVTarget, ValueTarget
 from beams.tree_config.condition import (BinaryConditionItem,
                                          ConditionOperator,
                                          ThresholdConditionItem)
-from beams.tree_config.py_trees import (RunningItem, StatusQueueItem,
-                                        SuccessItem)
-from beams.tree_config.tree_config import (CheckAndDoItem, IncPVActionItem,
-                                           SequenceItem, SetPVActionItem)
+from beams.tree_config.py_trees import (RunningItem, StatusQueueItem, SuccessItem)
+from beams.tree_config.action import (IncPVActionItem, SetPVActionItem)
+from beams.tree_config.idiom import CheckAndDoItem
 
 
 # egg 1

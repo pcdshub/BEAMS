@@ -8,14 +8,15 @@ from pathlib import Path
 import py_trees
 from apischema import serialize
 
+from beams.tree_config.action import IncPVActionItem, SetPVActionItem
 from beams.tree_config.base import BehaviorTreeItem, EPICSValue, FixedValue
-from beams.tree_config.condition import (BinaryConditionItem,
-                                         ConditionOperator,
-                                         BoundedConditionItem)
-from beams.tree_config.py_trees import (RunningItem, StatusQueueItem, SuccessItem)
-from beams.tree_config.action import (IncPVActionItem, SetPVActionItem)
 from beams.tree_config.composite import SequenceItem
+from beams.tree_config.condition import (BinaryConditionItem,
+                                         BoundedConditionItem,
+                                         ConditionOperator)
 from beams.tree_config.idiom import CheckAndDoItem
+from beams.tree_config.py_trees import (RunningItem, StatusQueueItem,
+                                        SuccessItem)
 
 
 # egg 1

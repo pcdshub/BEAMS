@@ -65,10 +65,6 @@ ITEM_TO_BEHAVIOUR = [
     (WaitForBlackboardVariableValueItem, WaitForBlackboardVariableValue),
 ]
 
-NOT_IMPLEMENTED_BASE_ITEM = [
-    (BaseConditionItem, ConditionNode),
-]
-
 
 @pytest.mark.parametrize('item_class, node_type', ITEM_TO_BEHAVIOUR)
 def test_get_tree(item_class: type[BaseItem], node_type: type[Behaviour]):

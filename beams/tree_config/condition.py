@@ -66,10 +66,10 @@ class BoundedConditionItem(BaseConditionItem):
     # TODO: convinience members such as "symettric bounds", "relative tolerance", etc
     lower_bound: BaseValue = field(default_factory=lambda: FixedValue(0))
     upper_bound: BaseValue = field(default_factory=lambda: FixedValue(0))
-    bounded_value: BaseValue = field(default_factory=lambda: FixedValue(0))
+    value: BaseValue = field(default_factory=lambda: FixedValue(0))
 
     def get_condition_function(self) -> Evaluatable:
         def cond_func():
-            return self.lower_bound.get_value() < self.bounded_value.get_value() < self.upper_bound.get_value()
+            return self.lower_bound.get_value() < self.value.get_value() < self.upper_bound.get_value()
 
         return cond_func

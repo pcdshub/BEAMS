@@ -4,7 +4,7 @@ from enum import Enum
 
 from beams.behavior_tree.ConditionNode import ConditionNode
 from beams.serialization import as_tagged_union
-from beams.tree_config.base import BaseItem, Target, ValueTarget
+from beams.tree_config.base import BaseItem, BaseValue, FixedValue
 from beams.typing_helper import Evaluatable
 
 
@@ -29,7 +29,6 @@ class DummyConditionItem(BaseConditionItem):
         return cond_func
 
 
-# Custom LCLS-built Behaviors (idioms)
 class ConditionOperator(Enum):
     equal = "eq"
     not_equal = "ne"
@@ -41,9 +40,8 @@ class ConditionOperator(Enum):
 
 @dataclass
 class BinaryConditionItem(BaseConditionItem):
-    # pv: str = ""
-    target: Target = field(default_factory=lambda: ValueTarget(0))
-    target_value: Target = field(default_factory=lambda: ValueTarget(0))
+    left_value: BaseValue = field(default_factory=lambda: FixedValue(0))
+    right_value: BaseValue = field(default_factory=lambda: FixedValue(0))
     operator: ConditionOperator = ConditionOperator.equal
 
     def get_tree(self) -> ConditionNode:
@@ -54,26 +52,24 @@ class BinaryConditionItem(BaseConditionItem):
         op = getattr(operator, self.operator.value)
 
         def cond_func():
-            # val = caget(self.pv)
-            # if val is None:
-            #     return False
-            val = self.target.get_value()
+            lhs = self.left_value.get_value()
+            # TODO: determine if we want to do NULL handling should we get a value but it is None type
+            rhs = self.right_value.get_value()
 
-            tval = self.target_value.get_value()
-
-            return op(val, tval)
+            return op(lhs, rhs)
 
         return cond_func
 
 
 @dataclass
-class ThresholdConditionItem(BaseConditionItem):
-    lower_bound: Target = field(default_factory=lambda: ValueTarget(0))
-    upper_bound: Target = field(default_factory=lambda: ValueTarget(0))
-    target: Target = field(default_factory=lambda: ValueTarget(0))
+class BoundedConditionItem(BaseConditionItem):
+    # TODO: convinience members such as "symettric bounds", "relative tolerance", etc
+    lower_bound: BaseValue = field(default_factory=lambda: FixedValue(0))
+    upper_bound: BaseValue = field(default_factory=lambda: FixedValue(0))
+    bounded_value: BaseValue = field(default_factory=lambda: FixedValue(0))
 
     def get_condition_function(self) -> Evaluatable:
         def cond_func():
-            return self.lower_bound.get_value() < self.target.get_value() < self.upper_bound.get_value()
+            return self.lower_bound.get_value() < self.bounded_value.get_value() < self.upper_bound.get_value()
 
         return cond_func

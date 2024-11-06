@@ -8,12 +8,13 @@ from pathlib import Path
 import py_trees
 from apischema import serialize
 
-from beams.tree_config.base import BehaviorTreeItem, PVTarget, ValueTarget
+from beams.tree_config.base import BehaviorTreeItem, EPICSValue, FixedValue
 from beams.tree_config.condition import (BinaryConditionItem,
                                          ConditionOperator,
-                                         ThresholdConditionItem)
+                                         BoundedConditionItem)
 from beams.tree_config.py_trees import (RunningItem, StatusQueueItem, SuccessItem)
 from beams.tree_config.action import (IncPVActionItem, SetPVActionItem)
+from beams.tree_config.composite import SequenceItem
 from beams.tree_config.idiom import CheckAndDoItem
 
 
@@ -21,8 +22,8 @@ from beams.tree_config.idiom import CheckAndDoItem
 def create_egg_1(write: bool = False):
     check = BinaryConditionItem(
         name="self_test_check",
-        target=PVTarget(pv_name="PERC:COMP"),
-        target_value=ValueTarget(value=100),
+        left_value=EPICSValue(pv_name="PERC:COMP"),
+        right_value=FixedValue(value=100),
         operator=ConditionOperator.greater_equal)
 
     do = IncPVActionItem(
@@ -50,8 +51,8 @@ def create_egg_2(write: bool = False):
 
     # Check and Do 1
     check_item_1 = BinaryConditionItem(name='ret_find_check',
-                                       target=PVTarget(pv_name='RET:FOUND'),
-                                       target_value=ValueTarget(value=1),
+                                       left_value=EPICSValue(pv_name='RET:FOUND'),
+                                       right_value=FixedValue(value=1),
                                        operator=ConditionOperator.greater_equal)
     do_item_1 = SetPVActionItem(
         name='ret_find_do', pv='RET:FOUND', value=1, loop_period_sec=0.01
@@ -62,8 +63,8 @@ def create_egg_2(write: bool = False):
 
     # CheckAndDo2
     check2 = BinaryConditionItem(name="ret_insert_check",
-                                 target=PVTarget(pv_name="RET:INSERT"),
-                                 target_value=ValueTarget(value=1),
+                                 left_value=EPICSValue(pv_name="RET:INSERT"),
+                                 right_value=FixedValue(value=1),
                                  operator=ConditionOperator.greater_equal)
     do2 = SetPVActionItem(
         name="ret_insert_do", pv="RET:INSERT", value=1,
@@ -126,8 +127,8 @@ def create_im2l0_test(write: bool = False):
     im2l0 = SequenceItem(name="IM2L0_checker_outer")
     check = BinaryConditionItem(
         name="check_reticule_state",
-        target=PVTarget(pv_name="IM2L0:XTES:MMS:STATE:GET_RBV", as_string=True),
-        target_value=ValueTarget(value="OUT"),
+        left_value=EPICSValue(pv_name="IM2L0:XTES:MMS:STATE:GET_RBV", as_string=True),
+        right_value=FixedValue(value="OUT"),
         operator=ConditionOperator.equal
     )
     do = SetPVActionItem(
@@ -138,11 +139,11 @@ def create_im2l0_test(write: bool = False):
     )
     cnd1 = CheckAndDoItem(name="reticle_state_out", check=check, do=do)
 
-    check2 = ThresholdConditionItem(
+    check2 = BoundedConditionItem(
         name="check_zoom_motor",
-        target=PVTarget(pv_name="IM2L0:XTES:CLZ.RBV"),
-        lower_bound=ValueTarget(value=24.8),
-        upper_bound=ValueTarget(value=25.2),
+        bounded_value=EPICSValue(pv_name="IM2L0:XTES:CLZ.RBV"),
+        lower_bound=FixedValue(value=24.8),
+        upper_bound=FixedValue(value=25.2),
     )
     do2 = SetPVActionItem(
         name="set_zoom_motor",
@@ -154,8 +155,8 @@ def create_im2l0_test(write: bool = False):
 
     check3 = BinaryConditionItem(
         name="check_focus_motor",
-        target=PVTarget(pv_name="IM2L0:XTES:CLF.RBV"),
-        target_value=ValueTarget(value=50),
+        left_value=EPICSValue(pv_name="IM2L0:XTES:CLF.RBV"),
+        right_value=FixedValue(value=50),
         operator=ConditionOperator.equal
     )
     do3 = SetPVActionItem(

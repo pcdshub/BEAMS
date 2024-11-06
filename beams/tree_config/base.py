@@ -39,13 +39,13 @@ class ExternalItem(BaseItem):
 
 @as_tagged_union
 @dataclass
-class Target:
+class BaseValue:
     def get_value(self) -> Any:
         raise NotImplementedError
 
 
 @dataclass
-class ValueTarget(Target):
+class FixedValue(BaseValue):
     value: Any
 
     def get_value(self) -> Any:
@@ -53,7 +53,7 @@ class ValueTarget(Target):
 
 
 @dataclass
-class PVTarget(Target):
+class EPICSValue(BaseValue):
     pv_name: str
     as_string: bool = False
 
@@ -62,6 +62,6 @@ class PVTarget(Target):
 
 
 @dataclass
-class OphydTarget(Target):
+class OphydTarget(BaseValue):
     device_name: str
     component_path: list[str]

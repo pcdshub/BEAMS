@@ -13,14 +13,14 @@
               "BinaryConditionItem": {
                 "name": "ret_find_check",
                 "description": "",
-                "target": {
-                  "PVTarget": {
+                "left_value": {
+                  "EPICSValue": {
                     "pv_name": "RET:FOUND",
                     "as_string": false
                   }
                 },
-                "target_value": {
-                  "ValueTarget": {
+                "right_value": {
+                  "FixedValue": {
                     "value": 1
                   }
                 },
@@ -50,14 +50,14 @@
               "BinaryConditionItem": {
                 "name": "ret_insert_check",
                 "description": "",
-                "target": {
-                  "PVTarget": {
+                "left_value": {
+                  "EPICSValue": {
                     "pv_name": "RET:INSERT",
                     "as_string": false
                   }
                 },
-                "target_value": {
-                  "ValueTarget": {
+                "right_value": {
+                  "FixedValue": {
                     "value": 1
                   }
                 },

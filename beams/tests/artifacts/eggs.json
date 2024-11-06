@@ -7,14 +7,14 @@
         "BinaryConditionItem": {
           "name": "self_test_check",
           "description": "",
-          "target": {
-            "PVTarget": {
+          "left_value": {
+            "EPICSValue": {
               "pv_name": "PERC:COMP",
               "as_string": false
             }
           },
-          "target_value": {
-            "ValueTarget": {
+          "right_value": {
+            "FixedValue": {
               "value": 100
             }
           },

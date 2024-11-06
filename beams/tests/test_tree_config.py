@@ -26,7 +26,7 @@ from beams.tree_config.py_trees import (BlackboardToStatusItem, CheckBlackboardV
                                         TickCounterItem, UnsetBlackboardVariableItem, 
                                         WaitForBlackboardVariableItem, WaitForBlackboardVariableValueItem)
 from beams.tree_config.condition import (BaseConditionItem, DummyConditionItem, 
-                                         BinaryConditionItem, ThresholdConditionItem)
+                                         BinaryConditionItem, BoundedConditionItem)
 from beams.tree_config.action import (IncPVActionItem, SetPVActionItem)
 from beams.tree_config.composite import (ParallelItem,  SelectorItem,
                                          SequenceConditionItem, SequenceItem)
@@ -44,7 +44,7 @@ ITEM_TO_BEHAVIOUR = [
     (DummyItem, Dummy),
     (DummyConditionItem, ConditionNode),
     (BinaryConditionItem, ConditionNode),
-    (ThresholdConditionItem, ConditionNode),
+    (BoundedConditionItem, ConditionNode),
     (SequenceConditionItem, Sequence),
     (SetPVActionItem, ActionNode),
     (IncPVActionItem, ActionNode),

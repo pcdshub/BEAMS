@@ -3,8 +3,8 @@ from apischema import deserialize, serialize
 from beams.tree_config.action import IncPVActionItem, SetPVActionItem
 from beams.tree_config.base import BehaviorTreeItem, PVTarget, ValueTarget
 from beams.tree_config.condition import BinaryConditionItem, ConditionOperator
-from beams.tree_config.interior import SequenceItem
-from beams.tree_config.tree_config import CheckAndDoItem
+from beams.tree_config.composite import SequenceItem
+from beams.tree_config.idiom import CheckAndDoItem
 
 
 def test_serialize_check_and_do():

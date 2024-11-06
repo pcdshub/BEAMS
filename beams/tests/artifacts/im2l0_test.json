@@ -60,7 +60,7 @@
                     "value": 25.2
                   }
                 },
-                "bounded_value": {
+                "value": {
                   "EPICSValue": {
                     "pv_name": "IM2L0:XTES:CLZ.RBV",
                     "as_string": false

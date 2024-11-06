@@ -142,7 +142,7 @@ def create_im2l0_test(write: bool = False):
 
     check2 = BoundedConditionItem(
         name="check_zoom_motor",
-        bounded_value=EPICSValue(pv_name="IM2L0:XTES:CLZ.RBV"),
+        value=EPICSValue(pv_name="IM2L0:XTES:CLZ.RBV"),
         lower_bound=FixedValue(value=24.8),
         upper_bound=FixedValue(value=25.2),
     )

@@ -11,11 +11,11 @@ Features
 
 Bugfixes
 --------
-- Fix an issue where cli entrypoints may not have the full serialization schema loaded.
+- Fixes an issue where cli entrypoints may not have the full serialization schema loaded.
 
 Maintenance
 -----------
-- Add regression tests for schema validation.
+- Adds regression tests for schema validation.
 
 Contributors
 ------------

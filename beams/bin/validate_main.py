@@ -19,4 +19,4 @@ def main(filepath: str):
     except Exception as exc:
         logger.error(f"Error when processing {filepath}: {exc}")
         logger.debug("", exc_info=True)
-        return 1
+        return 2

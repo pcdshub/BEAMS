@@ -8,9 +8,15 @@ logger = logging.getLogger(__name__)
 
 
 def main(filepath: str) -> int:
+    """
+    Try to deserialize the tree, and return a nonzero return code if we can't.
+
+    For the failure cases, give the exception text.
+    If log level is DEBUG or lower, show the full traceback.
+    """
     try:
         get_tree_from_path(filepath)
-        logger.info("File validation successful! File is well-formed.")
+        logger.info(f"Schema validation successful! {filepath} is well-formed.")
         return 0
     except ValidationError as exc:
         logger.error(f"Schema validation error for {filepath}: {exc}")

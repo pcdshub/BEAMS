@@ -1,25 +1,29 @@
 from pathlib import Path
 
-from beams.tree_config import (CheckAndDoItem, ConditionItem,
-                               ConditionOperator, RangeConditionItem,
-                               SelectorItem, SequenceConditionItem,
-                               SequenceItem, SetPVActionItem,
-                               save_tree_to_path)
+from beams.tree_config import save_tree_item_to_path
+from beams.tree_config.action import SetPVActionItem
+from beams.tree_config.base import EPICSValue, FixedValue
+from beams.tree_config.composite import (SelectorItem, SequenceConditionItem,
+                                         SequenceItem)
+from beams.tree_config.condition import (BinaryConditionItem,
+                                         BoundedConditionItem,
+                                         ConditionOperator)
+from beams.tree_config.idiom import CheckAndDoItem
 
 # DG2 Stopper: remove
-check_dg2_stp_closed = ConditionItem(
+check_dg2_stp_closed = BinaryConditionItem(
     name="check_dg2_stp_closed",
     description="Check that dg2 stopper is at closed switch.",
-    pv="HFX:DG2:STP:01:CLOSE",
-    value=1,
+    left_value=EPICSValue("HFX:DG2:STP:01:CLOSE"),
     operator=ConditionOperator.equal,
+    right_value=FixedValue(1),
 )
-check_dg2_stp_not_open = ConditionItem(
+check_dg2_stp_not_open = BinaryConditionItem(
     name="check_dg2_stp_not_open",
     description="Check that dg2 stopper is not at open switch.",
-    pv="HFX:DG2:STP:01:OPEN",
-    value=0,
+    left_value=EPICSValue("HFX:DG2:STP:01:OPEN"),
     operator=ConditionOperator.equal,
+    right_value=FixedValue(0),
 )
 check_dg2_stp_in = SequenceConditionItem(
     name="check_dg2_stp_in",
@@ -46,12 +50,12 @@ for lens in range(3):
     base_pv = f"MFX:LENS:DIA:0{index}"
     state_pv = base_pv + ":STATE"
     remove_pv = base_pv + ":REMOVE"
-    pfl_check = ConditionItem(
+    pfl_check = BinaryConditionItem(
         name=f"check_pfl{index}_out",
         description="Check if lens is removed",
-        pv=state_pv,
-        value=0,
+        left_value=EPICSValue(state_pv),
         operator=ConditionOperator.equal,
+        right_value=FixedValue(0),
     )
     pfl_remove = SetPVActionItem(
         name=f"act_pfl{index}_remove",
@@ -80,12 +84,12 @@ for lens in range(10):
     base_pv = f"MFX:LENS:TFS:{index:02}"
     state_pv = base_pv + ":STATE"
     remove_pv = base_pv + ":REMOVE"
-    tfs_check = ConditionItem(
+    tfs_check = BinaryConditionItem(
         name=f"check_tfs{index}_out",
         description="Check if lens is removed",
-        pv=state_pv,
-        value=0,
+        left_value=EPICSValue(state_pv),
         operator=ConditionOperator.equal,
+        right_value=FixedValue(0),
     )
     tfs_remove = SetPVActionItem(
         name=f"act_tfs{index}_remove",
@@ -108,12 +112,12 @@ transfocator_remove = SequenceItem(
 )
 
 # Yags: insert
-check_dg1_yag_in = ConditionItem(
+check_dg1_yag_in = BinaryConditionItem(
     name="check_dg1_yag_in",
     description="Check if the dg1 yag is in",
-    pv="MFX:DG1:PIM",
-    value="YAG",
+    left_value=EPICSValue("MFX:DG1:PIM", as_string=True),
     operator=ConditionOperator.equal,
+    right_value=FixedValue("YAG"),
 )
 act_insert_dg1_yag = SetPVActionItem(
     name="act_insert_dg1_yag",
@@ -127,12 +131,12 @@ dg1_yag = CheckAndDoItem(
     check=check_dg1_yag_in,
     do=act_insert_dg1_yag,
 )
-check_dg2_yag_in = ConditionItem(
+check_dg2_yag_in = BinaryConditionItem(
     name="check_dg2_yag_in",
     description="Check if the dg2 yag is in",
-    pv="MFX:DG2:PIM",
-    value="YAG",
+    left_value=EPICSValue("MFX:DG2:PIM", as_string=True),
     operator=ConditionOperator.equal,
+    right_value=FixedValue("YAG"),
 )
 act_insert_dg2_yag = SetPVActionItem(
     name="act_insert_dg2_yag",
@@ -148,18 +152,19 @@ dg2_yag = CheckAndDoItem(
 )
 
 # Attenuator: drop to 10%
-check_mfx_att_range = RangeConditionItem(
+check_mfx_att_range = BoundedConditionItem(
     name="check_mfx_att_range",
     description="Check if mfx_att is near 10% transmission",
-    pv="MFX:ATT:COM:R_CUR",
-    low_value=0.08,
-    high_value=0.12,
+    lower_bound=FixedValue(0.08),
+    value=EPICSValue("MFX:ATT:COM:R_CUR"),
+    upper_bound=FixedValue(0.12),
 )
-check_calc_ready = ConditionItem(
+check_calc_ready = BinaryConditionItem(
     name="check_calc_ready",
     description="Wait for previous or current calc to be done",
-    pv="MFX:ATT:COM:CALCP",
-    value=0,
+    left_value=EPICSValue("MFX:ATT:COM:CALCP"),
+    operator=ConditionOperator.equal,
+    right_value=FixedValue(0),
 )
 act_prepare_transmission = SetPVActionItem(
     name="act_prepare_transmission",
@@ -196,12 +201,12 @@ for slit_name, pv_ext in (
     base_pv = f"MFX:{pv_ext}:"
     for axis in ("X", "Y"):
         axis_name = f"{slit_name}_{axis.lower()}"
-        slit_check = RangeConditionItem(
+        slit_check = BoundedConditionItem(
             name=f"{axis_name}_check",
             description="Check if slit width is close to 2mm",
-            pv=f"{base_pv}Actual_{axis}WIDTH",
-            low_value=1.9,
-            high_value=2.1,
+            lower_bound=FixedValue(1.9),
+            value=EPICSValue(f"{base_pv}Actual_{axis}WIDTH"),
+            upper_bound=FixedValue(2.1),
         )
         slit_move = SetPVActionItem(
             name=f"{axis_name}_move",
@@ -223,12 +228,12 @@ slits_to_2mm = SequenceItem(
 )
 
 # MR1L4 MFX/MEC mirror
-check_mr1l4_xstate = ConditionItem(
+check_mr1l4_xstate = BinaryConditionItem(
     name="check_mr1l4_xstate",
     description="Check if mr1l4 is inserted",
-    pv="MR1L4:HOMS:MMS:XUP:STATE:GET_RBV",
-    value="IN",
+    left_value=EPICSValue("MR1L4:HOMS:MMS:XUP:STATE:GET_RBV"),
     operator=ConditionOperator.equal,
+    right_value=FixedValue("IN"),
 )
 act_mr1l4_xstate = SetPVActionItem(
     name="act_mr1l4_xstate",
@@ -243,12 +248,12 @@ insert_mr1l4 = CheckAndDoItem(
     do=act_mr1l4_xstate,
 )
 mr1l4_nominal = -544
-check_mr1l4_pointing = RangeConditionItem(
+check_mr1l4_pointing = BoundedConditionItem(
     name="check_mr1l4_pointing",
     description="Check if mr1l4 is pointing generally towards MFX",
-    pv="MR1L4:HOMS:MMS:PITCH.RBV",
-    low_value=mr1l4_nominal-5,
-    high_value=mr1l4_nominal+5,
+    lower_bound=FixedValue(mr1l4_nominal-5),
+    value=EPICSValue("MR1L4:HOMS:MMS:PITCH.RBV"),
+    upper_bound=FixedValue(mr1l4_nominal+5),
 )
 act_mr1l4_pitch = SetPVActionItem(
     name="act_mr1l4_pitch",
@@ -269,12 +274,13 @@ prepare_mr1l4 = SequenceItem(
 )
 
 # Set up the DG1 camera
-check_dg1_cam_running = ConditionItem(
+check_dg1_cam_running = BinaryConditionItem(
     name="Check_dg1_cam_running",
     description="Check if the camera is acquiring frames",
-    pv="MFX:DG1:P6740:ArrayRate_RBV",
-    value=1,
+    left_value=EPICSValue("MFX:DG1:P6740:ArrayRate_RBV"),
     operator=ConditionOperator.greater_equal,
+    right_value=FixedValue(1),
+
 )
 # If the cam isn't running, it either needs to be turned on, or off and back on
 # Simplest is to put the "off" and then the "on" in series without checking.
@@ -324,4 +330,4 @@ dg1_prep = SequenceItem(
 
 def update_mfx_json():
     path = Path(__file__).parent / "mfx_tree.json"
-    save_tree_to_path(path=path, root=dg1_prep)
+    save_tree_item_to_path(path=path, root=dg1_prep)

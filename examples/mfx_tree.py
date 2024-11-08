@@ -331,3 +331,7 @@ dg1_prep = SequenceItem(
 def update_mfx_json():
     path = Path(__file__).parent / "mfx_tree.json"
     save_tree_item_to_path(path=path, root=dg1_prep)
+
+
+if __name__ == "__main__":
+    update_mfx_json()

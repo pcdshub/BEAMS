@@ -15,4 +15,4 @@ export PYTHONPATH="$(realpath "$(dirname "${here}")"/..)"
 export EPICS_CA_SERVER_PORT=5066
 
 python mfx_tree.py
-(trap 'kill 0' SIGINT EXIT; python mfx_sim.py & python -m beams run mfx_tree.json & pydm mfx_tree_ui.ui)
+(trap 'kill 0' SIGINT EXIT; python mfx_sim.py & python -m beams run mfx_tree.json & pydm mfx_tree_ui.py)

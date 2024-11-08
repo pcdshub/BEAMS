@@ -1,849 +1,1256 @@
 {
-    "root": {
-      "SequenceItem": {
-        "name": "dg1_prep",
-        "description": "Prepare MFX for alignment to DG1",
-        "memory": false,
-        "children": [
-          {
-            "CheckAndDoItem": {
-              "name": "dg2_stopper",
-              "description": "Ensure that dg2 is inserted before moving focusing optics.",
-              "check": {
+  "root": {
+    "SequenceItem": {
+      "name": "dg1_prep",
+      "description": "Prepare MFX for alignment to DG1",
+      "memory": false,
+      "children": [
+        {
+          "CheckAndDoItem": {
+            "name": "dg2_stopper",
+            "description": "Ensure that dg2 is inserted before moving focusing optics.",
+            "check": {
+              "SequenceConditionItem": {
                 "name": "check_dg2_stp_in",
                 "description": "Check that dg2 stopper is at the closed switch but not at the open switch.",
                 "memory": false,
                 "children": [
                   {
-                    "name": "check_dg2_stp_closed",
-                    "description": "Check that dg2 stopper is at closed switch.",
-                    "pv": "HFX:DG2:STP:01:CLOSE",
-                    "value": 1,
-                    "operator": "eq"
+                    "BinaryConditionItem": {
+                      "name": "check_dg2_stp_closed",
+                      "description": "Check that dg2 stopper is at closed switch.",
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "HFX:DG2:STP:01:CLOSE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 1
+                        }
+                      },
+                      "operator": "eq"
+                    }
                   },
                   {
-                    "name": "check_dg2_stp_not_open",
-                    "description": "Check that dg2 stopper is not at open switch.",
-                    "pv": "HFX:DG2:STP:01:OPEN",
-                    "value": 0,
-                    "operator": "eq"
+                    "BinaryConditionItem": {
+                      "name": "check_dg2_stp_not_open",
+                      "description": "Check that dg2 stopper is not at open switch.",
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "HFX:DG2:STP:01:OPEN",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
+                      "operator": "eq"
+                    }
                   }
                 ]
-              },
-              "do": {
-                "name": "act_close_dg2_stp",
-                "description": "Move dg2 stopper to block the beam.",
-                "pv": "HFX:DG2:STP:01:CMD",
-                "value": 2,
-                "loop_period_sec": 1.0,
-                "termination_check": {
-                  "name": "",
-                  "description": "",
-                  "copy_from": "previous check"
+              }
+            },
+            "do": {
+              "name": "act_close_dg2_stp",
+              "description": "Move dg2 stopper to block the beam.",
+              "pv": "HFX:DG2:STP:01:CMD",
+              "value": 2,
+              "loop_period_sec": 1.0,
+              "termination_check": {
+                "UseCheckConditionItem": {
+                  "name": "act_close_dg2_stp_termination_check",
+                  "description": "Use parent's check node: check_dg2_stp_in"
                 }
               }
             }
-          },
-          {
-            "SequenceItem": {
-              "name": "prefocus_remove",
-              "description": "ensure all prefocusing lenses are removed",
-              "memory": false,
-              "children": [
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_pfl1_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+          }
+        },
+        {
+          "SequenceItem": {
+            "name": "prefocus_remove",
+            "description": "ensure all prefocusing lenses are removed",
+            "memory": false,
+            "children": [
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_pfl1_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_pfl1_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:DIA:01:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:DIA:01:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_pfl1_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:DIA:01:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_pfl1_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:DIA:01:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_pfl1_remove_termination_check",
+                        "description": "Use parent's check node: check_pfl1_out"
                       }
                     }
                   }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_pfl2_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_pfl2_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_pfl2_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:DIA:02:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:DIA:02:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_pfl2_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:DIA:02:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_pfl2_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:DIA:02:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_pfl2_remove_termination_check",
+                        "description": "Use parent's check node: check_pfl2_out"
                       }
                     }
                   }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_pfl3_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_pfl3_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_pfl3_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:DIA:03:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:DIA:03:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_pfl3_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:DIA:03:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_pfl3_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:DIA:03:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_pfl3_remove_termination_check",
+                        "description": "Use parent's check node: check_pfl3_out"
                       }
                     }
                   }
                 }
-              ]
-            }
-          },
-          {
-            "SequenceItem": {
-              "name": "transfocator_remove",
-              "description": "ensure all transfocator lenses are removed",
-              "memory": false,
-              "children": [
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_tfs1_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+              }
+            ]
+          }
+        },
+        {
+          "SequenceItem": {
+            "name": "transfocator_remove",
+            "description": "ensure all transfocator lenses are removed",
+            "memory": false,
+            "children": [
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs1_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_tfs1_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:TFS:01:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:TFS:01:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_tfs1_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:TFS:01:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_tfs1_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:01:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_tfs1_remove_termination_check",
+                        "description": "Use parent's check node: check_tfs1_out"
                       }
                     }
                   }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_tfs2_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs2_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_tfs2_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:TFS:02:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:TFS:02:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_tfs2_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:TFS:02:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_tfs2_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:02:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_tfs2_remove_termination_check",
+                        "description": "Use parent's check node: check_tfs2_out"
                       }
                     }
                   }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_tfs3_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs3_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_tfs3_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:TFS:03:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:TFS:03:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_tfs3_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:TFS:03:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_tfs3_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:03:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_tfs3_remove_termination_check",
+                        "description": "Use parent's check node: check_tfs3_out"
                       }
                     }
                   }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_tfs4_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs4_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_tfs4_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:TFS:04:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:TFS:04:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_tfs4_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:TFS:04:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_tfs4_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:04:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_tfs4_remove_termination_check",
+                        "description": "Use parent's check node: check_tfs4_out"
                       }
                     }
                   }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_tfs5_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs5_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_tfs5_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:TFS:05:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:TFS:05:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_tfs5_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:TFS:05:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_tfs5_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:05:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_tfs5_remove_termination_check",
+                        "description": "Use parent's check node: check_tfs5_out"
                       }
                     }
                   }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_tfs6_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs6_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_tfs6_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:TFS:06:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:TFS:06:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_tfs6_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:TFS:06:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_tfs6_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:06:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_tfs6_remove_termination_check",
+                        "description": "Use parent's check node: check_tfs6_out"
                       }
                     }
                   }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_tfs7_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs7_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_tfs7_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:TFS:07:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:TFS:07:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_tfs7_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:TFS:07:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_tfs7_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:07:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_tfs7_remove_termination_check",
+                        "description": "Use parent's check node: check_tfs7_out"
                       }
                     }
                   }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_tfs8_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs8_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_tfs8_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:TFS:08:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:TFS:08:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_tfs8_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:TFS:08:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_tfs8_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:08:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_tfs8_remove_termination_check",
+                        "description": "Use parent's check node: check_tfs8_out"
                       }
                     }
                   }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_tfs9_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs9_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_tfs9_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:TFS:09:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:TFS:09:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_tfs9_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:TFS:09:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_tfs9_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:09:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_tfs9_remove_termination_check",
+                        "description": "Use parent's check node: check_tfs9_out"
                       }
                     }
                   }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "cad_tfs10_remove",
-                    "description": "Ensure lens is removed",
-                    "check": {
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "cad_tfs10_remove",
+                  "description": "Ensure lens is removed",
+                  "check": {
+                    "BinaryConditionItem": {
                       "name": "check_tfs10_out",
                       "description": "Check if lens is removed",
-                      "pv": "MFX:LENS:TFS:10:STATE",
-                      "value": 0,
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:LENS:TFS:10:STATE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 0
+                        }
+                      },
                       "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_tfs10_remove",
-                      "description": "Remove lens",
-                      "pv": "MFX:LENS:TFS:10:REMOVE",
-                      "value": 1,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
+                    }
+                  },
+                  "do": {
+                    "name": "act_tfs10_remove",
+                    "description": "Remove lens",
+                    "pv": "MFX:LENS:TFS:10:REMOVE",
+                    "value": 1,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_tfs10_remove_termination_check",
+                        "description": "Use parent's check node: check_tfs10_out"
                       }
                     }
                   }
                 }
-              ]
-            }
-          },
-          {
-            "CheckAndDoItem": {
-              "name": "dg1_yag",
-              "description": "Ensure dg1_yag is inserted",
-              "check": {
+              }
+            ]
+          }
+        },
+        {
+          "CheckAndDoItem": {
+            "name": "dg1_yag",
+            "description": "Ensure dg1_yag is inserted",
+            "check": {
+              "BinaryConditionItem": {
                 "name": "check_dg1_yag_in",
                 "description": "Check if the dg1 yag is in",
-                "pv": "MFX:DG1:PIM",
-                "value": "YAG",
+                "left_value": {
+                  "EPICSValue": {
+                    "pv_name": "MFX:DG1:PIM",
+                    "as_string": true
+                  }
+                },
+                "right_value": {
+                  "FixedValue": {
+                    "value": "YAG"
+                  }
+                },
                 "operator": "eq"
-              },
-              "do": {
-                "name": "act_insert_dg1_yag",
-                "description": "Insert dg1 yag",
-                "pv": "MFX:DG1:PIM:GO",
-                "value": "YAG",
-                "loop_period_sec": 1.0,
-                "termination_check": {
-                  "name": "",
-                  "description": "",
-                  "copy_from": "previous check"
+              }
+            },
+            "do": {
+              "name": "act_insert_dg1_yag",
+              "description": "Insert dg1 yag",
+              "pv": "MFX:DG1:PIM:GO",
+              "value": "YAG",
+              "loop_period_sec": 1.0,
+              "termination_check": {
+                "UseCheckConditionItem": {
+                  "name": "act_insert_dg1_yag_termination_check",
+                  "description": "Use parent's check node: check_dg1_yag_in"
                 }
               }
             }
-          },
-          {
-            "CheckAndDoItem": {
-              "name": "d2_yag",
-              "description": "Ensure dg2_yag is inserted",
-              "check": {
+          }
+        },
+        {
+          "CheckAndDoItem": {
+            "name": "d2_yag",
+            "description": "Ensure dg2_yag is inserted",
+            "check": {
+              "BinaryConditionItem": {
                 "name": "check_dg2_yag_in",
                 "description": "Check if the dg2 yag is in",
-                "pv": "MFX:DG2:PIM",
-                "value": "YAG",
+                "left_value": {
+                  "EPICSValue": {
+                    "pv_name": "MFX:DG2:PIM",
+                    "as_string": true
+                  }
+                },
+                "right_value": {
+                  "FixedValue": {
+                    "value": "YAG"
+                  }
+                },
                 "operator": "eq"
-              },
-              "do": {
-                "name": "act_insert_dg2_yag",
-                "description": "Insert dg2 yag",
-                "pv": "MFX:DG2:PIM:GO",
-                "value": "YAG",
-                "loop_period_sec": 1.0,
-                "termination_check": {
-                  "name": "",
-                  "description": "",
-                  "copy_from": "previous check"
+              }
+            },
+            "do": {
+              "name": "act_insert_dg2_yag",
+              "description": "Insert dg2 yag",
+              "pv": "MFX:DG2:PIM:GO",
+              "value": "YAG",
+              "loop_period_sec": 1.0,
+              "termination_check": {
+                "UseCheckConditionItem": {
+                  "name": "act_insert_dg2_yag_termination_check",
+                  "description": "Use parent's check node: check_dg2_yag_in"
                 }
               }
             }
-          },
-          {
-            "SelectorItem": {
-              "name": "mfx_att",
-              "description": "Ensure mfx att is near 10% transmission for alignment",
-              "memory": false,
-              "children": [
-                {
-                  "RangeConditionItem": {
-                    "name": "check_mfx_att_range",
-                    "description": "Check if mfx_att is near 10% transmission",
-                    "memory": false,
-                    "pv": "MFX:ATT:COM:R_CUR",
-                    "low_value": 0.08,
-                    "high_value": 0.12
+          }
+        },
+        {
+          "SelectorItem": {
+            "name": "mfx_att",
+            "description": "Ensure mfx att is near 10% transmission for alignment",
+            "memory": false,
+            "children": [
+              {
+                "BoundedConditionItem": {
+                  "name": "check_mfx_att_range",
+                  "description": "Check if mfx_att is near 10% transmission",
+                  "lower_bound": {
+                    "FixedValue": {
+                      "value": 0.08
+                    }
+                  },
+                  "upper_bound": {
+                    "FixedValue": {
+                      "value": 0.12
+                    }
+                  },
+                  "value": {
+                    "EPICSValue": {
+                      "pv_name": "MFX:ATT:COM:R_CUR",
+                      "as_string": false
+                    }
                   }
-                },
-                {
-                  "SequenceItem": {
-                    "name": "seq_set_mfx_att",
-                    "description": "Set the mfx att to 10% transmission",
-                    "memory": false,
-                    "children": [
-                      {
-                        "ConditionItem": {
-                          "name": "check_calc_ready",
-                          "description": "Wait for previous or current calc to be done",
-                          "pv": "MFX:ATT:COM:CALCP",
-                          "value": 0,
-                          "operator": "eq"
-                        }
-                      },
-                      {
-                        "SetPVActionItem": {
-                          "name": "act_prepare_transmission",
-                          "description": "Set the transmission that will be applied",
-                          "pv": "MFX:ATT:COM:R_DES",
-                          "value": 0.1,
-                          "loop_period_sec": 1.0,
-                          "termination_check": {
+                }
+              },
+              {
+                "SequenceItem": {
+                  "name": "seq_set_mfx_att",
+                  "description": "Set the mfx att to 10% transmission",
+                  "memory": false,
+                  "children": [
+                    {
+                      "BinaryConditionItem": {
+                        "name": "check_calc_ready",
+                        "description": "Wait for previous or current calc to be done",
+                        "left_value": {
+                          "EPICSValue": {
+                            "pv_name": "MFX:ATT:COM:CALCP",
+                            "as_string": false
+                          }
+                        },
+                        "right_value": {
+                          "FixedValue": {
+                            "value": 0
+                          }
+                        },
+                        "operator": "eq"
+                      }
+                    },
+                    {
+                      "SetPVActionItem": {
+                        "name": "act_prepare_transmission",
+                        "description": "Set the transmission that will be applied",
+                        "pv": "MFX:ATT:COM:R_DES",
+                        "value": 0.1,
+                        "loop_period_sec": 1.0,
+                        "termination_check": {
+                          "DummyConditionItem": {
                             "name": "",
                             "description": "",
-                            "pv": "",
-                            "value": 1,
-                            "operator": "eq"
+                            "result": true
                           }
                         }
-                      },
-                      {
-                        "SetPVActionItem": {
-                          "name": "act_apply_transmission",
-                          "description": "Move the attenuator to the lesser of the two att options",
-                          "pv": "MFX:ATT:COM:GO",
-                          "value": 3,
-                          "loop_period_sec": 1.0,
-                          "termination_check": {
+                      }
+                    },
+                    {
+                      "SetPVActionItem": {
+                        "name": "act_apply_transmission",
+                        "description": "Move the attenuator to the lesser of the two att options",
+                        "pv": "MFX:ATT:COM:GO",
+                        "value": 3,
+                        "loop_period_sec": 1.0,
+                        "termination_check": {
+                          "BoundedConditionItem": {
                             "name": "check_mfx_att_range",
                             "description": "Check if mfx_att is near 10% transmission",
-                            "memory": false,
-                            "pv": "MFX:ATT:COM:R_CUR",
-                            "low_value": 0.08,
-                            "high_value": 0.12
+                            "lower_bound": {
+                              "FixedValue": {
+                                "value": 0.08
+                              }
+                            },
+                            "upper_bound": {
+                              "FixedValue": {
+                                "value": 0.12
+                              }
+                            },
+                            "value": {
+                              "EPICSValue": {
+                                "pv_name": "MFX:ATT:COM:R_CUR",
+                                "as_string": false
+                              }
+                            }
                           }
                         }
                       }
-                    ]
-                  }
+                    }
+                  ]
                 }
-              ]
-            }
-          },
-          {
-            "SequenceItem": {
-              "name": "slits_to_2mm",
-              "description": "Ensure all slit widths are close to 2mm",
-              "memory": false,
-              "children": [
-                {
-                  "CheckAndDoItem": {
-                    "name": "dg1_x_check_and_do",
-                    "description": "Ensure slit width is close to 2mm",
-                    "check": {
+              }
+            ]
+          }
+        },
+        {
+          "SequenceItem": {
+            "name": "slits_to_2mm",
+            "description": "Ensure all slit widths are close to 2mm",
+            "memory": false,
+            "children": [
+              {
+                "CheckAndDoItem": {
+                  "name": "dg1_x_check_and_do",
+                  "description": "Ensure slit width is close to 2mm",
+                  "check": {
+                    "BoundedConditionItem": {
                       "name": "dg1_x_check",
                       "description": "Check if slit width is close to 2mm",
-                      "memory": false,
-                      "pv": "MFX:DG1:JAWS:Actual_XWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
-                    },
-                    "do": {
-                      "name": "dg1_x_move",
-                      "description": "Move slit width to 2mm",
-                      "pv": "MFX:DG1:JAWS:XWID_REQ",
-                      "value": 2,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
-                      }
-                    }
-                  }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "dg1_y_check_and_do",
-                    "description": "Ensure slit width is close to 2mm",
-                    "check": {
-                      "name": "dg1_y_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": false,
-                      "pv": "MFX:DG1:JAWS:Actual_YWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
-                    },
-                    "do": {
-                      "name": "dg1_y_move",
-                      "description": "Move slit width to 2mm",
-                      "pv": "MFX:DG1:JAWS:YWID_REQ",
-                      "value": 2,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
-                      }
-                    }
-                  }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "dg2_us_x_check_and_do",
-                    "description": "Ensure slit width is close to 2mm",
-                    "check": {
-                      "name": "dg2_us_x_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": false,
-                      "pv": "MFX:DG2:JAWS:US:Actual_XWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
-                    },
-                    "do": {
-                      "name": "dg2_us_x_move",
-                      "description": "Move slit width to 2mm",
-                      "pv": "MFX:DG2:JAWS:US:XWID_REQ",
-                      "value": 2,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
-                      }
-                    }
-                  }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "dg2_us_y_check_and_do",
-                    "description": "Ensure slit width is close to 2mm",
-                    "check": {
-                      "name": "dg2_us_y_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": false,
-                      "pv": "MFX:DG2:JAWS:US:Actual_YWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
-                    },
-                    "do": {
-                      "name": "dg2_us_y_move",
-                      "description": "Move slit width to 2mm",
-                      "pv": "MFX:DG2:JAWS:US:YWID_REQ",
-                      "value": 2,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
-                      }
-                    }
-                  }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "dg2_ms_x_check_and_do",
-                    "description": "Ensure slit width is close to 2mm",
-                    "check": {
-                      "name": "dg2_ms_x_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": false,
-                      "pv": "MFX:DG2:JAWS:MS:Actual_XWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
-                    },
-                    "do": {
-                      "name": "dg2_ms_x_move",
-                      "description": "Move slit width to 2mm",
-                      "pv": "MFX:DG2:JAWS:MS:XWID_REQ",
-                      "value": 2,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
-                      }
-                    }
-                  }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "dg2_ms_y_check_and_do",
-                    "description": "Ensure slit width is close to 2mm",
-                    "check": {
-                      "name": "dg2_ms_y_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": false,
-                      "pv": "MFX:DG2:JAWS:MS:Actual_YWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
-                    },
-                    "do": {
-                      "name": "dg2_ms_y_move",
-                      "description": "Move slit width to 2mm",
-                      "pv": "MFX:DG2:JAWS:MS:YWID_REQ",
-                      "value": 2,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
-                      }
-                    }
-                  }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "dg2_ds_x_check_and_do",
-                    "description": "Ensure slit width is close to 2mm",
-                    "check": {
-                      "name": "dg2_ds_x_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": false,
-                      "pv": "MFX:DG2:JAWS:DS:Actual_XWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
-                    },
-                    "do": {
-                      "name": "dg2_ds_x_move",
-                      "description": "Move slit width to 2mm",
-                      "pv": "MFX:DG2:JAWS:DS:XWID_REQ",
-                      "value": 2,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
-                      }
-                    }
-                  }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "dg2_ds_y_check_and_do",
-                    "description": "Ensure slit width is close to 2mm",
-                    "check": {
-                      "name": "dg2_ds_y_check",
-                      "description": "Check if slit width is close to 2mm",
-                      "memory": false,
-                      "pv": "MFX:DG2:JAWS:DS:Actual_YWIDTH",
-                      "low_value": 1.9,
-                      "high_value": 2.1
-                    },
-                    "do": {
-                      "name": "dg2_ds_y_move",
-                      "description": "Move slit width to 2mm",
-                      "pv": "MFX:DG2:JAWS:DS:YWID_REQ",
-                      "value": 2,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
-                      }
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "SequenceItem": {
-              "name": "prepare_mr1l4",
-              "description": "Get mr1l4 ready for MFX beam",
-              "memory": false,
-              "children": [
-                {
-                  "CheckAndDoItem": {
-                    "name": "insert_mr1l4",
-                    "description": "Ensure mr1l4 is in",
-                    "check": {
-                      "name": "check_mr1l4_xstate",
-                      "description": "Check if mr1l4 is inserted",
-                      "pv": "MR1L4:HOMS:MMS:XUP:STATE:GET_RBV",
-                      "value": "IN",
-                      "operator": "eq"
-                    },
-                    "do": {
-                      "name": "act_mr1l4_xstate",
-                      "description": "Move mr1l4 in",
-                      "pv": "MR1L4:HOMS:MMS:XUP:STATE:SET",
-                      "value": "IN",
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
-                      }
-                    }
-                  }
-                },
-                {
-                  "CheckAndDoItem": {
-                    "name": "point_mr1l4",
-                    "description": "Ensure mr1l4 is pointed towards MFX",
-                    "check": {
-                      "name": "check_mr1l4_pointing",
-                      "description": "Check if mr1l4 is pointing generally towards MFX",
-                      "memory": false,
-                      "pv": "MR1L4:HOMS:MMS:PITCH.RBV",
-                      "low_value": -549,
-                      "high_value": -539
-                    },
-                    "do": {
-                      "name": "act_mr1l4_pitch",
-                      "description": "Move mr1l4 back to the nominal pitch",
-                      "pv": "MR1L4:HOMS:MMS:PITCH.VAL",
-                      "value": -544,
-                      "loop_period_sec": 1.0,
-                      "termination_check": {
-                        "name": "",
-                        "description": "",
-                        "copy_from": "previous check"
-                      }
-                    }
-                  }
-                }
-              ]
-            }
-          },
-          {
-            "SelectorItem": {
-              "name": "ensure_dg1_cam_running",
-              "description": "Refresh acquisition if needed",
-              "memory": false,
-              "children": [
-                {
-                  "ConditionItem": {
-                    "name": "Check_dg1_cam_running",
-                    "description": "Check if the camera is acquiring frames",
-                    "pv": "MFX:DG1:P6740:ArrayRate_RBV",
-                    "value": 1,
-                    "operator": "ge"
-                  }
-                },
-                {
-                  "SequenceItem": {
-                    "name": "seq_dg1_acq_cycle",
-                    "description": "Stop and then start the acquisition",
-                    "memory": false,
-                    "children": [
-                      {
-                        "SetPVActionItem": {
-                          "name": "act_dg1_no_acq",
-                          "description": "Stop acquiring",
-                          "pv": "MFX:DG1:P6740:Acquire",
-                          "value": 0,
-                          "loop_period_sec": 1.0,
-                          "termination_check": {
-                            "name": "",
-                            "description": "",
-                            "pv": "",
-                            "value": 1,
-                            "operator": "eq"
-                          }
+                      "lower_bound": {
+                        "FixedValue": {
+                          "value": 1.9
                         }
                       },
-                      {
-                        "SetPVActionItem": {
-                          "name": "act_dg1_yes_acq",
-                          "description": "Start acquiring",
-                          "pv": "MFX:DG1:P6740:Acquire",
-                          "value": 1,
-                          "loop_period_sec": 1.0,
-                          "termination_check": {
+                      "upper_bound": {
+                        "FixedValue": {
+                          "value": 2.1
+                        }
+                      },
+                      "value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:DG1:JAWS:Actual_XWIDTH",
+                          "as_string": false
+                        }
+                      }
+                    }
+                  },
+                  "do": {
+                    "name": "dg1_x_move",
+                    "description": "Move slit width to 2mm",
+                    "pv": "MFX:DG1:JAWS:XWID_REQ",
+                    "value": 2,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "dg1_x_move_termination_check",
+                        "description": "Use parent's check node: dg1_x_check"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "dg1_y_check_and_do",
+                  "description": "Ensure slit width is close to 2mm",
+                  "check": {
+                    "BoundedConditionItem": {
+                      "name": "dg1_y_check",
+                      "description": "Check if slit width is close to 2mm",
+                      "lower_bound": {
+                        "FixedValue": {
+                          "value": 1.9
+                        }
+                      },
+                      "upper_bound": {
+                        "FixedValue": {
+                          "value": 2.1
+                        }
+                      },
+                      "value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:DG1:JAWS:Actual_YWIDTH",
+                          "as_string": false
+                        }
+                      }
+                    }
+                  },
+                  "do": {
+                    "name": "dg1_y_move",
+                    "description": "Move slit width to 2mm",
+                    "pv": "MFX:DG1:JAWS:YWID_REQ",
+                    "value": 2,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "dg1_y_move_termination_check",
+                        "description": "Use parent's check node: dg1_y_check"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "dg2_us_x_check_and_do",
+                  "description": "Ensure slit width is close to 2mm",
+                  "check": {
+                    "BoundedConditionItem": {
+                      "name": "dg2_us_x_check",
+                      "description": "Check if slit width is close to 2mm",
+                      "lower_bound": {
+                        "FixedValue": {
+                          "value": 1.9
+                        }
+                      },
+                      "upper_bound": {
+                        "FixedValue": {
+                          "value": 2.1
+                        }
+                      },
+                      "value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:DG2:JAWS:US:Actual_XWIDTH",
+                          "as_string": false
+                        }
+                      }
+                    }
+                  },
+                  "do": {
+                    "name": "dg2_us_x_move",
+                    "description": "Move slit width to 2mm",
+                    "pv": "MFX:DG2:JAWS:US:XWID_REQ",
+                    "value": 2,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "dg2_us_x_move_termination_check",
+                        "description": "Use parent's check node: dg2_us_x_check"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "dg2_us_y_check_and_do",
+                  "description": "Ensure slit width is close to 2mm",
+                  "check": {
+                    "BoundedConditionItem": {
+                      "name": "dg2_us_y_check",
+                      "description": "Check if slit width is close to 2mm",
+                      "lower_bound": {
+                        "FixedValue": {
+                          "value": 1.9
+                        }
+                      },
+                      "upper_bound": {
+                        "FixedValue": {
+                          "value": 2.1
+                        }
+                      },
+                      "value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:DG2:JAWS:US:Actual_YWIDTH",
+                          "as_string": false
+                        }
+                      }
+                    }
+                  },
+                  "do": {
+                    "name": "dg2_us_y_move",
+                    "description": "Move slit width to 2mm",
+                    "pv": "MFX:DG2:JAWS:US:YWID_REQ",
+                    "value": 2,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "dg2_us_y_move_termination_check",
+                        "description": "Use parent's check node: dg2_us_y_check"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "dg2_ms_x_check_and_do",
+                  "description": "Ensure slit width is close to 2mm",
+                  "check": {
+                    "BoundedConditionItem": {
+                      "name": "dg2_ms_x_check",
+                      "description": "Check if slit width is close to 2mm",
+                      "lower_bound": {
+                        "FixedValue": {
+                          "value": 1.9
+                        }
+                      },
+                      "upper_bound": {
+                        "FixedValue": {
+                          "value": 2.1
+                        }
+                      },
+                      "value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:DG2:JAWS:MS:Actual_XWIDTH",
+                          "as_string": false
+                        }
+                      }
+                    }
+                  },
+                  "do": {
+                    "name": "dg2_ms_x_move",
+                    "description": "Move slit width to 2mm",
+                    "pv": "MFX:DG2:JAWS:MS:XWID_REQ",
+                    "value": 2,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "dg2_ms_x_move_termination_check",
+                        "description": "Use parent's check node: dg2_ms_x_check"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "dg2_ms_y_check_and_do",
+                  "description": "Ensure slit width is close to 2mm",
+                  "check": {
+                    "BoundedConditionItem": {
+                      "name": "dg2_ms_y_check",
+                      "description": "Check if slit width is close to 2mm",
+                      "lower_bound": {
+                        "FixedValue": {
+                          "value": 1.9
+                        }
+                      },
+                      "upper_bound": {
+                        "FixedValue": {
+                          "value": 2.1
+                        }
+                      },
+                      "value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:DG2:JAWS:MS:Actual_YWIDTH",
+                          "as_string": false
+                        }
+                      }
+                    }
+                  },
+                  "do": {
+                    "name": "dg2_ms_y_move",
+                    "description": "Move slit width to 2mm",
+                    "pv": "MFX:DG2:JAWS:MS:YWID_REQ",
+                    "value": 2,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "dg2_ms_y_move_termination_check",
+                        "description": "Use parent's check node: dg2_ms_y_check"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "dg2_ds_x_check_and_do",
+                  "description": "Ensure slit width is close to 2mm",
+                  "check": {
+                    "BoundedConditionItem": {
+                      "name": "dg2_ds_x_check",
+                      "description": "Check if slit width is close to 2mm",
+                      "lower_bound": {
+                        "FixedValue": {
+                          "value": 1.9
+                        }
+                      },
+                      "upper_bound": {
+                        "FixedValue": {
+                          "value": 2.1
+                        }
+                      },
+                      "value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:DG2:JAWS:DS:Actual_XWIDTH",
+                          "as_string": false
+                        }
+                      }
+                    }
+                  },
+                  "do": {
+                    "name": "dg2_ds_x_move",
+                    "description": "Move slit width to 2mm",
+                    "pv": "MFX:DG2:JAWS:DS:XWID_REQ",
+                    "value": 2,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "dg2_ds_x_move_termination_check",
+                        "description": "Use parent's check node: dg2_ds_x_check"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "dg2_ds_y_check_and_do",
+                  "description": "Ensure slit width is close to 2mm",
+                  "check": {
+                    "BoundedConditionItem": {
+                      "name": "dg2_ds_y_check",
+                      "description": "Check if slit width is close to 2mm",
+                      "lower_bound": {
+                        "FixedValue": {
+                          "value": 1.9
+                        }
+                      },
+                      "upper_bound": {
+                        "FixedValue": {
+                          "value": 2.1
+                        }
+                      },
+                      "value": {
+                        "EPICSValue": {
+                          "pv_name": "MFX:DG2:JAWS:DS:Actual_YWIDTH",
+                          "as_string": false
+                        }
+                      }
+                    }
+                  },
+                  "do": {
+                    "name": "dg2_ds_y_move",
+                    "description": "Move slit width to 2mm",
+                    "pv": "MFX:DG2:JAWS:DS:YWID_REQ",
+                    "value": 2,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "dg2_ds_y_move_termination_check",
+                        "description": "Use parent's check node: dg2_ds_y_check"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "SequenceItem": {
+            "name": "prepare_mr1l4",
+            "description": "Get mr1l4 ready for MFX beam",
+            "memory": false,
+            "children": [
+              {
+                "CheckAndDoItem": {
+                  "name": "insert_mr1l4",
+                  "description": "Ensure mr1l4 is in",
+                  "check": {
+                    "BinaryConditionItem": {
+                      "name": "check_mr1l4_xstate",
+                      "description": "Check if mr1l4 is inserted",
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "MR1L4:HOMS:MMS:XUP:STATE:GET_RBV",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": "IN"
+                        }
+                      },
+                      "operator": "eq"
+                    }
+                  },
+                  "do": {
+                    "name": "act_mr1l4_xstate",
+                    "description": "Move mr1l4 in",
+                    "pv": "MR1L4:HOMS:MMS:XUP:STATE:SET",
+                    "value": "IN",
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_mr1l4_xstate_termination_check",
+                        "description": "Use parent's check node: check_mr1l4_xstate"
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "CheckAndDoItem": {
+                  "name": "point_mr1l4",
+                  "description": "Ensure mr1l4 is pointed towards MFX",
+                  "check": {
+                    "BoundedConditionItem": {
+                      "name": "check_mr1l4_pointing",
+                      "description": "Check if mr1l4 is pointing generally towards MFX",
+                      "lower_bound": {
+                        "FixedValue": {
+                          "value": -549
+                        }
+                      },
+                      "upper_bound": {
+                        "FixedValue": {
+                          "value": -539
+                        }
+                      },
+                      "value": {
+                        "EPICSValue": {
+                          "pv_name": "MR1L4:HOMS:MMS:PITCH.RBV",
+                          "as_string": false
+                        }
+                      }
+                    }
+                  },
+                  "do": {
+                    "name": "act_mr1l4_pitch",
+                    "description": "Move mr1l4 back to the nominal pitch",
+                    "pv": "MR1L4:HOMS:MMS:PITCH.VAL",
+                    "value": -544,
+                    "loop_period_sec": 1.0,
+                    "termination_check": {
+                      "UseCheckConditionItem": {
+                        "name": "act_mr1l4_pitch_termination_check",
+                        "description": "Use parent's check node: check_mr1l4_pointing"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "SelectorItem": {
+            "name": "ensure_dg1_cam_running",
+            "description": "Refresh acquisition if needed",
+            "memory": false,
+            "children": [
+              {
+                "BinaryConditionItem": {
+                  "name": "Check_dg1_cam_running",
+                  "description": "Check if the camera is acquiring frames",
+                  "left_value": {
+                    "EPICSValue": {
+                      "pv_name": "MFX:DG1:P6740:ArrayRate_RBV",
+                      "as_string": false
+                    }
+                  },
+                  "right_value": {
+                    "FixedValue": {
+                      "value": 1
+                    }
+                  },
+                  "operator": "ge"
+                }
+              },
+              {
+                "SequenceItem": {
+                  "name": "seq_dg1_acq_cycle",
+                  "description": "Stop and then start the acquisition",
+                  "memory": false,
+                  "children": [
+                    {
+                      "SetPVActionItem": {
+                        "name": "act_dg1_no_acq",
+                        "description": "Stop acquiring",
+                        "pv": "MFX:DG1:P6740:Acquire",
+                        "value": 0,
+                        "loop_period_sec": 1.0,
+                        "termination_check": {
+                          "DummyConditionItem": {
+                            "name": "",
+                            "description": "",
+                            "result": true
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "SetPVActionItem": {
+                        "name": "act_dg1_yes_acq",
+                        "description": "Start acquiring",
+                        "pv": "MFX:DG1:P6740:Acquire",
+                        "value": 1,
+                        "loop_period_sec": 1.0,
+                        "termination_check": {
+                          "BinaryConditionItem": {
                             "name": "Check_dg1_cam_running",
                             "description": "Check if the camera is acquiring frames",
-                            "pv": "MFX:DG1:P6740:ArrayRate_RBV",
-                            "value": 1,
+                            "left_value": {
+                              "EPICSValue": {
+                                "pv_name": "MFX:DG1:P6740:ArrayRate_RBV",
+                                "as_string": false
+                              }
+                            },
+                            "right_value": {
+                              "FixedValue": {
+                                "value": 1
+                              }
+                            },
                             "operator": "ge"
                           }
                         }
                       }
-                    ]
-                  }
+                    }
+                  ]
                 }
-              ]
-            }
+              }
+            ]
           }
-        ]
-      }
+        }
+      ]
     }
   }
+}

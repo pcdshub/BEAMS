@@ -2,13 +2,20 @@ import json
 from pathlib import Path
 from typing import Union
 
-import py_trees
 from apischema import deserialize, serialize
+from py_trees.trees import BehaviourTree
 
+# Note: we must load all submodules with configuration items up front
+# If we do not, then they are not necessarily in the schema yet
+import beams.tree_config.action  # noqa: F401
+import beams.tree_config.composite  # noqa: F401
+import beams.tree_config.condition  # noqa: F401
+import beams.tree_config.idiom  # noqa: F401
+import beams.tree_config.py_trees  # noqa: F401
 from beams.tree_config.base import BaseItem, BehaviorTreeItem
 
 
-def get_tree_from_path(path: Path) -> py_trees.trees.BehaviourTree:
+def get_tree_from_path(path: Path) -> BehaviourTree:
     """
     Deserialize a json file, return the tree it specifies.
 

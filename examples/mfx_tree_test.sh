@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-here="${BASH_SOURCE[0]}"
+here="$(dirname ${BASH_SOURCE[0]})"
 cd "${here}"
 
 if [ -z "${CONDA_PREFiX}" ]; then
@@ -11,7 +11,7 @@ fi
 
 alias python="${conda_bin}/python"
 alias pydm="${conda_bin}/pydm"
-export PYTHONPATH="$(realpath "$(dirname "${here}")"/..)"
+export PYTHONPATH="$(realpath "${here}"/..)"
 export EPICS_CA_SERVER_PORT=5066
 
 python mfx_tree.py

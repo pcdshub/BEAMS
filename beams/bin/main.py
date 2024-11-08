@@ -5,6 +5,7 @@
 import argparse
 import importlib
 import logging
+import sys
 
 import beams
 from beams.logging import configure_log_directory, setup_logging
@@ -98,10 +99,10 @@ def main():
     if hasattr(args, 'func'):
         func = kwargs.pop('func')
         logger.debug('%s(**%r)', func.__name__, kwargs)
-        func(**kwargs)
+        return func(**kwargs)
     else:
         top_parser.print_help()
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

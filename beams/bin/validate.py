@@ -29,4 +29,4 @@ def build_arg_parser(argparser=None):
 
 def main(*args, **kwargs):
     from beams.bin.validate_main import main
-    main(*args, **kwargs)
+    return main(*args, **kwargs)

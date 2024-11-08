@@ -1,3 +1,5 @@
+import sys
+
 from .bin.main import main
 
-main()
+sys.exit(main())

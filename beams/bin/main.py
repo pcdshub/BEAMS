@@ -14,6 +14,7 @@ DESCRIPTION = __doc__
 
 COMMAND_TO_MODULE = {
     "run": "run",
+    "validate": "validate",
     "gen_test_ioc": "gen_test_ioc",
 }
 

@@ -1,6 +1,7 @@
 import functools
 import itertools
 import logging
+import subprocess
 from pathlib import Path
 
 import caproto.server
@@ -91,3 +92,18 @@ def test_gen_test_ioc(capsys: pytest.CaptureFixture, monkeypatch: pytest.MonkeyP
 
     # We essentially did an import, no run should have happened
     assert not run_called
+
+
+@pytest.mark.parametrize(
+    "artifact",
+    [
+        "eggs",
+        "eggs2",
+        "eternal_guard",
+        "im2l0_test",
+    ]
+)
+def test_validate_artifacts_subproc(artifact: str):
+    test_cfg = (Path(__file__).parent / "artifacts" / f"{artifact}.json").resolve()
+    cproc = subprocess.run(["python3", "-m", "beams", "validate", str(test_cfg)], capture_output=True, universal_newlines=True)
+    assert cproc.returncode == 0, cproc.stdout

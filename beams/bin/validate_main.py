@@ -7,7 +7,7 @@ from beams.tree_config import get_tree_from_path
 logger = logging.getLogger(__name__)
 
 
-def main(filepath: str):
+def main(filepath: str) -> int:
     try:
         get_tree_from_path(filepath)
         logger.info("File validation successful! File is well-formed.")

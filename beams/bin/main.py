@@ -8,6 +8,13 @@ import logging
 import sys
 
 import beams
+import beams.tree_config
+import beams.tree_config.action
+import beams.tree_config.base
+import beams.tree_config.composite
+import beams.tree_config.condition
+import beams.tree_config.idiom
+import beams.tree_config.py_trees
 from beams.logging import configure_log_directory, setup_logging
 
 DESCRIPTION = __doc__

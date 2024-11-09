@@ -16,7 +16,7 @@ class App(Display):
             deser = json.load(fd)
         all_pvnames = sorted(list(set(pv for pv in walk_dict_pvs(deser))))
         for pvname in all_pvnames:
-            self.ui.scroll.widget().layout().addRow(pvname, PyDMLineEdit(init_channel=pvname))
+            self.ui.scroll.widget().layout().addRow(pvname, PyDMLineEdit(init_channel=f"ca://{pvname}"))
 
     def ui_filename(self):
         return 'mfx_tree_ui.ui'

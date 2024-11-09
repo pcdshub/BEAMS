@@ -1,6 +1,7 @@
 import os
 from textwrap import dedent
 
+from caproto import ChannelType
 from caproto.server import PVGroup, ioc_arg_parser, pvproperty, run
 
 
@@ -75,11 +76,15 @@ class BTSimIOC(PVGroup):
     )
     mfx_dg1_pim = pvproperty(
         value="OUT",
+        enum_strings=["Unknown", "YAG", "OUT"],
+        dtype=ChannelType.ENUM,
         name="MFX:DG1:PIM",
         doc="Fake MFX:DG1:PIM",
     )
     mfx_dg1_pim_go = pvproperty(
         value="OUT",
+        enum_strings=["Unknown", "YAG", "OUT"],
+        dtype=ChannelType.ENUM,
         name="MFX:DG1:PIM:GO",
         doc="Fake MFX:DG1:PIM:GO",
     )
@@ -145,11 +150,15 @@ class BTSimIOC(PVGroup):
     )
     mfx_dg2_pim = pvproperty(
         value="OUT",
+        enum_strings=["Unknown", "YAG", "OUT"],
+        dtype=ChannelType.ENUM,
         name="MFX:DG2:PIM",
         doc="Fake MFX:DG2:PIM",
     )
     mfx_dg2_pim_go = pvproperty(
         value="OUT",
+        enum_strings=["Unknown", "YAG", "OUT"],
+        dtype=ChannelType.ENUM,
         name="MFX:DG2:PIM:GO",
         doc="Fake MFX:DG2:PIM:GO",
     )
@@ -295,11 +304,15 @@ class BTSimIOC(PVGroup):
     )
     mr1l4_homs_mms_xup_state_get_rbv = pvproperty(
         value="OUT",
+        enum_strings=["UNKNOWN", "OUT", "IN"],
+        dtype=ChannelType.ENUM,
         name="MR1L4:HOMS:MMS:XUP:STATE:GET_RBV",
         doc="Fake MR1L4:HOMS:MMS:XUP:STATE:GET_RBV",
     )
     mr1l4_homs_mms_xup_state_set = pvproperty(
         value="OUT",
+        enum_strings=["UNKNOWN", "OUT", "IN"],
+        dtype=ChannelType.ENUM,
         name="MR1L4:HOMS:MMS:XUP:STATE:SET",
         doc="Fake MR1L4:HOMS:MMS:XUP:STATE:SET",
     )

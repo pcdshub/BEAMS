@@ -27,7 +27,7 @@ def main(
 
 def walk_dict_pvs(tree_dict: dict) -> Iterator[str]:
     for key, value in tree_dict.items():
-        if key == "pv" and value:
+        if key == "pv" or key == "pv_name" and value:
             yield str(value)
         elif isinstance(value, dict):
             yield from walk_dict_pvs(value)

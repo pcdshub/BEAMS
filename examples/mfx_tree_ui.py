@@ -14,8 +14,9 @@ class App(Display):
         filepath = Path(__file__).parent / "mfx_tree.json"
         with open(filepath, "r") as fd:
             deser = json.load(fd)
-        all_pvnames = sorted(list(set(pv for pv in walk_dict_pvs(deser))))
-        for pvname in all_pvnames:
+        # Preserve order, ignore duplicates
+        seen = set()
+        for pvname in (pv for pv in walk_dict_pvs(deser) if not (pv in seen or seen.add(pv))):
             self.ui.scroll.widget().layout().addRow(pvname, PyDMLineEdit(init_channel=f"ca://{pvname}"))
 
     def ui_filename(self):

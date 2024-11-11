@@ -166,11 +166,24 @@ check_calc_ready = BinaryConditionItem(
     operator=ConditionOperator.equal,
     right_value=FixedValue(0),
 )
+check_prepare_transmission = BoundedConditionItem(
+    name="check_prepare_transmission",
+    description="Check if we've set the transmission to be applied",
+    lower_bound=FixedValue(0.09),
+    value=EPICSValue("MFX:ATT:COM:R_DES"),
+    upper_bound=FixedValue(0.11)
+)
 act_prepare_transmission = SetPVActionItem(
     name="act_prepare_transmission",
     description="Set the transmission that will be applied",
     pv="MFX:ATT:COM:R_DES",
     value=0.1,
+)
+cad_prepare_transmission = CheckAndDoItem(
+    name="cad_prepare_transmission",
+    description="Ensure the transmission setpoint is applied",
+    check=check_prepare_transmission,
+    do=act_prepare_transmission,
 )
 act_apply_transmission = SetPVActionItem(
     name="act_apply_transmission",
@@ -182,7 +195,7 @@ act_apply_transmission = SetPVActionItem(
 seq_set_mfx_att = SequenceItem(
     name="seq_set_mfx_att",
     description="Set the mfx att to 10% transmission",
-    children=[check_calc_ready, act_prepare_transmission, act_apply_transmission],
+    children=[check_calc_ready, cad_prepare_transmission, act_apply_transmission],
 )
 mfx_att = SelectorItem(
     name="mfx_att",

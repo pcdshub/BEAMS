@@ -26,6 +26,8 @@ fi
 
 # Align with sim IOC, do not touch real devices on 5068!
 export EPICS_CA_SERVER_PORT=5066
+export EPICS_CA_AUTO_ADDR_LIST=NO
+export EPICS_CA_ADDR_LIST=localhost
 
 python mfx_tree.py
 (

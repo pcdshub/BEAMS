@@ -695,17 +695,42 @@
                       }
                     },
                     {
-                      "SetPVActionItem": {
-                        "name": "act_prepare_transmission",
-                        "description": "Set the transmission that will be applied",
-                        "pv": "MFX:ATT:COM:R_DES",
-                        "value": 0.1,
-                        "loop_period_sec": 1.0,
-                        "termination_check": {
-                          "DummyConditionItem": {
-                            "name": "",
-                            "description": "",
-                            "result": true
+                      "CheckAndDoItem": {
+                        "name": "cad_prepare_transmission",
+                        "description": "Ensure the transmission setpoint is applied",
+                        "check": {
+                          "BoundedConditionItem": {
+                            "name": "check_prepare_transmission",
+                            "description": "Check if we've set the transmission to be applied",
+                            "lower_bound": {
+                              "FixedValue": {
+                                "value": 0.09
+                              }
+                            },
+                            "upper_bound": {
+                              "FixedValue": {
+                                "value": 0.11
+                              }
+                            },
+                            "value": {
+                              "EPICSValue": {
+                                "pv_name": "MFX:ATT:COM:R_DES",
+                                "as_string": false
+                              }
+                            }
+                          }
+                        },
+                        "do": {
+                          "name": "act_prepare_transmission",
+                          "description": "Set the transmission that will be applied",
+                          "pv": "MFX:ATT:COM:R_DES",
+                          "value": 0.1,
+                          "loop_period_sec": 1.0,
+                          "termination_check": {
+                            "UseCheckConditionItem": {
+                              "name": "act_prepare_transmission_termination_check",
+                              "description": "Use parent's check node: check_prepare_transmission"
+                            }
                           }
                         }
                       }

@@ -29,7 +29,12 @@ export EPICS_CA_SERVER_PORT=5066
 export EPICS_CA_AUTO_ADDR_LIST=NO
 export EPICS_CA_ADDR_LIST=localhost
 
+# Regenerate the tree
 python mfx_tree.py
+
+# This starts a subshell with three processes.
+# The trap command will cause all three processes to close on sigint
+# or when the foreground process (PyDM) closes
 (
   trap 'kill 0' SIGINT EXIT;
   python mfx_sim.py &

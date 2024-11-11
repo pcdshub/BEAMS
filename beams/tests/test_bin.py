@@ -94,16 +94,35 @@ def test_gen_test_ioc(capsys: pytest.CaptureFixture, monkeypatch: pytest.MonkeyP
     assert not run_called
 
 
-@pytest.mark.parametrize(
-    "artifact",
-    [
-        "eggs",
-        "eggs2",
-        "eternal_guard",
-        "im2l0_test",
-    ]
-)
-def test_validate_artifacts_subproc(artifact: str):
-    test_cfg = (Path(__file__).parent / "artifacts" / f"{artifact}.json").resolve()
+artifact_validation_codes = [
+    # Standard test eggs should work
+    ("eggs.json", 0),
+    ("eggs2.json", 0),
+    ("eternal_guard.json", 0),
+    ("im2l0_test.json", 0),
+    # File not found error
+    ("no_egg", 2),
+    # Not even json, just empty!
+    ("bad_egg1.txt", 2),
+    # A yaml file
+    ("bad_egg2.yaml", 2),
+    # An empty dict
+    ("bad_egg3.json", 1),
+    # Missing root
+    ("bad_egg4.json", 1),
+]
+
+
+@pytest.mark.parametrize("artifact, return_code", artifact_validation_codes)
+def test_validate_artifacts_subproc(artifact: str, return_code: int):
+    test_cfg = (Path(__file__).parent / "artifacts" / artifact).resolve()
     cproc = subprocess.run(["python3", "-m", "beams", "validate", str(test_cfg)], capture_output=True, universal_newlines=True)
-    assert cproc.returncode == 0, cproc.stdout
+    assert cproc.returncode == return_code, cproc.stdout
+
+
+@pytest.mark.parametrize("artifact, return_code", artifact_validation_codes)
+def test_validate_artifacts_inproc(artifact: str, return_code: int):
+    test_cfg = Path(__file__).parent / "artifacts" / artifact
+    args = ["beams", "validate", str(test_cfg)]
+    with cli_args(args), restore_logging():
+        assert main() == return_code

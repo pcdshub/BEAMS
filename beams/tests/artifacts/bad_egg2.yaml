@@ -1,0 +1,26 @@
+root:
+    CheckAndDoItem:
+        name: self_test
+        description: ""
+        check:
+          BinaryConditionItem:
+            name: self_test_check
+            description: ""
+            left_value:
+              EPICSValue:
+                pv_name: PERC:COMP
+                as_string: false
+            right_value:
+              FixedValue:
+                value: 100
+            operator: ge
+        do:
+          name: self_test_do
+          description: ""
+          pv: PERC:COMP
+          increment: 10
+          loop_period_sec: 0.01
+          termination_check:
+            UseCheckConditionItem:
+              name: self_test_do_termination_check,
+              description: "Use parent's check node: self_test_check"

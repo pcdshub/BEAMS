@@ -1,4 +1,14 @@
 #!/usr/bin/bash
+#
+# This script can be used to do an offline test-run of the mfx example tree.
+#
+# It does the following:
+# 1. Sets up a default conda environment if the user doesn't already have a conda or a venv activated
+# 2. Includes this clone's beams package as the PYTHONPATH if PYTHONPATH is unset
+# 3. Regenerates mfx_tree.json from the contents of mfx_sim.py to be used in future steps.
+# 4. Runs the simulator IOC, the behavior tree (in process), and a tree PV PyDM screen all at once.
+# 5. Stops the IOC and BT when the PyDM screen is closed.
+
 here="$(realpath "$(dirname ${BASH_SOURCE[0]})")"
 cd "${here}"
 

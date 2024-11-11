@@ -9,6 +9,8 @@
 # 4. Runs the simulator IOC, the behavior tree (in process), and a tree PV PyDM screen all at once.
 # 5. Stops the IOC and BT when the PyDM screen is closed.
 
+set -e
+
 here="$(realpath "$(dirname ${BASH_SOURCE[0]})")"
 cd "${here}"
 

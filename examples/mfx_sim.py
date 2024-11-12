@@ -69,6 +69,11 @@ class BTSimIOC(PVGroup):
         name="MFX:DG1:P6740:Acquire",
         doc="Fake MFX:DG1:P6740:Acquire",
     )
+    mfx_dg1_p6740_acquire_rbv = pvproperty(
+        value=1,
+        name="MFX:DG1:P6740:Acquire_RBV",
+        doc="Fake MFX:DG1:P6740:Acquire_RBV",
+    )
     mfx_dg1_p6740_arrayrate_rbv = pvproperty(
         value=0.0,
         name="MFX:DG1:P6740:ArrayRate_RBV",

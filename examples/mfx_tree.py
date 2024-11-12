@@ -297,23 +297,48 @@ check_dg1_cam_running = BinaryConditionItem(
 )
 # If the cam isn't running, it either needs to be turned on, or off and back on
 # Simplest is to put the "off" and then the "on" in series without checking.
+check_dg1_no_acq = BinaryConditionItem(
+    name="check_dg1_no_acq",
+    description="Check if we are already not aquiring",
+    left_value=EPICSValue("MFX:DG1:P6740:Acquire_RBV"),
+    operator=ConditionOperator.equal,
+    right_value=FixedValue(0),
+)
 act_dg1_no_acq = SetPVActionItem(
     name="act_dg1_no_acq",
     description="Stop acquiring",
     pv="MFX:DG1:P6740:Acquire",
     value=0,
 )
+cad_dg1_no_acq = CheckAndDoItem(
+    name="cad_dg1_no_acq",
+    description="Ensure the camera stops acquiring",
+    check=check_dg1_no_acq,
+    do=act_dg1_no_acq,
+)
+check_dg1_yes_acq = BinaryConditionItem(
+    name="check_dg1_yes_acq",
+    description="Check if we are already aquiring",
+    left_value=EPICSValue("MFX:DG1:P6740:Acquire_RBV"),
+    operator=ConditionOperator.equal,
+    right_value=FixedValue(1),
+)
 act_dg1_yes_acq = SetPVActionItem(
     name="act_dg1_yes_acq",
     description="Start acquiring",
     pv="MFX:DG1:P6740:Acquire",
     value=1,
-    termination_check=check_dg1_cam_running,
+)
+cad_dg1_yes_acq = CheckAndDoItem(
+    name="cad_dg1_yes_acq",
+    description="Ensure the camera starts acquiring",
+    check=check_dg1_yes_acq,
+    do=act_dg1_yes_acq,
 )
 seq_dg1_acq_cycle = SequenceItem(
     name="seq_dg1_acq_cycle",
     description="Stop and then start the acquisition",
-    children=[act_dg1_no_acq, act_dg1_yes_acq],
+    children=[cad_dg1_no_acq, cad_dg1_yes_acq],
 )
 ensure_dg1_cam_running = SelectorItem(
     name="ensure_dg1_cam_running",

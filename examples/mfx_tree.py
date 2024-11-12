@@ -292,8 +292,7 @@ check_dg1_cam_running = BinaryConditionItem(
     description="Check if the camera is acquiring frames",
     left_value=EPICSValue("MFX:DG1:P6740:ArrayRate_RBV"),
     operator=ConditionOperator.greater_equal,
-    right_value=FixedValue(1),
-
+    right_value=FixedValue(0.01),
 )
 # If the cam isn't running, it either needs to be turned on, or off and back on
 # Simplest is to put the "off" and then the "on" in series without checking.

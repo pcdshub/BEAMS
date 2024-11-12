@@ -1214,7 +1214,7 @@
                   },
                   "right_value": {
                     "FixedValue": {
-                      "value": 1
+                      "value": 0.01
                     }
                   },
                   "operator": "ge"

@@ -11,13 +11,6 @@ from beams.tree_config.condition import (BinaryConditionItem,
 from beams.tree_config.idiom import CheckAndDoItem
 
 # DG2 Stopper: remove
-check_dg2_stp_closed = BinaryConditionItem(
-    name="check_dg2_stp_closed",
-    description="Check that dg2 stopper is at closed switch.",
-    left_value=EPICSValue("HFX:DG2:STP:01:CLOSE"),
-    operator=ConditionOperator.equal,
-    right_value=FixedValue(1),
-)
 check_dg2_stp_not_open = BinaryConditionItem(
     name="check_dg2_stp_not_open",
     description="Check that dg2 stopper is not at open switch.",
@@ -25,10 +18,17 @@ check_dg2_stp_not_open = BinaryConditionItem(
     operator=ConditionOperator.equal,
     right_value=FixedValue(0),
 )
+check_dg2_stp_closed = BinaryConditionItem(
+    name="check_dg2_stp_closed",
+    description="Check that dg2 stopper is at closed switch.",
+    left_value=EPICSValue("HFX:DG2:STP:01:CLOSE"),
+    operator=ConditionOperator.equal,
+    right_value=FixedValue(1),
+)
 check_dg2_stp_in = SequenceConditionItem(
     name="check_dg2_stp_in",
     description="Check that dg2 stopper is at the closed switch but not at the open switch.",
-    children=[check_dg2_stp_closed, check_dg2_stp_not_open],
+    children=[check_dg2_stp_not_open, check_dg2_stp_closed],
 )
 act_close_dg2_stp = SetPVActionItem(
     name="act_close_dg2_stp",

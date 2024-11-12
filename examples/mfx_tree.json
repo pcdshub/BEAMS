@@ -17,24 +17,6 @@
                 "children": [
                   {
                     "BinaryConditionItem": {
-                      "name": "check_dg2_stp_closed",
-                      "description": "Check that dg2 stopper is at closed switch.",
-                      "left_value": {
-                        "EPICSValue": {
-                          "pv_name": "HFX:DG2:STP:01:CLOSE",
-                          "as_string": false
-                        }
-                      },
-                      "right_value": {
-                        "FixedValue": {
-                          "value": 1
-                        }
-                      },
-                      "operator": "eq"
-                    }
-                  },
-                  {
-                    "BinaryConditionItem": {
                       "name": "check_dg2_stp_not_open",
                       "description": "Check that dg2 stopper is not at open switch.",
                       "left_value": {
@@ -46,6 +28,24 @@
                       "right_value": {
                         "FixedValue": {
                           "value": 0
+                        }
+                      },
+                      "operator": "eq"
+                    }
+                  },
+                  {
+                    "BinaryConditionItem": {
+                      "name": "check_dg2_stp_closed",
+                      "description": "Check that dg2 stopper is at closed switch.",
+                      "left_value": {
+                        "EPICSValue": {
+                          "pv_name": "HFX:DG2:STP:01:CLOSE",
+                          "as_string": false
+                        }
+                      },
+                      "right_value": {
+                        "FixedValue": {
+                          "value": 1
                         }
                       },
                       "operator": "eq"

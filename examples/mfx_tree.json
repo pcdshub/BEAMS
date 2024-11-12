@@ -1126,7 +1126,7 @@
                       "left_value": {
                         "EPICSValue": {
                           "pv_name": "MR1L4:HOMS:MMS:XUP:STATE:GET_RBV",
-                          "as_string": false
+                          "as_string": true
                         }
                       },
                       "right_value": {

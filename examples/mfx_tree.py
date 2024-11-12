@@ -244,7 +244,7 @@ slits_to_2mm = SequenceItem(
 check_mr1l4_xstate = BinaryConditionItem(
     name="check_mr1l4_xstate",
     description="Check if mr1l4 is inserted",
-    left_value=EPICSValue("MR1L4:HOMS:MMS:XUP:STATE:GET_RBV"),
+    left_value=EPICSValue("MR1L4:HOMS:MMS:XUP:STATE:GET_RBV", as_string=True),
     operator=ConditionOperator.equal,
     right_value=FixedValue("IN"),
 )

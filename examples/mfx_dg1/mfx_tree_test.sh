@@ -21,7 +21,7 @@ if [[ -z "${CONDA_PREFiX}" ]] && [[ -z "${VIRTUAL_ENV}" ]]; then
 fi
 # If you didn't set up your python path, let's use this clone of beams
 if [[ -z "${PYTHONPATH}" ]]; then
-  export PYTHONPATH="$(realpath "${here}"/..)"
+  export PYTHONPATH="$(realpath "${here}"/../..)"
 fi
 
 # Align with sim IOC, do not touch real devices on 5068!

@@ -1227,35 +1227,53 @@
                   "memory": false,
                   "children": [
                     {
-                      "SetPVActionItem": {
-                        "name": "act_dg1_no_acq",
-                        "description": "Stop acquiring",
-                        "pv": "MFX:DG1:P6740:Acquire",
-                        "value": 0,
-                        "loop_period_sec": 1.0,
-                        "termination_check": {
-                          "DummyConditionItem": {
-                            "name": "",
-                            "description": "",
-                            "result": true
+                      "CheckAndDoItem": {
+                        "name": "cad_dg1_no_acq",
+                        "description": "Ensure the camera stops acquiring",
+                        "check": {
+                          "BinaryConditionItem": {
+                            "name": "check_dg1_no_acq",
+                            "description": "Check if we are already not aquiring",
+                            "left_value": {
+                              "EPICSValue": {
+                                "pv_name": "MFX:DG1:P6740:Acquire_RBV",
+                                "as_string": false
+                              }
+                            },
+                            "right_value": {
+                              "FixedValue": {
+                                "value": 0
+                              }
+                            },
+                            "operator": "eq"
+                          }
+                        },
+                        "do": {
+                          "name": "act_dg1_no_acq",
+                          "description": "Stop acquiring",
+                          "pv": "MFX:DG1:P6740:Acquire",
+                          "value": 0,
+                          "loop_period_sec": 1.0,
+                          "termination_check": {
+                            "UseCheckConditionItem": {
+                              "name": "act_dg1_no_acq_termination_check",
+                              "description": "Use parent's check node: check_dg1_no_acq"
+                            }
                           }
                         }
                       }
                     },
                     {
-                      "SetPVActionItem": {
-                        "name": "act_dg1_yes_acq",
-                        "description": "Start acquiring",
-                        "pv": "MFX:DG1:P6740:Acquire",
-                        "value": 1,
-                        "loop_period_sec": 1.0,
-                        "termination_check": {
+                      "CheckAndDoItem": {
+                        "name": "cad_dg1_yes_acq",
+                        "description": "Ensure the camera starts acquiring",
+                        "check": {
                           "BinaryConditionItem": {
-                            "name": "Check_dg1_cam_running",
-                            "description": "Check if the camera is acquiring frames",
+                            "name": "check_dg1_yes_acq",
+                            "description": "Check if we are already aquiring",
                             "left_value": {
                               "EPICSValue": {
-                                "pv_name": "MFX:DG1:P6740:ArrayRate_RBV",
+                                "pv_name": "MFX:DG1:P6740:Acquire_RBV",
                                 "as_string": false
                               }
                             },
@@ -1264,7 +1282,20 @@
                                 "value": 1
                               }
                             },
-                            "operator": "ge"
+                            "operator": "eq"
+                          }
+                        },
+                        "do": {
+                          "name": "act_dg1_yes_acq",
+                          "description": "Start acquiring",
+                          "pv": "MFX:DG1:P6740:Acquire",
+                          "value": 1,
+                          "loop_period_sec": 1.0,
+                          "termination_check": {
+                            "UseCheckConditionItem": {
+                              "name": "act_dg1_yes_acq_termination_check",
+                              "description": "Use parent's check node: check_dg1_yes_acq"
+                            }
                           }
                         }
                       }

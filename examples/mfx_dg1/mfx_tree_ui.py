@@ -1,8 +1,9 @@
 import json
 from pathlib import Path
 
+from ophyd.signal import EpicsSignal
 from pydm import Display
-from pydm.widgets.line_edit import PyDMLineEdit
+from typhos.widgets import determine_widget_type
 
 from beams.bin.gen_test_ioc_main import walk_dict_pvs
 
@@ -17,7 +18,9 @@ class App(Display):
         # Preserve order, ignore duplicates
         seen = set()
         for pvname in (pv for pv in walk_dict_pvs(deser) if not (pv in seen or seen.add(pv))):
-            self.ui.scroll.widget().layout().addRow(pvname, PyDMLineEdit(init_channel=f"ca://{pvname}"))
+            cls, kwargs = determine_widget_type(EpicsSignal(pvname))
+            widget = cls(**kwargs)
+            self.ui.scroll.widget().layout().addRow(pvname, widget)
 
     def ui_filename(self):
         return 'mfx_tree_ui.ui'

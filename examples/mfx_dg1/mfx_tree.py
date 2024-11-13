@@ -218,7 +218,7 @@ for slit_name, pv_ext in (
             name=f"{axis_name}_check",
             description="Check if slit width is close to 2mm",
             lower_bound=FixedValue(1.9),
-            value=EPICSValue(f"{base_pv}Actual_{axis}WIDTH"),
+            value=EPICSValue(f"{base_pv}ACTUAL_{axis}WIDTH"),
             upper_bound=FixedValue(2.1),
         )
         slit_move = SetPVActionItem(

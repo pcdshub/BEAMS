@@ -1,5 +1,7 @@
+import os
 from textwrap import dedent
 
+from caproto import ChannelType
 from caproto.server import PVGroup, ioc_arg_parser, pvproperty, run
 
 
@@ -7,11 +9,15 @@ class BTSimIOC(PVGroup):
     """
     An IOC to replicate the PVs used by your behavior tree.
     """
-{% for pvname in all_pvnames %}
-    {{ pvname.lower().replace(":","_").replace(".","_") }} = pvproperty(
-        value=0,
-        name="{{ pvname }}",
-        doc="Fake {{ pvname }}",
+{% for pv_info in all_pvinfo %}
+    {{ pv_info.python_name }} = pvproperty(
+        name="{{ pv_info.pvname }}",
+        doc="Fake {{ pv_info.pvname }}",
+        value={{ pv_info.value }},
+        dtype=ChannelType.{{ pv_info.dtype }},
+        {% if pv_info.enum_strings %}
+        enum_strings={{ pv_info.enum_strings }},
+        {% endif %}
     )
 {% endfor %}
 

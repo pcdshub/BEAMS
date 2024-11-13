@@ -798,7 +798,7 @@
                       },
                       "value": {
                         "EPICSValue": {
-                          "pv_name": "MFX:DG1:JAWS:Actual_XWIDTH",
+                          "pv_name": "MFX:DG1:JAWS:ACTUAL_XWIDTH",
                           "as_string": false
                         }
                       }
@@ -839,7 +839,7 @@
                       },
                       "value": {
                         "EPICSValue": {
-                          "pv_name": "MFX:DG1:JAWS:Actual_YWIDTH",
+                          "pv_name": "MFX:DG1:JAWS:ACTUAL_YWIDTH",
                           "as_string": false
                         }
                       }
@@ -880,7 +880,7 @@
                       },
                       "value": {
                         "EPICSValue": {
-                          "pv_name": "MFX:DG2:JAWS:US:Actual_XWIDTH",
+                          "pv_name": "MFX:DG2:JAWS:US:ACTUAL_XWIDTH",
                           "as_string": false
                         }
                       }
@@ -921,7 +921,7 @@
                       },
                       "value": {
                         "EPICSValue": {
-                          "pv_name": "MFX:DG2:JAWS:US:Actual_YWIDTH",
+                          "pv_name": "MFX:DG2:JAWS:US:ACTUAL_YWIDTH",
                           "as_string": false
                         }
                       }
@@ -962,7 +962,7 @@
                       },
                       "value": {
                         "EPICSValue": {
-                          "pv_name": "MFX:DG2:JAWS:MS:Actual_XWIDTH",
+                          "pv_name": "MFX:DG2:JAWS:MS:ACTUAL_XWIDTH",
                           "as_string": false
                         }
                       }
@@ -1003,7 +1003,7 @@
                       },
                       "value": {
                         "EPICSValue": {
-                          "pv_name": "MFX:DG2:JAWS:MS:Actual_YWIDTH",
+                          "pv_name": "MFX:DG2:JAWS:MS:ACTUAL_YWIDTH",
                           "as_string": false
                         }
                       }
@@ -1044,7 +1044,7 @@
                       },
                       "value": {
                         "EPICSValue": {
-                          "pv_name": "MFX:DG2:JAWS:DS:Actual_XWIDTH",
+                          "pv_name": "MFX:DG2:JAWS:DS:ACTUAL_XWIDTH",
                           "as_string": false
                         }
                       }
@@ -1085,7 +1085,7 @@
                       },
                       "value": {
                         "EPICSValue": {
-                          "pv_name": "MFX:DG2:JAWS:DS:Actual_YWIDTH",
+                          "pv_name": "MFX:DG2:JAWS:DS:ACTUAL_YWIDTH",
                           "as_string": false
                         }
                       }

@@ -159,8 +159,15 @@ check_mfx_att_range = BoundedConditionItem(
     value=EPICSValue("MFX:ATT:COM:R_CUR"),
     upper_bound=FixedValue(0.12),
 )
-check_calc_ready = BinaryConditionItem(
-    name="check_calc_ready",
+check_att_move_done = BinaryConditionItem(
+    name="check_att_move_done",
+    description="Wait for previous or current move to be done",
+    left_value=EPICSValue("MFX:ATT:COM:STATUS", as_string=True),
+    operator=ConditionOperator.equal,
+    right_value=FixedValue("OK"),
+)
+check_att_calc_ready = BinaryConditionItem(
+    name="check_att_calc_ready",
     description="Wait for previous or current calc to be done",
     left_value=EPICSValue("MFX:ATT:COM:CALCP"),
     operator=ConditionOperator.equal,
@@ -195,7 +202,7 @@ act_apply_transmission = SetPVActionItem(
 seq_set_mfx_att = SequenceItem(
     name="seq_set_mfx_att",
     description="Set the mfx att to 10% transmission",
-    children=[check_calc_ready, cad_prepare_transmission, act_apply_transmission],
+    children=[check_att_move_done, check_att_calc_ready, cad_prepare_transmission, act_apply_transmission],
 )
 mfx_att = SelectorItem(
     name="mfx_att",

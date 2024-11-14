@@ -678,7 +678,25 @@
                   "children": [
                     {
                       "BinaryConditionItem": {
-                        "name": "check_calc_ready",
+                        "name": "check_att_move_done",
+                        "description": "Wait for previous or current move to be done",
+                        "left_value": {
+                          "EPICSValue": {
+                            "pv_name": "MFX:ATT:COM:STATUS",
+                            "as_string": true
+                          }
+                        },
+                        "right_value": {
+                          "FixedValue": {
+                            "value": "OK"
+                          }
+                        },
+                        "operator": "eq"
+                      }
+                    },
+                    {
+                      "BinaryConditionItem": {
+                        "name": "check_att_calc_ready",
                         "description": "Wait for previous or current calc to be done",
                         "left_value": {
                           "EPICSValue": {

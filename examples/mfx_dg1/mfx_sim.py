@@ -40,23 +40,30 @@ class BTSimIOC(PVGroup):
     mfx_att_com_go = pvproperty(
         name="MFX:ATT:COM:GO",
         doc="Fake MFX:ATT:COM:GO",
-        value=3,
+        value=0,
         dtype=ChannelType.ENUM,
         enum_strings=['All OUT', 'All IN', 'Ceiling', 'Floor'],
     )
     mfx_att_com_r_cur = pvproperty(
         name="MFX:ATT:COM:R_CUR",
         doc="Fake MFX:ATT:COM:R_CUR",
-        value=7.315171595470277e-35,
+        value=1.0,
         dtype=ChannelType.DOUBLE,
         precision=4,
     )
     mfx_att_com_r_des = pvproperty(
         name="MFX:ATT:COM:R_DES",
         doc="Fake MFX:ATT:COM:R_DES",
-        value=1.0,
+        value=0.1,
         dtype=ChannelType.DOUBLE,
         precision=4,
+    )
+    mfx_att_com_status = pvproperty(
+        name="MFX:ATT:COM:STATUS",
+        doc="Fake MFX:ATT:COM:STATUS",
+        value=0,
+        dtype=ChannelType.ENUM,
+        enum_strings=['OK', 'Moving', 'Faulted'],
     )
     mfx_dg1_jaws_actual_xwidth = pvproperty(
         name="MFX:DG1:JAWS:ACTUAL_XWIDTH",
@@ -68,7 +75,7 @@ class BTSimIOC(PVGroup):
     mfx_dg1_jaws_actual_ywidth = pvproperty(
         name="MFX:DG1:JAWS:ACTUAL_YWIDTH",
         doc="Fake MFX:DG1:JAWS:ACTUAL_YWIDTH",
-        value=0.9007000000000001,
+        value=0.9007999999999998,
         dtype=ChannelType.DOUBLE,
         precision=4,
     )
@@ -404,7 +411,7 @@ class BTSimIOC(PVGroup):
     mr1l4_homs_mms_pitch_rbv = pvproperty(
         name="MR1L4:HOMS:MMS:PITCH.RBV",
         doc="Fake MR1L4:HOMS:MMS:PITCH.RBV",
-        value=-543.437262,
+        value=-543.446142,
         dtype=ChannelType.DOUBLE,
         precision=3,
     )

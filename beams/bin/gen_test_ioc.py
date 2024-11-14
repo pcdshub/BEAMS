@@ -1,10 +1,15 @@
 """
-Generate a test caproto IOC containing all the PVs from a tree set to 0 with no special logic.
+Generate a test caproto IOC containing all the PVs from a tree as they are in the live control system.
 
 Intended usage is something like:
 beams gen_test_ioc my_tree.json > outfile.py
 
-Then, edit outfile.py to set useful starting values and add logic if needed.
+You can use this file as-is or edit it for your purposes.
+
+If running in online mode (the default, unless you pass --offline),
+this will query the controls system for live starting values and data types.
+
+In offline mode (--offline) everything will start as an int with value 0.
 """
 from __future__ import annotations
 
@@ -28,6 +33,12 @@ def build_arg_parser(argparser=None):
         "filepath",
         type=str,
         help="Behavior Tree configuration filepath"
+    )
+
+    argparser.add_argument(
+        "--offline",
+        action="store_true",
+        help="Use default values instead of live values. Useful when running offline.",
     )
 
 

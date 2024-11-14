@@ -62,9 +62,9 @@ def test_run(added_args: tuple[str]):
         main()
 
 
-def test_gen_test_ioc(capsys: pytest.CaptureFixture, monkeypatch: pytest.MonkeyPatch):
+def test_gen_test_ioc_offline(capsys: pytest.CaptureFixture, monkeypatch: pytest.MonkeyPatch):
     test_cfg = Path(__file__).parent / "artifacts" / "eggs.json"
-    args = ["beams", "gen_test_ioc", str(test_cfg)]
+    args = ["beams", "gen_test_ioc", "--offline", str(test_cfg)]
     with cli_args(args), restore_logging():
         main()
     result = capsys.readouterr()

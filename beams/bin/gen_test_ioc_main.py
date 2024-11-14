@@ -22,7 +22,7 @@ class PVInfoForJ2:
     precision: int
 
     @classmethod
-    def from_result(cls: type[PVInfoForJ2], pvname: str, response: ReadNotifyResponse):
+    def from_result(cls: type[PVInfoForJ2], pvname: str, response: ReadNotifyResponse) -> PVInfoForJ2:
         try:
             enum_strings = response.metadata.enum_strings
         except AttributeError:
@@ -38,6 +38,17 @@ class PVInfoForJ2:
             dtype=response.data_type.name.removeprefix("CTRL_"),
             enum_strings=[bt.decode("utf8") for bt in enum_strings],
             precision=precision,
+        )
+
+    @classmethod
+    def as_default(cls: type[PVInfoForJ2], pvname: str) -> PVInfoForJ2:
+        return cls(
+            python_name=pvname.lower().replace(":", "_").replace(".", "_"),
+            pvname=pvname,
+            value=0,
+            dtype="INT",
+            enum_strings=[],
+            precision=0,
         )
 
 
@@ -68,8 +79,13 @@ def collect_pv_info(pvnames: Iterable[str]) -> list[PVInfoForJ2]:
     return results
 
 
+def default_pv_info(pvnames: Iterable[str]) -> list[PVInfoForJ2]:
+    return [PVInfoForJ2.as_default(pvname=pvname) for pvname in pvnames]
+
+
 def main(
     filepath: str,
+    offline: bool,
 ):
     with open(filepath, "r") as fd:
         deser = json.load(fd)
@@ -78,7 +94,11 @@ def main(
     if not all_pvnames:
         raise RuntimeError(f"Found zero PVs in {filepath}")
 
-    all_pvinfo = sorted(collect_pv_info(all_pvnames))
+    if offline:
+        pv_info = default_pv_info(all_pvnames)
+    else:
+        pv_info = collect_pv_info(all_pvnames)
+    sorted_pv_info = sorted(pv_info)
 
     jinja_env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(Path(__file__).parent),
@@ -86,7 +106,7 @@ def main(
         lstrip_blocks=True,
     )
     template = jinja_env.get_template("test_ioc.py.j2")
-    rendered = template.render(all_pvinfo=all_pvinfo)
+    rendered = template.render(all_pv_info=sorted_pv_info)
     print(rendered)
 
 

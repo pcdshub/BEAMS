@@ -9,7 +9,7 @@ class BTSimIOC(PVGroup):
     """
     An IOC to replicate the PVs used by your behavior tree.
     """
-{% for pv_info in all_pvinfo %}
+{% for pv_info in all_pv_info %}
     {{ pv_info.python_name }} = pvproperty(
         name="{{ pv_info.pvname }}",
         doc="Fake {{ pv_info.pvname }}",

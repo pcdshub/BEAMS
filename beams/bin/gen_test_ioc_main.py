@@ -23,6 +23,9 @@ class PVInfoForJ2:
 
     @classmethod
     def from_result(cls: type[PVInfoForJ2], pvname: str, response: ReadNotifyResponse) -> PVInfoForJ2:
+        value = response.data if response.data_count > 1 else response.data[0]
+        if isinstance(value, bytes):
+            value = value.decode("utf-8")
         try:
             enum_strings = response.metadata.enum_strings
         except AttributeError:
@@ -34,8 +37,8 @@ class PVInfoForJ2:
         return cls(
             python_name=pvname.lower().replace(":", "_").replace(".", "_"),
             pvname=pvname,
-            value=response.data if response.data_count > 1 else response.data[0],
-            dtype=response.data_type.name.removeprefix("CTRL_"),
+            value=value,
+            dtype=response.data_type.name.removeprefix("CTRL_").removeprefix("TIME_"),
             enum_strings=[bt.decode("utf8") for bt in enum_strings],
             precision=precision,
         )

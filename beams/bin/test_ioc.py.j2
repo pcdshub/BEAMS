@@ -18,6 +18,9 @@ class BTSimIOC(PVGroup):
         {% if pv_info.enum_strings %}
         enum_strings={{ pv_info.enum_strings }},
         {% endif %}
+        {% if pv_info.precision %}
+        precision={{ pv_info.precision }},
+        {% endif %}
     )
 {% endfor %}
 

@@ -19,6 +19,7 @@ class PVInfoForJ2:
     value: Any
     dtype: str
     enum_strings: list[str]
+    precision: int
 
     @classmethod
     def from_result(cls: type[PVInfoForJ2], pvname: str, response: ReadNotifyResponse):
@@ -26,12 +27,17 @@ class PVInfoForJ2:
             enum_strings = response.metadata.enum_strings
         except AttributeError:
             enum_strings = []
+        try:
+            precision = response.metadata.precision
+        except AttributeError:
+            precision = 0
         return cls(
             python_name=pvname.lower().replace(":", "_").replace(".", "_"),
             pvname=pvname,
             value=response.data if response.data_count > 1 else response.data[0],
             dtype=response.data_type.name.removeprefix("CTRL_"),
             enum_strings=[bt.decode("utf8") for bt in enum_strings],
+            precision=precision,
         )
 
 

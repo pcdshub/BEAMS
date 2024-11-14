@@ -40,45 +40,51 @@ class BTSimIOC(PVGroup):
     mfx_att_com_go = pvproperty(
         name="MFX:ATT:COM:GO",
         doc="Fake MFX:ATT:COM:GO",
-        value=1,
+        value=3,
         dtype=ChannelType.ENUM,
         enum_strings=['All OUT', 'All IN', 'Ceiling', 'Floor'],
     )
     mfx_att_com_r_cur = pvproperty(
         name="MFX:ATT:COM:R_CUR",
         doc="Fake MFX:ATT:COM:R_CUR",
-        value=5.899902216596077e-178,
+        value=7.315171595470277e-35,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_att_com_r_des = pvproperty(
         name="MFX:ATT:COM:R_DES",
         doc="Fake MFX:ATT:COM:R_DES",
-        value=1e-05,
+        value=1.0,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg1_jaws_actual_xwidth = pvproperty(
         name="MFX:DG1:JAWS:ACTUAL_XWIDTH",
         doc="Fake MFX:DG1:JAWS:ACTUAL_XWIDTH",
-        value=0.9995,
+        value=0.9001,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg1_jaws_actual_ywidth = pvproperty(
         name="MFX:DG1:JAWS:ACTUAL_YWIDTH",
         doc="Fake MFX:DG1:JAWS:ACTUAL_YWIDTH",
-        value=0.9995999999999998,
+        value=0.9007000000000001,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg1_jaws_xwid_req = pvproperty(
         name="MFX:DG1:JAWS:XWID_REQ",
         doc="Fake MFX:DG1:JAWS:XWID_REQ",
-        value=1.0,
+        value=0.9,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg1_jaws_ywid_req = pvproperty(
         name="MFX:DG1:JAWS:YWID_REQ",
         doc="Fake MFX:DG1:JAWS:YWID_REQ",
-        value=1.0,
+        value=0.9,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg1_p6740_acquire = pvproperty(
         name="MFX:DG1:P6740:Acquire",
@@ -99,6 +105,7 @@ class BTSimIOC(PVGroup):
         doc="Fake MFX:DG1:P6740:ArrayRate_RBV",
         value=10.0,
         dtype=ChannelType.DOUBLE,
+        precision=2,
     )
     mfx_dg1_pim = pvproperty(
         name="MFX:DG1:PIM",
@@ -110,81 +117,93 @@ class BTSimIOC(PVGroup):
     mfx_dg1_pim_go = pvproperty(
         name="MFX:DG1:PIM:GO",
         doc="Fake MFX:DG1:PIM:GO",
-        value=0,
+        value=2,
         dtype=ChannelType.ENUM,
         enum_strings=['Unknown', 'YAG', 'OUT'],
     )
     mfx_dg2_jaws_ds_actual_xwidth = pvproperty(
         name="MFX:DG2:JAWS:DS:ACTUAL_XWIDTH",
         doc="Fake MFX:DG2:JAWS:DS:ACTUAL_XWIDTH",
-        value=4.9996,
+        value=0.3004999999999999,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg2_jaws_ds_actual_ywidth = pvproperty(
         name="MFX:DG2:JAWS:DS:ACTUAL_YWIDTH",
         doc="Fake MFX:DG2:JAWS:DS:ACTUAL_YWIDTH",
-        value=4.999815806,
+        value=0.3001996720000004,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg2_jaws_ds_xwid_req = pvproperty(
         name="MFX:DG2:JAWS:DS:XWID_REQ",
         doc="Fake MFX:DG2:JAWS:DS:XWID_REQ",
-        value=5.0,
+        value=0.3,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg2_jaws_ds_ywid_req = pvproperty(
         name="MFX:DG2:JAWS:DS:YWID_REQ",
         doc="Fake MFX:DG2:JAWS:DS:YWID_REQ",
-        value=5.0,
+        value=0.3,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg2_jaws_ms_actual_xwidth = pvproperty(
         name="MFX:DG2:JAWS:MS:ACTUAL_XWIDTH",
         doc="Fake MFX:DG2:JAWS:MS:ACTUAL_XWIDTH",
-        value=5.0006,
+        value=0.30090000000000006,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg2_jaws_ms_actual_ywidth = pvproperty(
         name="MFX:DG2:JAWS:MS:ACTUAL_YWIDTH",
         doc="Fake MFX:DG2:JAWS:MS:ACTUAL_YWIDTH",
-        value=4.9993,
+        value=0.3004,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg2_jaws_ms_xwid_req = pvproperty(
         name="MFX:DG2:JAWS:MS:XWID_REQ",
         doc="Fake MFX:DG2:JAWS:MS:XWID_REQ",
-        value=5.0,
+        value=0.3,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg2_jaws_ms_ywid_req = pvproperty(
         name="MFX:DG2:JAWS:MS:YWID_REQ",
         doc="Fake MFX:DG2:JAWS:MS:YWID_REQ",
-        value=5.0,
+        value=0.3,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg2_jaws_us_actual_xwidth = pvproperty(
         name="MFX:DG2:JAWS:US:ACTUAL_XWIDTH",
         doc="Fake MFX:DG2:JAWS:US:ACTUAL_XWIDTH",
-        value=0.9990999999999985,
+        value=0.599499999999999,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg2_jaws_us_actual_ywidth = pvproperty(
         name="MFX:DG2:JAWS:US:ACTUAL_YWIDTH",
         doc="Fake MFX:DG2:JAWS:US:ACTUAL_YWIDTH",
-        value=0.9998,
+        value=0.6000000000000008,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg2_jaws_us_xwid_req = pvproperty(
         name="MFX:DG2:JAWS:US:XWID_REQ",
         doc="Fake MFX:DG2:JAWS:US:XWID_REQ",
-        value=1.0,
+        value=0.6,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg2_jaws_us_ywid_req = pvproperty(
         name="MFX:DG2:JAWS:US:YWID_REQ",
         doc="Fake MFX:DG2:JAWS:US:YWID_REQ",
-        value=1.0,
+        value=0.6,
         dtype=ChannelType.DOUBLE,
+        precision=4,
     )
     mfx_dg2_pim = pvproperty(
         name="MFX:DG2:PIM",
@@ -196,7 +215,7 @@ class BTSimIOC(PVGroup):
     mfx_dg2_pim_go = pvproperty(
         name="MFX:DG2:PIM:GO",
         doc="Fake MFX:DG2:PIM:GO",
-        value=0,
+        value=2,
         dtype=ChannelType.ENUM,
         enum_strings=['Unknown', 'YAG', 'OUT'],
     )
@@ -210,7 +229,7 @@ class BTSimIOC(PVGroup):
     mfx_lens_dia_01_state = pvproperty(
         name="MFX:LENS:DIA:01:STATE",
         doc="Fake MFX:LENS:DIA:01:STATE",
-        value=0,
+        value=1,
         dtype=ChannelType.ENUM,
         enum_strings=['Not in', 'In'],
     )
@@ -294,7 +313,7 @@ class BTSimIOC(PVGroup):
     mfx_lens_tfs_04_state = pvproperty(
         name="MFX:LENS:TFS:04:STATE",
         doc="Fake MFX:LENS:TFS:04:STATE",
-        value=0,
+        value=1,
         dtype=ChannelType.ENUM,
         enum_strings=['Not in', 'In'],
     )
@@ -322,7 +341,7 @@ class BTSimIOC(PVGroup):
     mfx_lens_tfs_06_state = pvproperty(
         name="MFX:LENS:TFS:06:STATE",
         doc="Fake MFX:LENS:TFS:06:STATE",
-        value=0,
+        value=1,
         dtype=ChannelType.ENUM,
         enum_strings=['Not in', 'In'],
     )
@@ -364,7 +383,7 @@ class BTSimIOC(PVGroup):
     mfx_lens_tfs_09_state = pvproperty(
         name="MFX:LENS:TFS:09:STATE",
         doc="Fake MFX:LENS:TFS:09:STATE",
-        value=0,
+        value=1,
         dtype=ChannelType.ENUM,
         enum_strings=['Not in', 'In'],
     )
@@ -385,26 +404,28 @@ class BTSimIOC(PVGroup):
     mr1l4_homs_mms_pitch_rbv = pvproperty(
         name="MR1L4:HOMS:MMS:PITCH.RBV",
         doc="Fake MR1L4:HOMS:MMS:PITCH.RBV",
-        value=840.547343,
+        value=-543.437262,
         dtype=ChannelType.DOUBLE,
+        precision=3,
     )
     mr1l4_homs_mms_pitch_val = pvproperty(
         name="MR1L4:HOMS:MMS:PITCH.VAL",
         doc="Fake MR1L4:HOMS:MMS:PITCH.VAL",
-        value=840.5500000000001,
+        value=-543.4429999999999,
         dtype=ChannelType.DOUBLE,
+        precision=3,
     )
     mr1l4_homs_mms_xup_state_get_rbv = pvproperty(
         name="MR1L4:HOMS:MMS:XUP:STATE:GET_RBV",
         doc="Fake MR1L4:HOMS:MMS:XUP:STATE:GET_RBV",
-        value=1,
+        value=2,
         dtype=ChannelType.ENUM,
         enum_strings=['UNKNOWN', 'OUT', 'IN'],
     )
     mr1l4_homs_mms_xup_state_set = pvproperty(
         name="MR1L4:HOMS:MMS:XUP:STATE:SET",
         doc="Fake MR1L4:HOMS:MMS:XUP:STATE:SET",
-        value=1,
+        value=2,
         dtype=ChannelType.ENUM,
         enum_strings=['UNKNOWN', 'OUT', 'IN'],
     )

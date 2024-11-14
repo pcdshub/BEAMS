@@ -9,6 +9,12 @@ from beams.bin.gen_test_ioc_main import walk_dict_pvs
 
 
 class App(Display):
+    """
+    Basic form ui to control simulated PVs from mfx_sim.py.
+
+    Based on the data type of the PVs we'll pick the most suitable widget type,
+    leveraging typhos.
+    """
 
     def __init__(self, parent=None, args=None, macros=None):
         super().__init__(parent=parent, args=args, macros=macros)

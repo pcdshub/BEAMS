@@ -7,11 +7,9 @@ from caproto.server import PVGroup, ioc_arg_parser, pvproperty, run
 
 class VariousTypesIOC(PVGroup):
     """
-    An IOC with three uncoupled read/writable PVs.
+    An IOC with PVs of various types.
 
-    Scalar PVs
-    ----------
-    COMP (int)
+    Used to test the IOC inspection/generation tooling.
     """
 
     INT = pvproperty(

@@ -17,10 +17,12 @@ class App(Display):
             deser = json.load(fd)
         # Preserve order, ignore duplicates
         seen = set()
-        for pvname in (pv for pv in walk_dict_pvs(deser) if not (pv in seen or seen.add(pv))):
-            cls, kwargs = determine_widget_type(EpicsSignal(pvname))
+        sigs = [EpicsSignal(pv) for pv in walk_dict_pvs(deser) if not (pv in seen or seen.add(pv))]
+        for sig in sigs:
+            sig.wait_for_connection()
+            cls, kwargs = determine_widget_type(EpicsSignal(sig.pvname))
             widget = cls(**kwargs)
-            self.ui.scroll.widget().layout().addRow(pvname, widget)
+            self.ui.scroll.widget().layout().addRow(sig.pvname, widget)
 
     def ui_filename(self):
         return 'mfx_tree_ui.ui'

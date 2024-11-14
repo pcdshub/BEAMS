@@ -14,6 +14,9 @@ from caproto.threading.client import Batch, Context
 
 @dataclass(frozen=True, eq=True, order=True)
 class PVInfoForJ2:
+    """
+    Dataclass that contains the information needed to generate one PV in the jinja2 template.
+    """
     python_name: str
     pvname: str
     value: Any
@@ -23,8 +26,15 @@ class PVInfoForJ2:
 
     @classmethod
     def from_result(cls: type[PVInfoForJ2], pvname: str, response: ReadNotifyResponse) -> PVInfoForJ2:
+        """
+        Create this dataclass using the results from a caproto pv.read(data_type="control")
+
+        This should gather all the information needed to spoof a real PV.
+        """
+        # Data is always an array, so we should unpack it if the PV has only one element
         value = response.data if response.data_count > 1 else response.data[0]
         if isinstance(value, bytes):
+            # I'm not sure if this is the right encoding but it works in testing so far
             value = value.decode("utf-8")
         try:
             enum_strings = response.metadata.enum_strings
@@ -38,6 +48,7 @@ class PVInfoForJ2:
             python_name=pvname.lower().replace(":", "_").replace(".", "_"),
             pvname=pvname,
             value=value,
+            # Despite our best effort, some types like STRING leak "TIME_STRING" here
             dtype=response.data_type.name.removeprefix("CTRL_").removeprefix("TIME_"),
             enum_strings=[bt.decode("utf8") for bt in enum_strings],
             precision=precision,
@@ -45,6 +56,11 @@ class PVInfoForJ2:
 
     @classmethod
     def as_default(cls: type[PVInfoForJ2], pvname: str) -> PVInfoForJ2:
+        """
+        Create a default version of the dataclass.
+
+        This can be used as a fallback for when the control system is unavailable.
+        """
         return cls(
             python_name=pvname.lower().replace(":", "_").replace(".", "_"),
             pvname=pvname,
@@ -56,6 +72,11 @@ class PVInfoForJ2:
 
 
 def collect_pv_info(pvnames: Iterable[str]) -> list[PVInfoForJ2]:
+    """
+    Given some PVs, collect the information needed to create a spoof IOC.
+
+    The results from this should be fed into the test_ioc.py.j2 jinja2 template file.
+    """
     ctx = Context()
     pvs = ctx.get_pvs(*pvnames)
     results = []
@@ -69,6 +90,7 @@ def collect_pv_info(pvnames: Iterable[str]) -> list[PVInfoForJ2]:
         except Exception as exc:
             print(exc)
 
+    # This is probably overkill but it does save some time for large trees
     with Batch() as batch:
         for pv in pvs:
             batch.read(pv, callback=partial(stash_results, pv.name), data_type="control")
@@ -83,6 +105,9 @@ def collect_pv_info(pvnames: Iterable[str]) -> list[PVInfoForJ2]:
 
 
 def default_pv_info(pvnames: Iterable[str]) -> list[PVInfoForJ2]:
+    """
+    An alternative to collect_pv_info that sets us up with some boring defaults.
+    """
     return [PVInfoForJ2.as_default(pvname=pvname) for pvname in pvnames]
 
 
@@ -114,6 +139,9 @@ def main(
 
 
 def walk_dict_pvs(tree_dict: dict) -> Iterator[str]:
+    """
+    Given the contents of a tree json file, iterate through the PVs.
+    """
     for key, value in tree_dict.items():
         if key == "pv" or key == "pv_name" and value:
             yield str(value)

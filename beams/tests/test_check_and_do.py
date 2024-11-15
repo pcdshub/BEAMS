@@ -5,9 +5,9 @@ from multiprocessing import Value
 import py_trees
 from py_trees.common import Status
 
-from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
-from beams.behavior_tree.CheckAndDo import CheckAndDo
-from beams.behavior_tree.ConditionNode import ConditionNode
+from beams.behavior_tree.action_node import ActionNode, wrapped_action_work
+from beams.behavior_tree.check_and_do import CheckAndDo
+from beams.behavior_tree.condition_node import ConditionNode
 
 logger = logging.getLogger(__name__)
 

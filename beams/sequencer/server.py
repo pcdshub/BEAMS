@@ -5,13 +5,13 @@ from multiprocessing import Semaphore
 
 import grpc
 
-from beams.sequencer.helpers.PriorityQueue import PriorityQueue
-from beams.sequencer.helpers.Worker import Worker
+from beams.sequencer.helpers.queue import PriorityQueue
+from beams.sequencer.helpers.worker import Worker
 from beams.sequencer.remote_calls.sequencer_pb2 import (CommandReply,
                                                         MessageType)
 from beams.sequencer.remote_calls.sequencer_pb2_grpc import (
     SequencerServicer, add_SequencerServicer_to_server)
-from beams.sequencer.SequencerState import SequencerState
+from beams.sequencer.state import SequencerState
 
 message_priority_dict = {
     MessageType.MESSAGE_TYPE_ALTER_RUN_STATE: 0,

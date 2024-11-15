@@ -5,7 +5,7 @@ from typing import Any
 import py_trees
 from epics import caget, caput
 
-from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
+from beams.behavior_tree.action_node import ActionNode, wrapped_action_work
 from beams.tree_config.base import BaseItem
 from beams.tree_config.condition import BaseConditionItem, DummyConditionItem
 from beams.typing_helper import Evaluatable

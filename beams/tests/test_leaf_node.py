@@ -5,8 +5,8 @@ from typing import Callable
 
 from py_trees.common import Status
 
-from beams.behavior_tree.ActionNode import ActionNode, wrapped_action_work
-from beams.behavior_tree.ConditionNode import ConditionNode
+from beams.behavior_tree.action_node import ActionNode, wrapped_action_work
+from beams.behavior_tree.condition_node import ConditionNode
 
 logger = logging.getLogger(__name__)
 

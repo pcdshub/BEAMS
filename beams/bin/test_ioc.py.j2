@@ -13,7 +13,11 @@ class BTSimIOC(PVGroup):
     {{ pv_info.python_name }} = pvproperty(
         name="{{ pv_info.pvname }}",
         doc="Fake {{ pv_info.pvname }}",
+        {% if pv_info.dtype == "STRING" %}
+        value="{{ pv_info.value }}",
+        {% else %}
         value={{ pv_info.value }},
+        {% endif %}
         dtype=ChannelType.{{ pv_info.dtype }},
         {% if pv_info.enum_strings %}
         enum_strings={{ pv_info.enum_strings }},

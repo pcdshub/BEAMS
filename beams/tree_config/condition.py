@@ -2,7 +2,7 @@ import operator
 from dataclasses import dataclass, field
 from enum import Enum
 
-from beams.behavior_tree.ConditionNode import ConditionNode
+from beams.behavior_tree.condition_node import ConditionNode
 from beams.serialization import as_tagged_union
 from beams.tree_config.base import BaseItem, BaseValue, FixedValue
 from beams.typing_helper import Evaluatable

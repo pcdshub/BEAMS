@@ -1,7 +1,7 @@
 import py_trees
 
-from beams.behavior_tree.ActionNode import ActionNode
-from beams.behavior_tree.ConditionNode import ConditionNode
+from beams.behavior_tree.action_node import ActionNode
+from beams.behavior_tree.condition_node import ConditionNode
 
 
 class CheckAndDo(py_trees.composites.Selector):

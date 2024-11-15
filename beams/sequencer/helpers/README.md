@@ -4,7 +4,6 @@ Various helper classes oriented around distributing work or sharing variables in
 ## PriorityQueue
 * Implements a multiprocessing safe binary tree priority queue enabled by the heapq module.
 
-
 ## Worker
 * An base class for child classes whos main function is to support a work thread.
 * Holds volatile `self.do_work` which is intended to handle kill signal

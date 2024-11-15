@@ -1,5 +1,5 @@
-from beams.sequencer.SequencerState import SequencerState
-from beams.sequencer.SequenceServer import SequenceServer
+from beams.sequencer.server import SequenceServer
+from beams.sequencer.state import SequencerState
 
 
 class TestTask:

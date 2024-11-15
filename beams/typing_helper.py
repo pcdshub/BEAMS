@@ -10,7 +10,7 @@ from typing import Callable
 
 import py_trees
 
-from beams.behavior_tree.VolatileStatus import VolatileStatus
+from beams.behavior_tree.volatile_status import VolatileStatus
 
 '''
 # Evaluatable: function handle that returns a boolean , accpeting arbitrary arugments

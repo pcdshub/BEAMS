@@ -7,9 +7,9 @@ from threading import Thread
 
 import py_trees
 
-from beams.sequencer.helpers.Worker import Worker
-from beams.sequencer.SequencerState import SequencerState
-from beams.sequencer.SequenceServer import SequenceServer
+from beams.sequencer.helpers.worker import Worker
+from beams.sequencer.server import SequenceServer
+from beams.sequencer.state import SequencerState
 from beams.tree_generator.TreeGenerator import GenerateTreeFromRequest
 
 logger = logging.getLogger(__name__)

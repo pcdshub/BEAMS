@@ -2,8 +2,7 @@ from beams.sequencer.remote_calls.sequencer_pb2 import (MessageType,
                                                         RunStateType,
                                                         SequenceType,
                                                         TickStatus)
-from beams.sequencer.SequencerState import (SequencerState,
-                                            SequencerStateVariable)
+from beams.sequencer.state import SequencerState, SequencerStateVariable
 
 
 class TestTask:

@@ -13,9 +13,9 @@ from py_trees.behaviours import (BlackboardToStatus,
                                  WaitForBlackboardVariableValue)
 from py_trees.composites import Parallel, Selector, Sequence
 
-from beams.behavior_tree.ActionNode import ActionNode
-from beams.behavior_tree.CheckAndDo import CheckAndDo
-from beams.behavior_tree.ConditionNode import ConditionNode
+from beams.behavior_tree.action_node import ActionNode
+from beams.behavior_tree.check_and_do import CheckAndDo
+from beams.behavior_tree.condition_node import ConditionNode
 from beams.serialization import get_all_subclasses, is_tagged_union
 from beams.tree_config.action import IncPVActionItem, SetPVActionItem
 from beams.tree_config.base import BaseItem

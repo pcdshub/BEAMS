@@ -37,6 +37,7 @@ class ActionNode(py_trees.behaviour.Behaviour):
             comp_cond=completion_condition,
             stop_func=None
         )  # TODO: some standard notion of stop function could be valuable
+        self.is_set_up = False
         logger.debug("%s.__init__()" % (self.__class__.__name__))
 
     def setup(self, **kwargs: int) -> None:
@@ -51,8 +52,14 @@ class ActionNode(py_trees.behaviour.Behaviour):
         # Having this in setup means the workthread should always be running.
         self.worker.start_work()
         atexit.register(
-            self.worker.stop_work
+            self.shutdown
         )  # TODO(josh): make sure this cleans up resources when it dies
+        self.is_set_up = True
+
+    def shutdown(self) -> None:
+        if self.is_set_up:
+            self.worker.stop_work()
+            self.is_set_up = False
 
     def initialise(self) -> None:
         """

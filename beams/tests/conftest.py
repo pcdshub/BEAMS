@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import sys
@@ -6,6 +8,8 @@ from copy import copy
 
 import py_trees.logging
 import pytest
+from py_trees.behaviour import Behaviour
+from py_trees.trees import BehaviourTree
 
 from beams.logging import setup_logging
 
@@ -29,6 +33,41 @@ def ca_env_vars():
     # Only broadcast and get on local if
     os.environ["EPICS_CA_AUTO_ADDR_LIST"] = "NO"
     os.environ["EPICS_CA_ADDR_LIST"] = "localhost"
+
+
+class BTCleaner:
+    """
+    Helper to call shutdown early to avoid pytest atexit spam
+    """
+    nodes: list[Behaviour]
+    trees: list[BehaviourTree]
+
+    def __init__(self):
+        self.nodes = []
+        self.trees = []
+
+    def register(self, node_or_tree: Behaviour | BehaviourTree):
+        if isinstance(node_or_tree, Behaviour):
+            self.nodes.append(node_or_tree)
+        elif isinstance(node_or_tree, BehaviourTree):
+            self.trees.append(node_or_tree)
+        else:
+            raise TypeError("Can only register Behavior and BehaviorTree instances!")
+
+    def clean(self):
+        for node in self.nodes:
+            node.shutdown()
+            for child_node in node.children:
+                child_node.shutdown()
+        for tree in self.trees:
+            tree.shutdown()
+
+
+@pytest.fixture(scope="function")
+def bt_cleaner():
+    cleaner = BTCleaner()
+    yield cleaner
+    cleaner.clean()
 
 
 @contextmanager

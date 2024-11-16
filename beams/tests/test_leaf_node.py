@@ -11,7 +11,7 @@ from beams.behavior_tree.ConditionNode import ConditionNode
 logger = logging.getLogger(__name__)
 
 
-def test_action_node():
+def test_action_node(bt_cleaner):
     # For test
     percentage_complete = Value("i", 0)
 
@@ -28,6 +28,7 @@ def test_action_node():
 
     action = ActionNode(name="action", work_func=work_func,
                         completion_condition=comp_cond)
+    bt_cleaner.register(action)
     action.setup()
     for _ in range(20):
         time.sleep(0.01)
@@ -35,7 +36,7 @@ def test_action_node():
     assert percentage_complete.value == 100
 
 
-def test_action_node_timeout():
+def test_action_node_timeout(bt_cleaner):
     # For test
     percentage_complete = Value("i", 0)
 
@@ -52,6 +53,7 @@ def test_action_node_timeout():
 
     action = ActionNode(name="action", work_func=work_func,
                         completion_condition=comp_cond)
+    bt_cleaner.register(action)
     action.setup()
 
     while action.status not in (
@@ -64,11 +66,12 @@ def test_action_node_timeout():
     assert percentage_complete.value != 100
 
 
-def test_condition_node():
+def test_condition_node(bt_cleaner):
     def condition_fn():
         return True
 
     con = ConditionNode("con", condition_fn)
+    bt_cleaner.register(con)
     con.setup()
     assert con.status == Status.INVALID
     for _ in range(3):
@@ -78,12 +81,13 @@ def test_condition_node():
     assert con.status == Status.SUCCESS
 
 
-def test_condition_node_with_arg():
+def test_condition_node_with_arg(bt_cleaner):
     def check(val):
         return val
 
     value = False
     con = ConditionNode("con", check, value)
+    bt_cleaner.register(con)
     con.setup()
     assert con.status == Status.INVALID
     for _ in range(3):

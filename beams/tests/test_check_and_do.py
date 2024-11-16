@@ -12,7 +12,7 @@ from beams.behavior_tree.ConditionNode import ConditionNode
 logger = logging.getLogger(__name__)
 
 
-def test_check_and_do():
+def test_check_and_do(bt_cleaner):
     percentage_complete = Value("i", 0)
 
     @wrapped_action_work(loop_period_sec=0.001)
@@ -38,6 +38,7 @@ def test_check_and_do():
     check = ConditionNode("check", check_fn, percentage_complete)
 
     candd = CheckAndDo("yuhh", check, action)
+    bt_cleaner.register(candd)
     candd.setup_with_descendants()
 
     while (

@@ -19,9 +19,10 @@ def test_tree_obj_ser():
     assert isinstance(tg.root, CheckAndDo)
 
 
-def test_tree_obj_execution(request):
+def test_tree_obj_execution(request, bt_cleaner):
     fname = Path(__file__).parent / "artifacts" / "eggs.json"
     tree = get_tree_from_path(fname)
+    bt_cleaner.register(tree)
 
     # start mock IOC # NOTE: assumes test is being run from top level of
     run_example_ioc(
@@ -43,7 +44,7 @@ def test_tree_obj_execution(request):
     assert rel_val >= 100
 
 
-def test_father_tree_execution(request):
+def test_father_tree_execution(request, bt_cleaner):
     run_example_ioc(
         "beams.tests.mock_iocs.ImagerNaysh",
         request=request,
@@ -52,6 +53,7 @@ def test_father_tree_execution(request):
 
     fname = Path(__file__).parent / "artifacts" / "eggs2.json"
     tree = get_tree_from_path(fname)
+    bt_cleaner.register(tree)
     tree.setup()
     ct = 0
     while (
@@ -79,7 +81,7 @@ def test_save_tree_item_round_trip(tmp_path: Path):
     assert loaded_tree.root.name == item.name
 
 
-def test_stop_hitting_yourself(request):
+def test_stop_hitting_yourself(request, bt_cleaner):
     run_example_ioc(
         "beams.tests.mock_iocs.IM2L0",
         request=request,
@@ -88,6 +90,7 @@ def test_stop_hitting_yourself(request):
 
     fname = Path(__file__).parent / "artifacts" / "im2l0_test.json"
     tree = get_tree_from_path(fname)
+    bt_cleaner.register(tree)
     tree.setup()
     ct = 0
     while (

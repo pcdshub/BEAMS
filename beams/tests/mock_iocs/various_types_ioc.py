@@ -29,9 +29,9 @@ class VariousTypesIOC(PVGroup):
     )
 
     ENUM = pvproperty(
-        value=2,
+        value=0,
         dtype=ChannelType.ENUM,
-        enum_strings=["e", "i", "pi"]
+        enum_strings=["apple", "pumpkin", "shepherd's"]
     )
 
 

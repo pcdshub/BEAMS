@@ -13,7 +13,9 @@ not required by work functions in general. The add_args are as follows:
 """
 import logging
 import time
-from multiprocessing import Event, Queue, Value
+from multiprocessing import Queue
+from multiprocessing.sharedctypes import Synchronized
+from multiprocessing.synchronize import Event as EventClass
 from typing import Callable, Optional
 
 import py_trees
@@ -32,9 +34,9 @@ logger = logging.getLogger(__name__)
 def wrapped_action_work(loop_period_sec: float = 0.1, work_function_timeout_period_sec: float = 2):
     def action_worker_work_function_generator(func: ActionNodeWorkFunction) -> ActionNodeWorkLoop:
         def work_wrapper(
-            do_work: Value,
+            do_work: Synchronized,
             name: str,
-            work_gate: Event,
+            work_gate: EventClass,
             volatile_status: VolatileStatus,
             completion_condition: Evaluatable,
             log_queue: Queue,
@@ -52,7 +54,7 @@ def wrapped_action_work(loop_period_sec: float = 0.1, work_function_timeout_peri
                                             timer_period_seconds=work_function_timeout_period_sec,
                                             auto_start=False)
             while (do_work.value):
-                logger.debug(f"WAITING FOR INIT from node: {name}")
+                logger.debug(f" <<-- ({name}) waiting for work release")
                 work_gate.wait()
                 work_gate.clear()
 
@@ -61,25 +63,25 @@ def wrapped_action_work(loop_period_sec: float = 0.1, work_function_timeout_peri
                 # Start timer
                 work_loop_timeout_timer.start_timer()
                 while not completion_condition() and not work_loop_timeout_timer.is_elapsed():
-                    logger.debug(f"CALLING CAGET FROM from node ({name})")
+                    logger.debug(f" <<-- ({name}) not complete, doing work")
                     try:
                         status = func(completion_condition)
                     except Exception as ex:
                         volatile_status.set_value(py_trees.common.Status.FAILURE)
-                        logger.error(f"Work function failed, setting node ({name}) "
-                                     f"as FAILED. ({ex})")
+                        logger.error(f" <<-- ({name}) Work failed, setting "
+                                     f"status=FAILURE. ({ex})")
                         break
 
                     volatile_status.set_value(status)
-                    logger.debug(f"Setting node ({name}): {volatile_status.get_value()}")
+                    logger.debug(f" <<-- ({name}): {volatile_status.get_value().name}")
                     time.sleep(loop_period_sec)
 
                 # check if we exited loop because we timed out or we succeeded at task
                 if completion_condition():
-                    logger.debug(f"Worker for node ({name}) completed.")
+                    logger.debug(f" <<-- ({name}): SUCCESS")
                     volatile_status.set_value(py_trees.common.Status.SUCCESS)
                 else:
-                    logger.debug(f"Worker for node ({name}) failed.")
+                    logger.debug(f" <<-- ({name}): FAILURE")
                     volatile_status.set_value(py_trees.common.Status.FAILURE)
 
         return work_wrapper
@@ -91,7 +93,7 @@ class ActionWorker(Worker):
         self,
         proc_name: str,
         volatile_status: VolatileStatus,
-        work_gate: Event,
+        work_gate: EventClass,
         work_func: Callable[..., None],
         comp_cond: Callable[..., bool],
         stop_func: Optional[Callable[[None], None]] = None

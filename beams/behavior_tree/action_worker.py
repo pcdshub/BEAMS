@@ -108,7 +108,7 @@ class ActionWorker(Worker):
                       LOGGER_QUEUE,
                       worker_logging_configurer)
         )
-
+        logger.debug(f"Creating worker ({proc_name})")
         # Note: there may be a world where we define a common stop_func here in
         # which case the class may have maintain a reference to voltaile_status and
         # or comp_cond

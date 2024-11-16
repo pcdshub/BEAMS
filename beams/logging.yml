@@ -5,7 +5,7 @@ formatters:
   # For the console:
   custom:
     (): 'logging.Formatter'
-    fmt: '%(levelname)-8s - PID %(process)d %(funcName)s %(message)s'
+    fmt: '%(levelname)-8s - PID %(process)d : %(message)s'
   # For log files:
   file:
     (): 'logging.Formatter'

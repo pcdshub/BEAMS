@@ -54,3 +54,6 @@ file = "docs-requirements.txt"
 
 [tool.pytest.ini_options]
 addopts = "--cov=."
+markers = [
+    "flaky: register this mark to avoid pytest warnings (comes from caproto -> pytest-rerunfailures)",
+]

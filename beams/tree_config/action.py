@@ -27,17 +27,19 @@ class SetPVActionItem(BaseItem):
         def work_func(comp_condition: Evaluatable) -> py_trees.common.Status:
             try:
                 # Set to running
-                value = caget(self.pv)  # double caget, this is uneeded as currently the comp_condition has caget baked in
+                # double caget, this is uneeded as currently the comp_condition
+                # has caget baked in
+                value = caget(self.pv)
 
                 if comp_condition():
                     return py_trees.common.Status.SUCCESS
-                logger.debug(f"{self.name}: Value is {value}")
+                logger.debug(f" <<-- ({self.name}): {self.pv} = {value}")
 
                 # specific caput logic to SetPVActionItem
                 caput(self.pv, self.value)
                 return py_trees.common.Status.RUNNING
             except Exception as ex:
-                logger.warning(f"{self.name}: work failed: {ex}")
+                logger.warning(f" <<-- ({self.name}): work failed, {ex}")
                 return py_trees.common.Status.FAILURE
 
         comp_cond = self.termination_check.get_condition_function()
@@ -70,7 +72,7 @@ class IncPVActionItem(BaseItem):
             try:
                 value = caget(self.pv)
 
-                logging.debug(f"(wf) {self.name}: Value is {value}")
+                logger.debug(f" <<-- ({self.name}): {self.pv} = {value}")
                 if comp_condition():
                     return py_trees.common.Status.SUCCESS
 
@@ -78,7 +80,7 @@ class IncPVActionItem(BaseItem):
                 caput(self.pv, value + self.increment)
                 return py_trees.common.Status.RUNNING
             except Exception as ex:
-                logger.warning(f"{self.name}: work failed: {ex}")
+                logger.warning(f" <<-- ({self.name}): work failed, {ex}")
                 return py_trees.common.Status.FAILURE
 
         comp_cond = self.termination_check.get_condition_function()

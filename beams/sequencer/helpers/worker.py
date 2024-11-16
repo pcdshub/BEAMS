@@ -5,7 +5,9 @@
 * Optional constructor arg `stop_func` to be executde on process termination before joining work process.
 """
 import logging
+from ctypes import c_bool
 from multiprocessing import Process, Value
+from multiprocessing.sharedctypes import Synchronized
 from typing import Any, Callable, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -20,7 +22,7 @@ class Worker():
         proc_type: type[Process] = Process,
         add_args: Optional[List[Any]] = None,
     ):
-        self.do_work = Value('i', False)
+        self.do_work: Synchronized = Value(c_bool, False)
         self.proc_name = proc_name
         self.proc_type = proc_type
         self.add_args = add_args or []

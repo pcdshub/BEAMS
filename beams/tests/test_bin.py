@@ -132,8 +132,8 @@ def test_collect_pvinfo(
         elif info.pvname == "VAR:TYPES:ENUM":
             assert info.python_name == "var_types_enum"
             assert info.dtype == "ENUM"
-            assert info.value == 2
-            assert info.enum_strings == ["e", "i", "pi"]
+            assert info.value == 0
+            assert info.enum_strings == ["apple", "pumpkin", "shepherd's"]
         else:
             raise RuntimeError(f"Unexpected pvname {info.pvname}")
 

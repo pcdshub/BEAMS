@@ -99,8 +99,6 @@ class ActionNode(py_trees.behaviour.Behaviour):
     def terminate(self, new_status: py_trees.common.Status) -> None:
         """Nothing to clean up."""
         logger.debug(
-            py_trees.console.red
-            + "%s.terminate()[%s->%s]"
-            % (self.__class__.__name__, self.status, new_status)
-            + py_trees.console.reset
+            "%s.terminate [%s->%s]"
+            % (self.name, self.status.name, new_status.name)
         )

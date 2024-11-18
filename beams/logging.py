@@ -179,11 +179,14 @@ class LoggingVisitor(VisitorBase):
 
     def run(self, behaviour: Behaviour) -> None:
         """
-        Write node status to logging stream.
+        Write node status to logging stream, executes AFTER a node is ticked.
+        (operates on nodes yielded by Behaviour.tick())
+
         If print_status is requested and the console logger won't display, also
-        print to console
+        print to console.
         """
-        out_msg = f"{behaviour.__class__.__name__}.run() [{behaviour.status}]"
+        name = getattr(behaviour, 'name', None) or behaviour.__class__.__name__
+        out_msg = f"{name} node tick completed [{behaviour.status.name}]"
         if behaviour.feedback_message:
             logger.debug(out_msg + f": [{behaviour.feedback_message}]")
             if self.print_status and (self.stream_handler_level > logging.DEBUG):

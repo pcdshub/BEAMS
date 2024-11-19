@@ -58,16 +58,13 @@ class ActionNode(py_trees.behaviour.Behaviour):
         """
         Initialise configures and resets the behaviour ready for (repeated) execution
         """
-        logger.debug(f"Initliazing {self.name}...")
+        logger.debug(f"{self.name}.initialise [{self.status.name}->RUNNING]")
         self.volatile_status.set_value(py_trees.common.Status.RUNNING)
         self.work_gate.set()
 
     def update(self) -> py_trees.common.Status:
         """Increment the counter, monitor and decide on a new status."""
-        logger.debug(
-            f"Getting tick on {self.name}. "
-            f"Status: {self.volatile_status.get_value()}"
-        )
+        logger.debug(f"{self.name}.update [{self.status.name}]")
 
         # This does the interprocess communcication between this thread which is
         # getting ticked and the work_proc thread which is doing work
@@ -76,13 +73,8 @@ class ActionNode(py_trees.behaviour.Behaviour):
         if new_status == py_trees.common.Status.SUCCESS:
             self.feedback_message = "Processing finished"
             logger.debug(
-                "%s.update()[%s->%s][%s]"
-                % (
-                    self.__class__.__name__,
-                    self.status,
-                    new_status,
-                    self.feedback_message,
-                )
+                f"{self.name}.update [{self.status.name}->{new_status.name}] "
+                f"{self.feedback_message}"
             )
             # TODO: should clear even here so work thread can go back to wait state
             # self.work_gate.clear()

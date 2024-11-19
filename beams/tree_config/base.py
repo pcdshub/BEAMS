@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from typing import Any
 
@@ -6,6 +7,8 @@ from epics import caget
 from py_trees.behaviour import Behaviour
 
 from beams.serialization import as_tagged_union
+
+logger = logging.getLogger(__name__)
 
 
 @as_tagged_union
@@ -58,7 +61,9 @@ class EPICSValue(BaseValue):
     as_string: bool = False
 
     def get_value(self) -> Any:
-        return caget(self.pv_name, as_string=self.as_string)
+        value = caget(self.pv_name, as_string=self.as_string)
+        logger.debug(f" <<-- (EPICSValue): caget({self.pv_name}) -> {value}")
+        return value
 
 
 @dataclass

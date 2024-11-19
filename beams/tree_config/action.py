@@ -30,13 +30,14 @@ class SetPVActionItem(BaseItem):
                 # double caget, this is uneeded as currently the comp_condition
                 # has caget baked in
                 value = caget(self.pv)
+                logger.debug(f" <<-- ({self.name}): caget({self.pv}) -> {value}")
 
                 if comp_condition():
                     return py_trees.common.Status.SUCCESS
-                logger.debug(f" <<-- ({self.name}): {self.pv} = {value}")
 
                 # specific caput logic to SetPVActionItem
                 caput(self.pv, self.value)
+                logger.debug(f" <<-- ({self.name}): caput({self.pv}, {value})")
                 return py_trees.common.Status.RUNNING
             except Exception as ex:
                 logger.warning(f" <<-- ({self.name}): work failed, {ex}")
@@ -71,13 +72,14 @@ class IncPVActionItem(BaseItem):
             """
             try:
                 value = caget(self.pv)
+                logger.debug(f" <<-- ({self.name}): caget({self.pv}) -> {value}")
 
-                logger.debug(f" <<-- ({self.name}): {self.pv} = {value}")
                 if comp_condition():
                     return py_trees.common.Status.SUCCESS
 
                 # specific caput logic to IncPVActionItem
                 caput(self.pv, value + self.increment)
+                logger.debug(f" <<-- ({self.name}): caput({self.pv}, {value})")
                 return py_trees.common.Status.RUNNING
             except Exception as ex:
                 logger.warning(f" <<-- ({self.name}): work failed, {ex}")

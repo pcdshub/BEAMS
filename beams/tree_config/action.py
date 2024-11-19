@@ -37,7 +37,7 @@ class SetPVActionItem(BaseItem):
 
                 # specific caput logic to SetPVActionItem
                 caput(self.pv, self.value)
-                logger.debug(f" <<-- ({self.name}): caput({self.pv}, {value})")
+                logger.debug(f" <<-- ({self.name}): caput({self.pv}, {self.value})")
                 return py_trees.common.Status.RUNNING
             except Exception as ex:
                 logger.warning(f" <<-- ({self.name}): work failed, {ex}")

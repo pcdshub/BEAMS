@@ -1,6 +1,5 @@
 import atexit
 import logging
-import os
 from multiprocessing import Event
 
 import py_trees
@@ -28,7 +27,6 @@ class ActionNode(py_trees.behaviour.Behaviour):
         self.work_gate = Event()
         self.completion_condition = completion_condition
         self.work_func = work_func
-        logger.debug(f'creating worker from {os.getpid()}')
         self.worker = ActionWorker(
             proc_name=name,
             volatile_status=self.volatile_status,
@@ -38,17 +36,12 @@ class ActionNode(py_trees.behaviour.Behaviour):
             stop_func=None
         )  # TODO: some standard notion of stop function could be valuable
         self.is_set_up = False
-        logger.debug("%s.__init__()" % (self.__class__.__name__))
 
     def setup(self, **kwargs: int) -> None:
         """Kickstart the separate process this behaviour will work with.
         Ordinarily this process will be already running. In this case,
         setup is usually just responsible for verifying it exists.
         """
-        logger.debug(
-            "%s.setup()->connections to an external process" % (self.__class__.__name__)
-        )
-
         # Having this in setup means the workthread should always be running.
         self.worker.start_work()
         atexit.register(

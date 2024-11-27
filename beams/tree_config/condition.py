@@ -4,7 +4,8 @@ from enum import Enum
 
 from beams.behavior_tree.condition_node import ConditionNode
 from beams.serialization import as_tagged_union
-from beams.tree_config.base import BaseItem, BaseValue, FixedValue
+from beams.tree_config.base import BaseItem
+from beams.tree_config.value import BaseValue, FixedValue
 from beams.typing_helper import Evaluatable
 
 

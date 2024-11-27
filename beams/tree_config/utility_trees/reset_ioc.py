@@ -2,16 +2,14 @@ import logging
 from dataclasses import dataclass
 
 import py_trees
+from epics import caget
 from py_trees.composites import Sequence
 
-from epics import caget
-
 from beams.behavior_tree.action_node import ActionNode, wrapped_action_work
-
-from beams.tree_config.base import BaseItem
-from beams.tree_config.value import BlackBoardValue, EPICSValue
 from beams.tree_config.action import SetPVActionItem
+from beams.tree_config.base import BaseItem
 from beams.tree_config.condition import BinaryConditionItem, ConditionOperator
+from beams.tree_config.value import BlackBoardValue, EPICSValue
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +25,7 @@ class ResetIOCItem(BaseItem):
     def __post_init__(self):
         # non dataclass PVss
         self.hbeat_val = BlackBoardValue(bb_name=f"{self.ioc_prefix}_reset",
-                                         key_name=self.HEARTBEAT_KEY_NAME) 
+                                         key_name=self.HEARTBEAT_KEY_NAME)
         self.name = f"{self.ioc_prefix}_reset_tree"
 
     def get_tree(self) -> Sequence:
@@ -59,7 +57,7 @@ class ResetIOCItem(BaseItem):
         send_reset = SetPVActionItem(name=f"reset_{self.ioc_prefix}",
                                      pv=f"{self.ioc_prefix}:SysReset",
                                      value=1,
-                                     loop_period_sec=3.0,  # this is greater than work_timeout period, should only happen once. 
+                                     loop_period_sec=3.0,  # this is greater than work_timeout period, should only happen once.
                                      termination_check=reset_success_termination_condiiton)
 
         root = Sequence(name=self.name,

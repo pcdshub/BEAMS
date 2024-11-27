@@ -1,5 +1,4 @@
 import time
-from pathlib import Path
 
 import py_trees
 from caproto.tests.conftest import run_example_ioc
@@ -18,7 +17,7 @@ def test_sys_reset(request, bt_cleaner):
         "beams.tests.mock_iocs.SysResetIOC",
         request=request,
         pv_to_check="SysResetTest:HEARTBEAT",
-    )   
+    )
 
     reset_ioc_tree.setup_with_descendants()
     while reset_ioc_tree.status not in (

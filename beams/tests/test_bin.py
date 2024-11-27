@@ -15,9 +15,9 @@ from beams.bin.gen_test_ioc_main import collect_pv_info
 from beams.bin.main import main
 from beams.tests.conftest import cli_args, restore_logging
 from beams.tree_config import save_tree_item_to_path
-from beams.tree_config.value import EPICSValue
 from beams.tree_config.composite import SequenceItem
 from beams.tree_config.condition import BinaryConditionItem
+from beams.tree_config.value import EPICSValue
 
 logger = logging.getLogger(__name__)
 

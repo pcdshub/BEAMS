@@ -1,9 +1,10 @@
 import logging
-from typing import Any
 from dataclasses import dataclass
+from typing import Any
 
 import py_trees
 from epics import caget
+
 from beams.serialization import as_tagged_union
 
 logger = logging.getLogger(__name__)

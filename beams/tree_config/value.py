@@ -1,8 +1,9 @@
 import logging
+from ctypes import c_int
 from dataclasses import dataclass
+from multiprocessing import Value
 from typing import Any
 
-import py_trees
 from epics import caget
 
 from beams.serialization import as_tagged_union
@@ -37,22 +38,17 @@ class EPICSValue(BaseValue):
 
 
 @dataclass
-class BlackBoardValue(BaseValue):
-    bb_name: str = ""
-    key_name: str = ""
+class ProcessIntValue():
+    value: int = 0
+
+    def __post_init__(self):
+        self._value = Value(c_int, self.value, lock=True)
+
+    def set_value(self, value):
+        self._value.value = value
 
     def get_value(self) -> Any:
-        logger.debug(f" <<-- (BlackBoardValue): checking blackboard: {self.bb_name} \
-                      for key {self.key_name}")
-        bb_client = py_trees.blackboard.Client(name=self.bb_name)
-        try:
-            value = bb_client.get(self.key_name)
-        except AttributeError:  # Note: seems like it should be KeyError, but in practice getting this one
-            logger.error(f"<<-- In blackboard: {self.bb_name} \
-                          key {self.key_name} does not exist \
-                          returning None")
-            return None
-        return value
+        return self._value.value
 
 
 @dataclass

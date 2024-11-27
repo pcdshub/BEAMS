@@ -26,4 +26,6 @@ def test_sys_reset(request, bt_cleaner):
     ):
         for n in reset_ioc_tree.tick():
             print(n)
-            time.sleep(1)
+            time.sleep(0.01)
+
+    assert reset_ioc_tree.status == py_trees.common.Status.SUCCESS

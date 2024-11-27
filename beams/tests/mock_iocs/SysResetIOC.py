@@ -11,7 +11,7 @@ class MockSysResetIOC(PVGroup):
 
   heartbeat = pvproperty(
         name="HEARTBEAT",
-        value=0,
+        value=4000,
         dtype=int,
         doc="Represents heartbeat of IOC, monotonically increasing (until reset)")
   sys_reset = pvproperty(

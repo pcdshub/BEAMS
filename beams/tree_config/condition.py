@@ -1,3 +1,4 @@
+import logging
 import operator
 from dataclasses import dataclass, field
 from enum import Enum
@@ -7,6 +8,8 @@ from beams.serialization import as_tagged_union
 from beams.tree_config.base import BaseItem
 from beams.tree_config.value import BaseValue, FixedValue
 from beams.typing_helper import Evaluatable
+
+logger = logging.getLogger(__name__)
 
 
 @as_tagged_union
@@ -57,7 +60,9 @@ class BinaryConditionItem(BaseConditionItem):
             # TODO: determine if we want to do NULL handling should we get a value but it is None type
             rhs = self.right_value.get_value()
 
-            return op(lhs, rhs)
+            eval = op(lhs, rhs)
+            logger.debug(f"Evalling as lhs {lhs}, rhs {rhs}: {eval}")
+            return eval
 
         return cond_func
 

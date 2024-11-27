@@ -1,17 +1,16 @@
 import logging
 from dataclasses import dataclass
-from sys import maxsize as MAX_INT
 
 import py_trees
 from epics import caget
 from py_trees.composites import Sequence
 
 from beams.behavior_tree.action_node import ActionNode, wrapped_action_work
-from beams.typing_helper import Evaluatable
 from beams.tree_config.action import SetPVActionItem
 from beams.tree_config.base import BaseItem
 from beams.tree_config.condition import BinaryConditionItem, ConditionOperator
-from beams.tree_config.value import ProcessIntValue, EPICSValue
+from beams.tree_config.value import EPICSValue, ProcessIntValue
+from beams.typing_helper import Evaluatable
 
 logger = logging.getLogger(__name__)
 
@@ -26,21 +25,21 @@ class ResetIOCItem(BaseItem):
 
     def __post_init__(self):
         # non dataclass PVss
-        self.hbeat_val = ProcessIntValue(value=-1)
+        self.hbeat_val = ProcessIntValue(value=-1)  # set to unachievable heartbeat val 
         self.name = f"{self.ioc_prefix}_reset_tree"
 
     def get_tree(self) -> Sequence:
         def check_acquired_current_hbeat():
-            val = self.hbeat_val.get_value() != -1
-            logger.debug(f"GOT CURRENT HBEAT AS {val}, {self.hbeat_val.get_value()}")
+            val = self.hbeat_val.get_value() != -1  # set to unachievable heartbeat val 
+            logger.debug(f"Heartbeat cached as {val}, {self.hbeat_val.get_value()}")
             return val
 
         # get the current heartbeat of IOC
-        @wrapped_action_work(loop_period_sec=1.0)
+        @wrapped_action_work(loop_period_sec=0.1)
         def cache_hbeat_wfunc(comp_condition: Evaluatable) -> py_trees.common.Status:
             current_hbeat = caget(self.ioc_prefix+self.HEARTBEAT_POSTFIX)
             self.hbeat_val.set_value(current_hbeat)
-            logger.debug(f"<<-- Aquired ioc: {self.ioc_prefix} hbeat count: {current_hbeat} and put to blackboard")
+            logger.debug(f"<<-- Aquired ioc hbeat: {self.ioc_prefix} hbeat count: {current_hbeat}")
 
             return py_trees.common.Status.SUCCESS
 
@@ -57,7 +56,7 @@ class ResetIOCItem(BaseItem):
         send_reset = SetPVActionItem(name=f"reset_{self.ioc_prefix}",
                                      pv=f"{self.ioc_prefix}:SysReset",
                                      value=1,
-                                     loop_period_sec=1.0,  # this is greater than work_timeout period, should only happen once.
+                                     loop_period_sec=0.1,  # this is greater than work_timeout period, should only happen once.
                                      termination_check=reset_success_termination_condiiton)
 
         root = Sequence(name=self.name,

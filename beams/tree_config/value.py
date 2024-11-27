@@ -1,8 +1,8 @@
 import logging
-from dataclasses import dataclass
-from typing import Any
 from ctypes import c_int
+from dataclasses import dataclass
 from multiprocessing import Value
+from typing import Any
 
 from epics import caget
 

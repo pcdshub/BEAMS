@@ -19,9 +19,10 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ResetIOCItem(BaseItem):
     ioc_prefix: str = ""
-    HEARTBEAT_POSTFIX = ":HEARTBEART"
-    SYSRESET_POSTFIX = ":SysReset"
-    HEARTBEAT_KEY_NAME = "heartbeat"
+    # semi static member objects
+    HEARTBEAT_POSTFIX: str = ":HEARTBEART"
+    SYSRESET_POSTFIX: str = ":SysReset"
+    HEARTBEAT_KEY_NAME: str = "heartbeat"
 
     def __post_init__(self):
         # non dataclass PVss
@@ -31,8 +32,10 @@ class ResetIOCItem(BaseItem):
 
     def get_tree(self) -> Sequence:
         def check_acquired_current_hbeat():
-            self.hbeat_val.get_value() is not None
-        
+            val = self.hbeat_val.get_value() is not None
+            logger.debug(f"checking opur guy as {val}")
+            return val
+
         # get the current heartbeat of IOC
         @wrapped_action_work(loop_period_sec=3.0)
         def cache_hbeat_wfunc():
@@ -61,5 +64,5 @@ class ResetIOCItem(BaseItem):
 
         root = Sequence(name=self.name,
                         memory=False,
-                        children=[cache_current_heartbeat, send_reset])
+                        children=[cache_current_heartbeat, send_reset.get_tree()])
         return root

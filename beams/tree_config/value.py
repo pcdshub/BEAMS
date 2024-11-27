@@ -35,6 +35,7 @@ class EPICSValue(BaseValue):
         return value
 
 
+@dataclass
 class BlackBoardValue(BaseValue):
     bb_name: str = ""
     key_name: str = ""

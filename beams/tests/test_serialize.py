@@ -2,10 +2,10 @@ from apischema import deserialize, serialize
 
 from beams.tree_config.action import IncPVActionItem, SetPVActionItem
 from beams.tree_config.base import BehaviorTreeItem
-from beams.tree_config.value import EPICSValue, FixedValue
 from beams.tree_config.composite import SequenceItem
 from beams.tree_config.condition import BinaryConditionItem, ConditionOperator
 from beams.tree_config.idiom import CheckAndDoItem
+from beams.tree_config.value import EPICSValue, FixedValue
 
 
 def test_serialize_check_and_do():

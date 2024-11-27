@@ -2,16 +2,14 @@ import logging
 from dataclasses import dataclass
 
 import py_trees
+from epics import caget
 from py_trees.composites import Sequence
 
-from epics import caget
-
 from beams.behavior_tree.action_node import ActionNode, wrapped_action_work
-
-from beams.tree_config.base import BaseItem
-from beams.tree_config.value import BlackBoardValue, EPICSValue
 from beams.tree_config.action import SetPVActionItem
+from beams.tree_config.base import BaseItem
 from beams.tree_config.condition import BinaryConditionItem, ConditionOperator
+from beams.tree_config.value import BlackBoardValue, EPICSValue
 
 logger = logging.getLogger(__name__)
 
@@ -19,20 +17,23 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ResetIOCItem(BaseItem):
     ioc_prefix: str = ""
-    HEARTBEAT_POSTFIX = ":HEARTBEART"
-    SYSRESET_POSTFIX = ":SysReset"
-    HEARTBEAT_KEY_NAME = "heartbeat"
+    # semi static member objects
+    HEARTBEAT_POSTFIX: str = ":HEARTBEART"
+    SYSRESET_POSTFIX: str = ":SysReset"
+    HEARTBEAT_KEY_NAME: str = "heartbeat"
 
     def __post_init__(self):
         # non dataclass PVss
         self.hbeat_val = BlackBoardValue(bb_name=f"{self.ioc_prefix}_reset",
-                                         key_name=self.HEARTBEAT_KEY_NAME) 
+                                         key_name=self.HEARTBEAT_KEY_NAME)
         self.name = f"{self.ioc_prefix}_reset_tree"
 
     def get_tree(self) -> Sequence:
         def check_acquired_current_hbeat():
-            self.hbeat_val.get_value() is not None
-        
+            val = self.hbeat_val.get_value() is not None
+            logger.debug(f"checking opur guy as {val}")
+            return val
+
         # get the current heartbeat of IOC
         @wrapped_action_work(loop_period_sec=3.0)
         def cache_hbeat_wfunc():
@@ -56,10 +57,10 @@ class ResetIOCItem(BaseItem):
         send_reset = SetPVActionItem(name=f"reset_{self.ioc_prefix}",
                                      pv=f"{self.ioc_prefix}:SysReset",
                                      value=1,
-                                     loop_period_sec=3.0,  # this is greater than work_timeout period, should only happen once. 
+                                     loop_period_sec=3.0,  # this is greater than work_timeout period, should only happen once.
                                      termination_check=reset_success_termination_condiiton)
 
         root = Sequence(name=self.name,
                         memory=False,
-                        children=[cache_current_heartbeat, send_reset])
+                        children=[cache_current_heartbeat, send_reset.get_tree()])
         return root

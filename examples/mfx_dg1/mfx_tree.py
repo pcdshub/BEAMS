@@ -2,13 +2,13 @@ from pathlib import Path
 
 from beams.tree_config import save_tree_item_to_path
 from beams.tree_config.action import SetPVActionItem
-from beams.tree_config.base import EPICSValue, FixedValue
 from beams.tree_config.composite import (SelectorItem, SequenceConditionItem,
                                          SequenceItem)
 from beams.tree_config.condition import (BinaryConditionItem,
                                          BoundedConditionItem,
                                          ConditionOperator)
 from beams.tree_config.idiom import CheckAndDoItem
+from beams.tree_config.value import EPICSValue, FixedValue
 
 # DG2 Stopper: remove
 check_dg2_stp_not_open = BinaryConditionItem(

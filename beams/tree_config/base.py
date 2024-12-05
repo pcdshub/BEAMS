@@ -1,9 +1,7 @@
 import logging
 from dataclasses import dataclass
-from typing import Any
 
 import py_trees
-from epics import caget
 from py_trees.behaviour import Behaviour
 
 from beams.serialization import as_tagged_union
@@ -38,35 +36,3 @@ class ExternalItem(BaseItem):
         # grab file
         # de-serialize tree, return it
         raise NotImplementedError
-
-
-@as_tagged_union
-@dataclass
-class BaseValue:
-    def get_value(self) -> Any:
-        raise NotImplementedError
-
-
-@dataclass
-class FixedValue(BaseValue):
-    value: Any
-
-    def get_value(self) -> Any:
-        return self.value
-
-
-@dataclass
-class EPICSValue(BaseValue):
-    pv_name: str
-    as_string: bool = False
-
-    def get_value(self) -> Any:
-        value = caget(self.pv_name, as_string=self.as_string)
-        logger.debug(f" <<-- (EPICSValue): caget({self.pv_name}) -> {value}")
-        return value
-
-
-@dataclass
-class OphydTarget(BaseValue):
-    device_name: str
-    component_path: list[str]

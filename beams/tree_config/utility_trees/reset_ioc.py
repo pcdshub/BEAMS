@@ -25,12 +25,12 @@ class ResetIOCItem(BaseItem):
 
     def __post_init__(self):
         # non dataclass PVss
-        self.hbeat_val = ProcessIntValue(value=-1)  # set to unachievable heartbeat val 
+        self.hbeat_val = ProcessIntValue(value=-1)  # set to unachievable heartbeat val
         self.name = f"{self.ioc_prefix}_reset_tree"
 
     def get_tree(self) -> Sequence:
         def check_acquired_current_hbeat():
-            val = self.hbeat_val.get_value() != -1  # set to unachievable heartbeat val 
+            val = self.hbeat_val.get_value() != -1  # set to unachievable heartbeat val
             logger.debug(f"Heartbeat cached as {val}, {self.hbeat_val.get_value()}")
             return val
 

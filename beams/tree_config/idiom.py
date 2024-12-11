@@ -49,4 +49,3 @@ class UseCheckConditionItem(BaseConditionItem):
 
     If used in any other context the tree will not be constructable.
     """
-    ...

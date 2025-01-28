@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+import "generic_message.proto"; // MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE import
+
+/* Behavior Tree Update related feilds */
+
+enum TickStatus {
+  INVALID = 0;
+  RUNNING = 1;
+  SUCCESS = 2;
+  FAILURE = 3;
+}
+
+enum TickConfiguration {
+  UNKNOWN = 0;
+  INTERACTIVE = 1;
+  CONTINOUS = 2;
+}
+
+message BehaviorTreeUpdate {
+  MessageType mess_t = 1; // MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE
+  string tree_name = 2;
+  string node_name = 3;
+  TickStatus tick_status = 4;
+  TickConfiguration tick_config= 5;
+  int32 tick_delay_ms = 6;
+}

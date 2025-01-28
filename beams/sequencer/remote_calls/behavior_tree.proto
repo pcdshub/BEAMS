@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "generic_message.proto"; // MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE import
 
-/* Behavior Tree Update related feilds */
+/* Behavior Tree Update related fields */
 
 enum TickStatus {
   INVALID = 0;

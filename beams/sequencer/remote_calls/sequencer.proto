@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "generic_message.proto";
-import "heartbeat.proto";
-import "command.proto";
+import "generic_message.proto"; // Empty
+import "heartbeat.proto"; // HeartbeatReply
+import "command.proto"; // CommandMessage
 
 // Sequencer Service Definition
 service Sequencer {

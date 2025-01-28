@@ -13,8 +13,8 @@ The "base" proto file is "generic_message.proto", each derived message type shou
 * command.proto - structure of expected commands requested of the program
 
 ### generic_message.proto
-Serves as base module. Defines what type of fundamental messages this package intends to communicate with. 
-The defined "GenericMessage" schema is very useful for strongly typed languages 
+Serves as base module. Defines what type of fundamental messages this package intends to communicate with.
+The defined "GenericMessage" schema is very useful for strongly typed languages
 ```
 message GenericMessage {
   MessageType mess_t = 1;
@@ -47,4 +47,3 @@ message HeartbeatReply {
 ```
 
 ### command.proto
-

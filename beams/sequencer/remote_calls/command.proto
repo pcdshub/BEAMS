@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "generic_message.proto"; // MESSAGE_TYPE_COMMAND_MESSAGE
 
-// First pass schema of commands. 
+// First pass schema of commands.
 // Very well could decompose into further optional messages
 
 enum CommandType {

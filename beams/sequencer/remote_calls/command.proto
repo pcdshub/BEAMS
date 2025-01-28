@@ -16,11 +16,23 @@ enum CommandType {
   ACK_NODE = 7;
 }
 
+// Optional messages for commands
+message LoadNewTreeMessage {
+  bool should_replace_existing_tree = 1;
+  optional string tree_to_replace = 2;
+}
+
+message AckNodeMessage {
+  string node_name_to_ack = 5;
+  string user_acking_node = 6;
+}
+
 message CommandMessage {
   MessageType mess_t = 1; // MESSAGE_TYPE_COMMAND_MESSAGE
   CommandType command_t = 2; // informs which option to try deser
+  // May want to add notion of priority here
   optional string tree_name = 3;
   optional int32 tick_rate_ms = 4;
-  optional string node_name_to_ack = 5;
-  optional string user_acking_node = 6;
+  optional AckNodeMessage ack_node = 5;
+  optional LoadNewTreeMessage load_new_tree = 6;
 }

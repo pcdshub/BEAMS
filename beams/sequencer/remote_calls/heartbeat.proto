@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+import "generic_message.proto";
+import "behavior_tree.proto";
+
+/*
+  Message to be returned upon "heartbeat" request to program from client
+  Informs client about application state in general
+*/
+
+message HeartbeatReply {
+  MessageType mess_t = 1;
+  BehaviorTreeUpdate behavior_tree_update = 2; // when our program is ticking many trees this may become a repeated or mapped fields
+  google.protobuf.Timestamp reply_timestamp = 3;
+  // maybe program uptime and git hash??
+}

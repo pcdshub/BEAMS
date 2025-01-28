@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "generic_message.proto"; // MESSAGE_TYPE_COMMAND_MESSAGE
+
+// First pass schema of commands. 
+// Very well could decompose into further optional messages
+
+enum CommandType {
+  UNKOWN_COMMAND = 0;
+  PAUSE_TREE = 1;
+  TICK_TREE = 2;
+  STOP_TREE = 3;
+  START_TREE = 4;
+  LOAD_NEW_TREE = 5;
+  CHANGE_TICK_RATE_OF_TREE = 6;
+  ACK_NODE = 7;
+}
+
+message CommandMessage {
+  MessageType mess_t = 1; // MESSAGE_TYPE_COMMAND_MESSAGE
+  CommandType command_t = 2; // informs which option to try deser
+  optional string tree_name = 3;
+  optional int32 tick_rate_ms = 4;
+  optional string node_name_to_ack = 5;
+  optional string user_acking_node = 6;
+}

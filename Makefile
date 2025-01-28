@@ -3,7 +3,10 @@ VERSION=0x03
 
 .PHONY: gen_grpc
 gen_grpc:
-	@python3 -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. beams/sequencer/remote_calls/sequencer.proto
+	# This is a tough one to read I'm sorry. This grabs allo our protofiles that aren't GRPC proto files
+	@python3 -m grpc_tools.protoc -I beams/sequencer/remote_calls --python_out=beams/sequencer/remote_calls --pyi_out=beams/sequencer/remote_calls $(filter-out beams/sequencer/remote_calls/sequencer.proto, $(wildcard beams/sequencer/remote_calls/*.proto))
+	# This runs the GRPC proto on GRPC proto file
+	@python3 -m grpc_tools.protoc -I beams/sequencer/remote_calls --python_out=beams/sequencer/remote_calls --pyi_out=beams/sequencer/remote_calls --grpc_python_out=beams/sequencer/remote_calls beams/sequencer/remote_calls/sequencer.proto
 
 .PHONY: update_beams
 update_beams:

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+enum MessageType {
+  MESSAGE_TYPE_UNKOWN = 0;
+  // MESSAGE_TYPE_ALTER_RUN_STATE = 1; // Highest priority message
+  // MESSAGE_TYPE_ENQUEUE_SEQUENCE_PRIORITY = 2; // Insert this task for next execution
+  // MESSAGE_TYPE_ENQUEUE_SEQUENCE = 3; // Append this task to end of task queue
+  // MESSAGE_TYPE_COMMAND_REPLY = 4;
+
+  MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE = 1;
+  MESSAGE_TYPE_COMMAND_MESSAGE = 2;
+}
+
+// For when we use a real programming language
+message GenericMessage {
+  MessageType mess_t = 1;
+}
+
+// Inspired by: https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/empty.proto
+message Empty{
+
+}

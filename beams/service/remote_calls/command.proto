@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "generic_message.proto"; // MESSAGE_TYPE_COMMAND_MESSAGE
+import "behavior_tree.proto"; // TickConfiguration
 
 // First pass schema of commands.
 // Very well could decompose into further optional messages
@@ -9,17 +10,19 @@ enum CommandType {
   UNKOWN_COMMAND = 0;
   PAUSE_TREE = 1;
   TICK_TREE = 2;
-  STOP_TREE = 3;
+  STOP_TREE = 3; // DEFOREST, UNLOAD
   START_TREE = 4;
   LOAD_NEW_TREE = 5;
   CHANGE_TICK_RATE_OF_TREE = 6;
-  ACK_NODE = 7;
+  CHANGE_TICK_CONFIGURATION = 7;
+  ACK_NODE = 8;
 }
 
 // Optional messages for commands
 message LoadNewTreeMessage {
   bool should_replace_existing_tree = 1;
   optional string tree_to_replace = 2;
+  // Optionally specify tick config?
 }
 
 message AckNodeMessage {
@@ -35,4 +38,5 @@ message CommandMessage {
   optional int32 tick_rate_ms = 4;
   optional AckNodeMessage ack_node = 5;
   optional LoadNewTreeMessage load_new_tree = 6;
+  optional TickConfiguration tick_config = 7;
 }

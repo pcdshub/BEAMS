@@ -1,14 +1,14 @@
 syntax = "proto3";
 
 import "generic_message.proto"; // Empty
-import "heartbeat.proto"; // HeartbeatReply
+import "heartbeat.proto"; // HeartBeatReply
 import "command.proto"; // CommandMessage
 
 // Sequencer Service Definition
 service Sequencer {
   // Enqueue a sequence command of varying priority
-  rpc EnqueueCommand (CommandMessage) returns (HeartbeatReply) {}
+  rpc EnqueueCommand (CommandMessage) returns (HeartBeatReply) {}
 
   // Heart beat message for clients
-  rpc RequestHeartBeat(Empty) returns (HeartbeatReply) {}
+  rpc RequestHeartBeat(Empty) returns (HeartBeatReply) {}
 }

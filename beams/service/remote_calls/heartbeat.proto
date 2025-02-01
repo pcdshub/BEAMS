@@ -10,9 +10,9 @@ import "behavior_tree.proto";
   Informs client about application state in general
 */
 
-message HeartbeatReply {
+message HeartBeatReply {
   MessageType mess_t = 1;
-  BehaviorTreeUpdate behavior_tree_update = 2; // when our program is ticking many trees this may become a repeated or mapped fields
+  repeated BehaviorTreeUpdateMessage behavior_tree_update = 2; // when our program is ticking many trees this may become a repeated or mapped fields
   google.protobuf.Timestamp reply_timestamp = 3;
   // maybe program uptime and git hash??
 }

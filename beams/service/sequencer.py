@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class Sequencer(Worker):
     def __init__(self):
-        super().__init__("Sequencer")
+        super().__init__("GRPCServer")
         # state maintenece object
         self.state = SequencerState()
         self.job_queue = Queue()

@@ -1,9 +1,7 @@
-from beams.service.remote_calls.sequencer_pb2 import (MessageType,
-                                                        RunStateType,
-                                                        SequenceType,
-                                                        TickStatus)
-from beams.service.state import SequencerState, SequencerStateVariable
-
+from beams.service.remote_calls.generic_message_pb2 import MessageType, GenericMessage, Empty
+from beams.service.remote_calls.behavior_tree_pb2 import BehaviorTreeUpdateMessage, TickStatus, TickConfiguration
+from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
+from beams.service.remote_calls.command_pb2 import CommandType, CommandReply
 
 class TestTask:
     def test_init(self, capsys):

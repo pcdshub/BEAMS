@@ -17,7 +17,7 @@ enum TickConfiguration {
   CONTINOUS = 2;
 }
 
-message BehaviorTreeUpdate {
+message BehaviorTreeUpdateMessage {
   MessageType mess_t = 1; // MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE
   string tree_name = 2;
   string node_name = 3;

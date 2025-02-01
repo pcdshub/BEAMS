@@ -2,7 +2,7 @@ import logging
 from enum import Enum
 from multiprocessing import Array, Lock, Value
 
-from beams.sequencer.remote_calls.sequencer_pb2 import (MessageType,
+from beams.service.remote_calls.sequencer_pb2 import (MessageType,
                                                         RunStateType,
                                                         SequenceType,
                                                         TickStatus)

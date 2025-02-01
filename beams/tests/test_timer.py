@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-from beams.sequencer.helpers.timer import Timer
+from beams.service.helpers.timer import Timer
 
 
 def test_elapsed():

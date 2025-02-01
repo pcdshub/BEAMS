@@ -6,13 +6,13 @@ import logging
 import grpc
 
 from beams.logging import setup_logging
-from beams.sequencer.remote_calls.sequencer_pb2 import (AlterState, Empty,
+from beams.service.remote_calls.sequencer_pb2 import (AlterState, Empty,
                                                         GenericCommand,
                                                         MessageType,
                                                         RunStateType,
                                                         SequenceCommand,
                                                         SequenceType)
-from beams.sequencer.remote_calls.sequencer_pb2_grpc import SequencerStub
+from beams.service.remote_calls.sequencer_pb2_grpc import SequencerStub
 
 logger = logging.getLogger(__name__)
 

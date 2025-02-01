@@ -9,14 +9,14 @@ API Breaks
     - beams.behavior_tree.CheckAndDo -> beams.behavior_tree.check_and_do
     - beams.behavior_tree.ConditionNode -> beams.behavior_tree.condition_node
     - beams.behavior_tree.VolatileStatus -> beams.behavior_tree.volatile_status
-    - beams.sequencer.SequenceClient -> beams.sequenecer.client
-    - beams.sequencer.Sequencer -> beams.sequenecer.sequencer
-    - beams.sequencer.Server -> beams.sequenecer.server
-    - beams.sequencer.SequencerState -> beams.sequenecer.state
-    - beams.sequencer.helpers.SharedEnum -> beams.sequenecer.helpers.enum
-    - beams.sequencer.helpers.PriorityQueue -> beams.sequenecer.helpers.queue
-    - beams.sequencer.helpers.Timer -> beams.sequenecer.helpers.timer
-    - beams.sequencer.helpers.Worker -> beams.sequenecer.helpers.worker
+    - beams.service.SequenceClient -> beams.sequenecer.client
+    - beams.service.Sequencer -> beams.sequenecer.sequencer
+    - beams.service.Server -> beams.sequenecer.server
+    - beams.service.SequencerState -> beams.sequenecer.state
+    - beams.service.helpers.SharedEnum -> beams.sequenecer.helpers.enum
+    - beams.service.helpers.PriorityQueue -> beams.sequenecer.helpers.queue
+    - beams.service.helpers.Timer -> beams.sequenecer.helpers.timer
+    - beams.service.helpers.Worker -> beams.sequenecer.helpers.worker
 
 Features
 --------

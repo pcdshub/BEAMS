@@ -59,5 +59,5 @@ def build_arg_parser(argparser=None):
 
 
 def main(*args, **kwargs):
-    from beams.service.tree_ticker import tree_tick_work_func
-    tree_tick_work_func(*args, **kwargs)
+    from beams.service.tree_ticker import run_from_file_tree_tick_work_func
+    run_from_file_tree_tick_work_func(*args, **kwargs)

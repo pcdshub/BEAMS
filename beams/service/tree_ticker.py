@@ -121,6 +121,7 @@ class TreeTicker(Worker):
         tick_interactive = Value(c_bool, False)
         pause_tree = Value(c_bool, False)
         tick_config = SharedEnum(TickConfiguration)
+        tree: BehaviourTree
 
     def get_behavior_tree_update(self) -> BehaviorTreeUpdateMessage:
         mess = BehaviorTreeUpdateMessage(
@@ -148,19 +149,19 @@ class TreeTicker(Worker):
                 if not fp.is_file():
                     raise ValueError("Provided filepath is not a file")
 
-                tree = get_tree_from_path(fp)
-                tree.visitors.append(LoggingVisitor(print_status=True))
+                self.state.tree = get_tree_from_path(fp)
+                self.state.tree.visitors.append(LoggingVisitor(print_status=True))
 
                 snapshot_visitor = SnapshotVisitor()
-                tree.add_post_tick_handler(
+                self.state.tree.add_post_tick_handler(
                     partial(snapshot_post_tick_handler,
                             snapshot_visitor,
                             True,
                             False)
                 )
-                tree.setup()
+                self.state.tree.setup()
 
             while (self.state.tick_current_tree.value):
                 while (self.state.pause_tree.value):
                     time.sleep(self.state.tick_delay_ms.value)
-                tick_tree(tree, self.state.tick_interactive.value, self.state.tick_delay_ms.value)
+                tick_tree(self.state.tree, self.state.tick_interactive.value, self.state.tick_delay_ms.value)

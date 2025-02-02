@@ -6,7 +6,7 @@ import logging
 import grpc
 
 from beams.logging import setup_logging
-from beams.service.remote_calls.generic_message_pb2 import MessageType
+from beams.service.remote_calls.generic_message_pb2 import MessageType, Empty
 from beams.service.remote_calls.heartbeat_pb2 import HeartbeatReply
 from beams.service.remote_calls.command_pb2 import (CommandType, CommandMessage,
                                                     LoadNewTreeMessage, AckNodeMessage, 
@@ -24,38 +24,74 @@ def enumerate_choices(enum_type):
 def parse_arguments():
     # arg parse and validation
     parser = argparse.ArgumentParser(
-        prog="sequencer client",
-        description="allows users to interact with sequencing server",
+        prog="beams rpc client",
+        description="allows users to interact with BEAMS service",
         epilog="I hope you're having as much fun as me",
     )
 
-    group = parser.add_mutually_exclusive_group(
-        required=True
-    )  # only accept one of the following
-    group.add_argument(
-        "-s",
-        "--sequence",
-        help="choose sequence",
-        type=str,
-        choices=enumerate_choices(SequenceType),
+    subparsers = parser.add_subparsers(help="client subcommands")
+
+    parser.add_argument(
+        "-H",
+        "--hbeat",
+        help="get heartbeat message from service",
+        action="store_true"
     )
-    group.add_argument(
-        "-S",
-        "--priority_sequence",
-        help="append sequence to top of queue",
-        type=str,
-        choices=enumerate_choices(SequenceType),
+    command_parser = subparsers.add_parser('command', 
+                                           help="command parser help")
+    command_parser.add_argument(
+        '-c',
+        "--command_type",
+        type=CommandType,
+        choices=enumerate_choices(CommandType)
     )
-    group.add_argument(
+    command_parser.add_argument(
+        '-t',
+        "--tree_name",
+        type=str,
+        help="name of tree to interact with"
+    )
+    # load new tree
+    load_new_tree_parser = command_parser.add_argument_group(
+                                    'load_new_tree', 
+                                    "command for specifying new tree")
+    load_new_tree_parser.add_argument(
+        "-f",
+        "--new_tree_filepath",
+        help="filepath of tree to be loaded",
+        type=str
+    )
+    load_new_tree_parser.add_argument(
         "-r",
-        "--run_state",
-        help="change run state",
+        "--replace_existing_tree",
+        help="If present will replace existing tree of sepcified name",
+        type=str
+    )
+
+    # ack node
+    ack_node_parser = command_parser.add_argument_group(
+                                "ack_node",
+                                "specify node to send use ack to")
+    ack_node_parser.add_argument(
+        "-n",
+        '--node_name',
         type=str,
-        choices=enumerate_choices(RunStateType),
+        help="name of node to acknowledge"
     )
-    group.add_argument(
-        "-b", "--heartbeat", help="request_heartbeat", action="store_true"
+    ack_node_parser.add_argument(
+        "-t"
+        "--tree_name",
+        type=str,
+        help="name of tree"
     )
+    ack_node_parser.add_argument(
+        "-u",
+        "--user",
+        type=str,
+        help="user sending acknowledge"
+    )
+
+    # todo change tick config
 
     return parser.parse_args()
 
@@ -72,37 +108,40 @@ class SequencerClient:
             "localhost:50051"
         ) as channel:  # TODO: obviously not this. Grab from config
             stub = BEAMS_rpcStub(channel)
-            mt = None
-            mess = None
-            mess_val = None
             response = None
 
-            if self.args.run_state is not None:
-                mt = MessageType.MESSAGE_TYPE_ALTER_RUN_STATE
-                mess = args.run_state
-                mess_val = GenericCommand(
-                    mess_t=mt, alt_m=AlterState(mess_t=mt, stateToUpdateTo=mess)
-                )
-            elif self.args.priority_sequence is not None:
-                mt = MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE_PRIORITY
-                mess = args.priority_sequence
-                mess_val = GenericCommand(
-                    mess_t=mt, seq_m=SequenceCommand(mess_t=mt, seq_t=mess)
-                )
-            elif self.args.sequence is not None:
-                mt = MessageType.MESSAGE_TYPE_ENQUEUE_SEQUENCE
-                mess = args.sequence
-                logger.debug(f"Arg provided {args.sequence}")
-                mess_val = GenericCommand(
-                    mess_t=mt, seq_m=SequenceCommand(mess_t=mt, seq_t=mess)
-                )
+            # build the message
+            if self.args.hbeat:
+                response = stub.RequestHeartBeat(Empty())
+            else:
+                # unapack the command type from arg parse
+                command_m = CommandMessage(mess_t=MessageType.MESSAGE_TYPE_COMMAND_MESSAGE)
+                command_t = CommandType(self.args.command_t)
+                command_m.command_t = command_t
+                command_m.tree_name = self.args.tree_name
 
-            if mt is not None and mess is not None:
+                # permutate state of running tree
+                tree_execution_control_commands = [CommandType.PAUSE_TREE, CommandType.TICK_TREE, CommandType.START_TREE]
+
+                # These commands only need captured tree name and command itself
+                if command_t in tree_execution_control_commands + [MessageType.UNLOAD_TREE]:
+                    pass
+                elif command_t == CommandType.LOAD_NEW_TREE:
+                    LNT_mess = LoadNewTreeMessage()
+                    # should replace is true then
+                    if self.args.replace_existing_tree != "":
+                        LNT_mess.should_replace_existing_tree = True
+                        LNT_mess.tree_to_replace = self.args.replace_current_tree
+                    else:
+                        # in this case we will have the service just launch a new process for a new tree, forest in bound!!
+                        LNT_mess.should_replace_existing_tree = False  # default but whatever
+                    command_m.load_new_tree = LNT_mess
+                # TODO other messages
+                # elif command_t == MessageType.CHANGE_TICK_RATE_OF_TREE:
+                #     change_tick_mess = ChangeTickConfigurationMessage()
+
                 p_message_info(mt, mess_val)
                 response = stub.EnqueueCommand(mess_val)
-            else:
-                p_message_info("HEARTBEAT", "HEARTBEAT")
-                response = stub.RequestHeartBeat(Empty())
 
             logger.debug(response)
 

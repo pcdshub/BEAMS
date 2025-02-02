@@ -2,7 +2,7 @@ import logging
 import time
 from concurrent import futures
 from multiprocessing import Semaphore, Queue, Manager
-from typing import Optional
+from typing import Optional, List
 
 import grpc
 from google.protobuf.timestamp_pb2 import Timestamp
@@ -48,6 +48,11 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
                 logger.error(f"Unable to find tree of name {tree_name} currently being tickde")
                 return None
 
+    def get_all_tree_updates(self) -> List[BehaviorTreeUpdateMessage]:
+        with self.sync_man:
+            updates = [tree.get_behavior_tree_update() for tree in self.tree_dict.values()]
+            return updates
+
     def EnqueueCommand(self, request, context) -> HeartbeatReply:
         mess_t = request.mess_t
         if mess_t != MessageType.MESSAGE_TYPE_COMMAND_MESSAGE:
@@ -64,14 +69,15 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             )
 
     def RequestHeartBeat(self, request, context) -> HeartbeatReply:
+        # assumption that hitting this service endpoint means you want to know ALL the trees this service is currently ticking
+
         # TODO: it is placing like here that I am not happy with the distance of the py_trees vs GRPC object, reflect on this
         # for example: how could we keep thee py_tree treename and this one aligned?
         return HeartbeatReply(
                 mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT,
                 reply_timestamp=Timestamp(),
-                behavior_tree_update=[self.attempt_to_get_tree_update(request.tree_name)]
+                behavior_tree_update=self.get_all_tree_updates()
             )
-        return HeartbeatReply(**self.sequencer_state.get_command_reply())
 
     def work_func(self):
         logger.debug(f"{self.proc_name} running")

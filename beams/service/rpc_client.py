@@ -6,13 +6,13 @@ import logging
 import grpc
 
 from beams.logging import setup_logging
-from beams.service.remote_calls.sequencer_pb2 import (AlterState, Empty,
-                                                        GenericCommand,
-                                                        MessageType,
-                                                        RunStateType,
-                                                        SequenceCommand,
-                                                        SequenceType)
-from beams.service.remote_calls.sequencer_pb2_grpc import SequencerStub
+from beams.service.remote_calls.generic_message_pb2 import MessageType
+from beams.service.remote_calls.heartbeat_pb2 import HeartbeatReply
+from beams.service.remote_calls.command_pb2 import (CommandType, CommandMessage,
+                                                    LoadNewTreeMessage, AckNodeMessage, 
+                                                    ChangeTickConfigurationMessage)
+
+from beams.service.remote_calls.beams_rpc_pb2_grpc import BEAMS_rpcStub
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ class SequencerClient:
         with grpc.insecure_channel(
             "localhost:50051"
         ) as channel:  # TODO: obviously not this. Grab from config
-            stub = SequencerStub(channel)
+            stub = BEAMS_rpcStub(channel)
             mt = None
             mess = None
             mess_val = None

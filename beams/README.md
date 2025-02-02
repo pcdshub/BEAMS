@@ -14,7 +14,7 @@ Defines sequencer engine that can be seen as the main object of this program. Th
 This module uses [GRPC](https://grpc.io/) to facilitate RPC calls.
 ###### Components
 * Sequencer : main object, launches child threads to field GRPC server, parse messages into trees, and tick ensuing trees
-* SequenceServer : defines GRPC interactions
+* RPCHandler : defines GRPC interactions
 * SequenceClient : client to be launched in conjunction with main Sequencer object to inject RPC commands
 * SequencerState : multiprocesses safe object to persist state variables needed for sequencing
 * remote_calls

@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-import "generic_message.proto"; // Empty
-import "heartbeat.proto"; // HeartBeatReply
-import "command.proto"; // CommandMessage
+import "beams/service/remote_calls/generic_message.proto"; // Empty
+import "beams/service/remote_calls/heartbeat.proto"; // HeartBeatReply
+import "beams/service/remote_calls/command.proto"; // CommandMessage
 
 // Sequencer Service Definition
-service Sequencer {
+service BEAMS_rpc {
   // Enqueue a sequence command of varying priority
   rpc EnqueueCommand (CommandMessage) returns (HeartBeatReply) {}
 

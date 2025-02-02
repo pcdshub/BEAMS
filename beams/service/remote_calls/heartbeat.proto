@@ -2,8 +2,8 @@ syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
 
-import "generic_message.proto";
-import "behavior_tree.proto";
+import "beams/service/remote_calls/generic_message.proto";
+import "beams/service/remote_calls/behavior_tree.proto";
 
 /*
   Message to be returned upon "heartbeat" request to program from client

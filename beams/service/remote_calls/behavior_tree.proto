@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "generic_message.proto"; // MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE import
+import "beams/service/remote_calls/generic_message.proto"; // MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE import
 
 /* Behavior Tree Update related fields */
 

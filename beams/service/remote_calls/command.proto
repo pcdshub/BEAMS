@@ -8,13 +8,19 @@ import "beams/service/remote_calls/behavior_tree.proto"; // TickConfiguration
 
 enum CommandType {
   UNKOWN_COMMAND = 0;
+  // At some point these could become a TREE_EXECUTION_CONTROL type with related message
   PAUSE_TREE = 1;
   TICK_TREE = 2;
-  STOP_TREE = 3; // DEFOREST, UNLOAD
-  START_TREE = 4;
+  START_TREE = 3;
+  //
+  // Could be their own logical group
+  UNLOAD_TREE = 4;
   LOAD_NEW_TREE = 5;
+  //
+  // Again its own logical group
   CHANGE_TICK_RATE_OF_TREE = 6;
   CHANGE_TICK_CONFIGURATION = 7;
+  //
   ACK_NODE = 8;
 }
 
@@ -31,7 +37,7 @@ message AckNodeMessage {
 }
 
 message ChangeTickConfigurationMessage {
-  TickConfiguration tick_config = 1;
+  optional TickConfiguration tick_config = 1;
   optional uint32 delay_ms = 2;
 }
 

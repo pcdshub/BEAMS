@@ -4,7 +4,7 @@ from beams.service.remote_calls.generic_message_pb2 import MessageType, GenericM
 from beams.service.remote_calls.behavior_tree_pb2 import BehaviorTreeUpdateMessage, TickStatus, TickConfiguration
 from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
 from beams.service.remote_calls.command_pb2 import (CommandType, CommandMessage,
-                                                    LoadNewTreeMessage, AckNodeMessage, ChangeTickConfigurationMessage)
+                                                    LoadNewTreeMessage, AckNodeMessage, TickConfigurationMessage)
 
 
 class TestProtos:
@@ -57,8 +57,8 @@ class TestProtos:
                 mess_t=MessageType.MESSAGE_TYPE_COMMAND_MESSAGE,
                 command_t=CommandType.CHANGE_TICK_CONFIGURATION,
                 tree_name="Tree1",
-                tick_config=ChangeTickConfigurationMessage(tick_config=TickConfiguration.CONTINOUS, 
-                                                           delay_ms=5)
+                tick_config=TickConfigurationMessage(tick_config=TickConfiguration.CONTINOUS, 
+                                                     delay_ms=5)
             )
         com2 = CommandMessage(
                 mess_t=MessageType.MESSAGE_TYPE_COMMAND_MESSAGE,

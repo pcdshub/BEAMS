@@ -26,9 +26,8 @@ enum CommandType {
 
 // Optional messages for commands
 message LoadNewTreeMessage {
-  bool should_replace_existing_tree = 1;
-  optional string tree_to_replace = 2;
-  // Optionally specify tick config?
+  string tree_file_path = 1;
+  TickConfigurationMessage tick_spec = 2;
 }
 
 message AckNodeMessage {
@@ -36,8 +35,8 @@ message AckNodeMessage {
   string user_acking_node = 6;
 }
 
-message ChangeTickConfigurationMessage {
-  optional TickConfiguration tick_config = 1;
+message TickConfigurationMessage {
+  TickConfiguration tick_config = 1;
   optional uint32 delay_ms = 2;
 }
 
@@ -49,5 +48,5 @@ message CommandMessage {
   optional int32 tick_rate_ms = 4;
   optional AckNodeMessage ack_node = 5;
   optional LoadNewTreeMessage load_new_tree = 6;
-  optional ChangeTickConfigurationMessage tick_config = 7;
+  optional TickConfigurationMessage tick_config = 7;
 }

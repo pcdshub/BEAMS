@@ -22,11 +22,13 @@ class Worker():
         work_func: Optional[Callable[[Any], None]] = None,
         proc_type: type[Process] = Process,
         add_args: Optional[List[Any]] = None,
+        grace_window_before_terminate_seconds: int = 0
     ):
         self.do_work: Synchronized = Value(c_bool, False)
         self.proc_name = proc_name
         self.proc_type = proc_type
         self.add_args = add_args or []
+        self.grace_window_before_terminate_seconds = grace_window_before_terminate_seconds
         if (work_func is None):
           self.work_proc = proc_type(target=self.work_func, name=self.proc_name)
         else:
@@ -53,7 +55,7 @@ class Worker():
             return
         self.do_work.value = False
         logger.debug(f"({self.proc_name}) -->>: Sending terminate signal to process")
-        time.sleep(0.5)
+        time.sleep(self.grace_window_before_terminate_seconds)
         # Send kill signal to work process. # TODO: the exact location of this
         # is important. Reflect with self.do_work.get_lock():
         self.work_proc.terminate()

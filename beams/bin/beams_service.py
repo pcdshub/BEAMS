@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class BeamsService(Worker):
     def __init__(self):
-        super().__init__("BeamsService")
+        super().__init__("BeamsService", grace_window_before_terminate_seconds=0.5)
 
         class MyManager(BaseManager):
           pass

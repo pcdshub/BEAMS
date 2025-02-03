@@ -12,7 +12,7 @@ from beams.service.helpers.worker import Worker
 
 from beams.service.remote_calls.generic_message_pb2 import MessageType
 from beams.service.remote_calls.behavior_tree_pb2 import BehaviorTreeUpdateMessage
-from beams.service.remote_calls.heartbeat_pb2 import HeartbeatReply
+from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
 
 
 from beams.service.remote_calls.beams_rpc_pb2_grpc import (
@@ -48,12 +48,16 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
                 logger.error(f"Unable to find tree of name {tree_name} currently being tickde")
                 return None
 
-    def get_all_tree_updates(self) -> List[BehaviorTreeUpdateMessage]:
+    def get_all_tree_updates(self) -> Optional[List[BehaviorTreeUpdateMessage]]:
         with self.sync_man:
+            # if dictionary empty return none
+            if not bool(self.tree_dict):
+                return None
+
             updates = [tree.get_behavior_tree_update() for tree in self.tree_dict.values()]
             return updates
 
-    def EnqueueCommand(self, request, context) -> HeartbeatReply:
+    def EnqueueCommand(self, request, context) -> HeartBeatReply:
         mess_t = request.mess_t
         if mess_t != MessageType.MESSAGE_TYPE_COMMAND_MESSAGE:
             logger.error("You seriously messed up, reevlauate your life choices")
@@ -62,21 +66,36 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             logger.debug(f"Command of type: {request.command_t} enqueued for {request.tree_name}")
             self.command_ready_sem.release()
 
-        return HeartbeatReply(
+        bt_update = self.attempt_to_get_tree_update(request.tree_name)
+
+        if bt_update is None:
+            return HeartBeatReply(
                 mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT,
                 reply_timestamp=Timestamp(),
-                behavior_tree_update=[self.attempt_to_get_tree_update(request.tree_name)]
+            )
+        else:
+            return HeartBeatReply(
+                    mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT,
+                    reply_timestamp=Timestamp(),
+                    behavior_tree_update=[bt_update]
             )
 
-    def RequestHeartBeat(self, request, context) -> HeartbeatReply:
+    def RequestHeartBeat(self, request, context) -> HeartBeatReply:
         # assumption that hitting this service endpoint means you want to know ALL the trees this service is currently ticking
 
         # TODO: it is placing like here that I am not happy with the distance of the py_trees vs GRPC object, reflect on this
         # for example: how could we keep thee py_tree treename and this one aligned?
-        return HeartbeatReply(
+        updates = self.get_all_tree_updates()
+        if updates is None:
+            return HeartBeatReply(
                 mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT,
                 reply_timestamp=Timestamp(),
-                behavior_tree_update=self.get_all_tree_updates()
+            )
+        else:
+            return HeartBeatReply(
+                mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT,
+                reply_timestamp=Timestamp(),
+                behavior_tree_update=updates
             )
 
     def work_func(self):
@@ -96,5 +115,5 @@ if __name__ == "__main__":
     p = RPCHandler()
     p.start_work()
 
-    time.sleep(5)
+    time.sleep(100)
     p.stop_work()

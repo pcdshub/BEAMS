@@ -7,7 +7,7 @@ import grpc
 
 from beams.logging import setup_logging
 from beams.service.remote_calls.generic_message_pb2 import MessageType, Empty
-from beams.service.remote_calls.heartbeat_pb2 import HeartbeatReply
+from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
 from beams.service.remote_calls.command_pb2 import (CommandType, CommandMessage,
                                                     LoadNewTreeMessage, AckNodeMessage, 
                                                     ChangeTickConfigurationMessage)
@@ -19,6 +19,10 @@ logger = logging.getLogger(__name__)
 
 def enumerate_choices(enum_type):
     return [e[0] for e in enum_type.items()]
+
+
+def unwrap_protobuf_enum_wrapper(enum_type, enum_string_name):
+    return dict(enum_type.items())[enum_string_name]
 
 
 def parse_arguments():
@@ -42,7 +46,7 @@ def parse_arguments():
     command_parser.add_argument(
         '-c',
         "--command_type",
-        type=CommandType,
+        type=str,
         choices=enumerate_choices(CommandType)
     )
     command_parser.add_argument(
@@ -65,7 +69,8 @@ def parse_arguments():
         "-r",
         "--replace_existing_tree",
         help="If present will replace existing tree of sepcified name",
-        type=str
+        type=str,
+        default=""
     )
 
     # ack node
@@ -112,11 +117,12 @@ class SequencerClient:
 
             # build the message
             if self.args.hbeat:
+                print("hbeat")
                 response = stub.RequestHeartBeat(Empty())
             else:
                 # unapack the command type from arg parse
                 command_m = CommandMessage(mess_t=MessageType.MESSAGE_TYPE_COMMAND_MESSAGE)
-                command_t = CommandType(self.args.command_t)
+                command_t = unwrap_protobuf_enum_wrapper(CommandType, self.args.command_type)
                 command_m.command_t = command_t
                 command_m.tree_name = self.args.tree_name
 
@@ -124,24 +130,24 @@ class SequencerClient:
                 tree_execution_control_commands = [CommandType.PAUSE_TREE, CommandType.TICK_TREE, CommandType.START_TREE]
 
                 # These commands only need captured tree name and command itself
-                if command_t in tree_execution_control_commands + [MessageType.UNLOAD_TREE]:
+                if command_t in tree_execution_control_commands + [CommandType.UNLOAD_TREE]:
                     pass
                 elif command_t == CommandType.LOAD_NEW_TREE:
                     LNT_mess = LoadNewTreeMessage()
                     # should replace is true then
                     if self.args.replace_existing_tree != "":
                         LNT_mess.should_replace_existing_tree = True
-                        LNT_mess.tree_to_replace = self.args.replace_current_tree
+                        LNT_mess.tree_to_replace = self.args.replace_existing_tree
                     else:
                         # in this case we will have the service just launch a new process for a new tree, forest in bound!!
                         LNT_mess.should_replace_existing_tree = False  # default but whatever
-                    command_m.load_new_tree = LNT_mess
+                    command_m.load_new_tree.CopyFrom(LNT_mess)
                 # TODO other messages
                 # elif command_t == MessageType.CHANGE_TICK_RATE_OF_TREE:
                 #     change_tick_mess = ChangeTickConfigurationMessage()
 
-                p_message_info(mt, mess_val)
-                response = stub.EnqueueCommand(mess_val)
+                print(command_m)
+                response = stub.EnqueueCommand(command_m)
 
             logger.debug(response)
 

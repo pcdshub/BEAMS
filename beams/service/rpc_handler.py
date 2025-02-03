@@ -5,8 +5,6 @@ from multiprocessing import Semaphore, Queue, Manager
 from typing import Optional, List
 
 import grpc
-from google.protobuf.timestamp_pb2 import Timestamp
-
 
 from beams.service.helpers.worker import Worker
 
@@ -18,13 +16,12 @@ from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
 from beams.service.remote_calls.beams_rpc_pb2_grpc import (
     BEAMS_rpcServicer, add_BEAMS_rpcServicer_to_server)
 
-from beams.service.tree_ticker import TreeTicker
 
 logger = logging.getLogger(__name__)
 
 
 class RPCHandler(BEAMS_rpcServicer, Worker):
-    def __init__(self, sync_manager: Manager = Manager()):
+    def __init__(self, sync_manager: Manager = None):
         # GRPC server launching things from docs: https://grpc.io/docs/languages/python/basics/#starting-the-server
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=10)
         self.server = grpc.server(self.thread_pool)
@@ -32,20 +29,23 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         # calling Worker's super
         super().__init__("RPCHandler", lambda: self.server.stop(1))
 
-        # process safe dictionary given by BEAMSService so we can appropriately respond with heartbeat
         self.sync_man = sync_manager
-        self.sync_man.connect()
-        self.sync_man.register("get_tree_dict")
+        if sync_manager is not None:  # for testing modularity purposes
+            # process safe dictionary given by BEAMSService so we can appropriately respond with heartbeat
+            self.sync_man.connect()
+            self.sync_man.register("get_tree_dict")
 
         # queue for owning object to grab commands s
         self.incoming_command_queue = Queue()
         self.command_ready_sem = Semaphore(value=0)
 
+    # NOTE: these could also live and work in a process spawned by beams service..
+
     def attempt_to_get_tree_update(self, tree_name: str) -> Optional[BehaviorTreeUpdateMessage]:
-        logger.debug("got hereXX")
+        if self.sync_man is None:  # for testing modularity
+            return None
         with self.sync_man as my_boy:
             tree_dict = my_boy.get_tree_dict()
-            logger.debug("not hereXX")
             if tree_name in tree_dict.keys():
                 return tree_dict.get(tree_name).get_behavior_tree_update()
             else:
@@ -53,6 +53,9 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
                 return None
 
     def get_all_tree_updates(self) -> Optional[List[BehaviorTreeUpdateMessage]]:
+        if self.sync_man is None:  # for testing modularity
+            return None
+
         with self.sync_man as your_boy:
             tree_dict = your_boy.get_tree_dict()
             # if dictionary empty return none
@@ -71,7 +74,10 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             logger.debug(f"Command of type: {request.command_t} enqueued for {request.tree_name}")
             self.command_ready_sem.release()
 
-        bt_update = self.attempt_to_get_tree_update(request.tree_name)
+        bt_update = None
+        if self.sync_man is not None:  # for testing modularity 
+            bt_update = self.attempt_to_get_tree_update(request.tree_name)
+        
         hbeat_message = HeartBeatReply(mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT)
         hbeat_message.reply_timestamp.GetCurrentTime()
 
@@ -88,17 +94,14 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         # for example: how could we keep thee py_tree treename and this one aligned?
         logger.debug("GOT HBEAT")
         updates = self.get_all_tree_updates()
+        
+        hbeat_message = HeartBeatReply(mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT)
+        hbeat_message.reply_timestamp.GetCurrentTime()
+        
         if updates is None:
-            return HeartBeatReply(
-                mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT,
-                reply_timestamp=Timestamp().GetCurrentTime(),
-            )
+            return hbeat_message
         else:
-            return HeartBeatReply(
-                mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT,
-                reply_timestamp=Timestamp().GetCurrentTime(),
-                behavior_tree_update=updates
-            )
+            return hbeat_message.extend(updates)
 
     def work_func(self):
         logger.debug(f"{self.proc_name} running")

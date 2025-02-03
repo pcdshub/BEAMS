@@ -108,58 +108,53 @@ def run_from_file_tree_tick_work_func(
 
 
 class TreeTicker(Worker):
-    def __init__(self):
+    def __init__(self, filepath):
         super().__init__("TreeTicker")
         self.state = TreeTicker.TreeState()
+        self.fp = filepath
 
     @dataclass
     class TreeState():
-        current_tree_fp = Value(c_char_p, b"")
         current_node = Value(c_char_p, b"")
-        tick_current_tree = Value(c_bool, False)
+        tick_current_tree = Value(c_bool, True)  # setting False will allow, stop_work / unloading 
         tick_delay_ms = Value(c_uint, 5)
         tick_interactive = Value(c_bool, False)
-        pause_tree = Value(c_bool, False)
+        pause_tree = Value(c_bool, True)  # start in paused state
         tick_config = Value(c_uint, TickConfiguration.UNKNOWN)  # don't forget protobuf enums are just int wrappers 
-        tree: BehaviourTree
+        tree: BehaviourTree = None  # don't know if this will pickle...
 
     def get_behavior_tree_update(self) -> BehaviorTreeUpdateMessage:
         mess = BehaviorTreeUpdateMessage(
                 mess_t=MessageType.MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE,
-                tree_name=self.state.current_tree_fp.value.decode(),
+                # tree_name=self.state.tree.name,  # again, atm nothing is strictly holding these in line
                 node_name=self.state.current_node.value.decode(),
                 tick_status=TickStatus.RUNNING,  # TOOD: josh actually plumb this up, next commit
-                tick_config=self.tick_config.get_value(),
-                tick_delay_ms=self.tick_delay_ms.value
+                tick_config=self.state.tick_config.value,
+                tick_delay_ms=self.state.tick_delay_ms.value
             )
 
         return mess
 
     def work_func(self):
         while (self.do_work.value):
-            # If filepath is available get file
-            if self.state.current_tree_fp.value.decode() == "":
-                time.sleep(100)
-                continue
-            else:
-                # load new tree
-                logger.info(f"Running behavior tree at {self.current_tree_fp.value.decode()}")
-                # grab config
-                fp = Path(self.current_tree_fp.value.decode()).resolve()
-                if not fp.is_file():
-                    raise ValueError("Provided filepath is not a file")
+            # load new tree
+            logger.info(f"Running behavior tree at {self.fp}")
+            # grab config
+            fp = Path(self.fp).resolve()
+            if not fp.is_file():
+                raise ValueError("Provided filepath is not a file")
 
-                self.state.tree = get_tree_from_path(fp)
-                self.state.tree.visitors.append(LoggingVisitor(print_status=True))
+            self.state.tree = get_tree_from_path(fp)
+            self.state.tree.visitors.append(LoggingVisitor(print_status=True))
 
-                snapshot_visitor = SnapshotVisitor()
-                self.state.tree.add_post_tick_handler(
-                    partial(snapshot_post_tick_handler,
-                            snapshot_visitor,
-                            True,
-                            False)
-                )
-                self.state.tree.setup()
+            snapshot_visitor = SnapshotVisitor()
+            self.state.tree.add_post_tick_handler(
+                partial(snapshot_post_tick_handler,
+                        snapshot_visitor,
+                        True,
+                        False)
+            )
+            self.state.tree.setup()
 
             while (self.state.tick_current_tree.value):
                 while (self.state.pause_tree.value):

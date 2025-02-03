@@ -53,7 +53,7 @@ class Worker():
             return
         self.do_work.value = False
         logger.debug(f"({self.proc_name}) -->>: Sending terminate signal to process")
-        time.sleep(.1)
+        time.sleep(0.5)
         # Send kill signal to work process. # TODO: the exact location of this
         # is important. Reflect with self.do_work.get_lock():
         self.work_proc.terminate()

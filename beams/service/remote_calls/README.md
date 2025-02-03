@@ -9,7 +9,7 @@ Protobuf is a great industry standard for serializing data. This also obviates r
 ## Structure
 The "base" proto file is "generic_message.proto", each derived message type should (generally) get its own \[message_name].proto file. Here we have
 * behavior_tree.proto - defines a message which contains information on the currently ticked tree
-* heartbeat.proto - packages the BehaviorTreeUpdate messsage(s) into a HeartbeatReply message for clients
+* heartbeat.proto - packages the BehaviorTreeUpdate messsage(s) into a HeartBeatReply message for clients
 * command.proto - structure of expected commands requested of the program
 
 ### generic_message.proto
@@ -38,7 +38,7 @@ message BehaviorTreeUpdate {
 ### heartbeat.proto
 Response to client
 ```
-message HeartbeatReply {
+message HeartBeatReply {
   MessageType mess_t = 1;
   BehaviorTreeUpdate behavior_tree_update = 2; // when our program is ticking many trees this may become a repeated or mapped fields
   google.protobuf.Timestamp reply_timestamp = 3;

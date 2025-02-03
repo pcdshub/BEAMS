@@ -1,21 +1,18 @@
 import logging
 import time
 from concurrent import futures
-from multiprocessing import Semaphore, Queue, Manager
-from typing import Optional, List
+from multiprocessing import Manager, Queue, Semaphore
+from typing import List, Optional
 
 import grpc
 
 from beams.service.helpers.worker import Worker
-
-from beams.service.remote_calls.generic_message_pb2 import MessageType
-from beams.service.remote_calls.behavior_tree_pb2 import BehaviorTreeUpdateMessage
-from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
-
-
 from beams.service.remote_calls.beams_rpc_pb2_grpc import (
     BEAMS_rpcServicer, add_BEAMS_rpcServicer_to_server)
-
+from beams.service.remote_calls.behavior_tree_pb2 import \
+    BehaviorTreeUpdateMessage
+from beams.service.remote_calls.generic_message_pb2 import MessageType
+from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
 
 logger = logging.getLogger(__name__)
 
@@ -75,9 +72,9 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             self.command_ready_sem.release()
 
         bt_update = None
-        if self.sync_man is not None:  # for testing modularity 
+        if self.sync_man is not None:  # for testing modularity
             bt_update = self.attempt_to_get_tree_update(request.tree_name)
-        
+
         hbeat_message = HeartBeatReply(mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT)
         hbeat_message.reply_timestamp.GetCurrentTime()
 
@@ -85,7 +82,7 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             return hbeat_message
         else:
             hbeat_message.behavior_tree_update.extend(bt_update)
-            return 
+            return
 
     def RequestHeartBeat(self, request, context) -> HeartBeatReply:
         # assumption that hitting this service endpoint means you want to know ALL the trees this service is currently ticking
@@ -94,10 +91,10 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         # for example: how could we keep thee py_tree treename and this one aligned?
         logger.debug("GOT HBEAT")
         updates = self.get_all_tree_updates()
-        
+
         hbeat_message = HeartBeatReply(mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT)
         hbeat_message.reply_timestamp.GetCurrentTime()
-        
+
         if updates is None:
             return hbeat_message
         else:

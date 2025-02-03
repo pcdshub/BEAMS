@@ -24,7 +24,9 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         self.server = grpc.server(self.thread_pool)
 
         # calling Worker's super
-        super().__init__("RPCHandler", lambda: self.server.stop(1))
+        super().__init__(proc_name="RPCHandler",
+                         stop_func=lambda: self.server.stop(1),
+                         grace_window_before_terminate_seconds=.5)
 
         self.sync_man = sync_manager
         if sync_manager is not None:  # for testing modularity purposes

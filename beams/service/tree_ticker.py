@@ -7,7 +7,7 @@ import time
 from functools import partial
 from pathlib import Path
 from multiprocessing import Value
-from ctypese import c_char_p, c_bool, c_uint
+from ctypes import c_char_p, c_bool, c_uint
 from dataclasses import dataclass
 
 from py_trees.console import read_single_keypress
@@ -120,7 +120,7 @@ class TreeTicker(Worker):
         tick_delay_ms = Value(c_uint, 5)
         tick_interactive = Value(c_bool, False)
         pause_tree = Value(c_bool, False)
-        tick_config = SharedEnum(TickConfiguration)
+        tick_config = Value(c_uint, TickConfiguration.UNKNOWN)  # don't forget protobuf enums are just int wrappers 
         tree: BehaviourTree
 
     def get_behavior_tree_update(self) -> BehaviorTreeUpdateMessage:

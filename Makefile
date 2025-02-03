@@ -28,9 +28,9 @@ test_verbose:
 test_artifacts:
 	@python3 beams/tests/artifacts/egg_generator.py
 
-.PHONY: run_sequencer
+.PHONY: run_service
 run_sequencer:
-	@source venv/bin/activate && python3 beams/sequencer/Sequencer.py
+	@source venv/bin/activate && python3 beams/bin/beams_service.py
 
 .PHONY: docker_build
 docker_build:

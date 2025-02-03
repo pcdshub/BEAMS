@@ -5,14 +5,14 @@ import logging
 
 import grpc
 
-from beams.logging import setup_logging
-from beams.service.remote_calls.generic_message_pb2 import MessageType, Empty
-from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
-from beams.service.remote_calls.command_pb2 import (CommandType, CommandMessage,
-                                                    LoadNewTreeMessage, AckNodeMessage, 
-                                                    TickConfigurationMessage)
-from beams.service.remote_calls.behavior_tree_pb2 import TickConfiguration
 from beams.service.remote_calls.beams_rpc_pb2_grpc import BEAMS_rpcStub
+from beams.service.remote_calls.behavior_tree_pb2 import TickConfiguration
+from beams.service.remote_calls.command_pb2 import (AckNodeMessage,
+                                                    CommandMessage,
+                                                    CommandType,
+                                                    LoadNewTreeMessage,
+                                                    TickConfigurationMessage)
+from beams.service.remote_calls.generic_message_pb2 import Empty, MessageType
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ def parse_arguments():
         help="get heartbeat message from service",
         action="store_true"
     )
-    command_parser = subparsers.add_parser('command', 
+    command_parser = subparsers.add_parser('command',
                                            help="command parser help")
     command_parser.add_argument(
         '-c',
@@ -57,7 +57,7 @@ def parse_arguments():
     )
     # load new tree
     load_new_tree_parser = command_parser.add_argument_group(
-                                    'load_new_tree', 
+                                    'load_new_tree',
                                     "command for specifying new tree")
     load_new_tree_parser.add_argument(
         "-f",
@@ -125,7 +125,6 @@ class RPCClient:
             "localhost:50051"
         ) as channel:  # TODO: obviously not this. Grab from config
             stub = BEAMS_rpcStub(channel)
-            response = None
 
             # build the message
             if self.args.hbeat:
@@ -154,10 +153,13 @@ class RPCClient:
                     # pack em up
                     LNT_mess.tick_spec.CopyFrom(tc)
                     command_m.load_new_tree.CopyFrom(LNT_mess)
-                # TODO other messages
-                # elif command_t == MessageType.CHANGE_TICK_RATE_OF_TREE:
-                #     change_tick_mess = TickConfigurationMessage()
 
+                elif command_t == CommandType.ACK_NODE:
+                    ack_node_mess = AckNodeMessage(
+                                        node_name_to_ack=self.args.node_name,
+                                        user_acking_ndoe=self.args.user
+                    )
+                    command_m.ack_node.CopyFrom(ack_node_mess)
                 print(command_m)
                 self.response = stub.EnqueueCommand(command_m)
 

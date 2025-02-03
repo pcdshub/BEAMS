@@ -10,8 +10,8 @@ from beams.service.remote_calls.generic_message_pb2 import MessageType, Empty
 from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
 from beams.service.remote_calls.command_pb2 import (CommandType, CommandMessage,
                                                     LoadNewTreeMessage, AckNodeMessage, 
-                                                    ChangeTickConfigurationMessage)
-
+                                                    TickConfigurationMessage)
+from beams.service.remote_calls.behavior_tree_pb2 import TickConfiguration
 from beams.service.remote_calls.beams_rpc_pb2_grpc import BEAMS_rpcStub
 
 logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ def parse_arguments():
     subparsers = parser.add_subparsers(help="client subcommands")
 
     parser.add_argument(
-        "-H",
+        "-b",
         "--hbeat",
         help="get heartbeat message from service",
         action="store_true"
@@ -65,12 +65,23 @@ def parse_arguments():
         help="filepath of tree to be loaded",
         type=str
     )
-    load_new_tree_parser.add_argument(
-        "-r",
-        "--replace_existing_tree",
-        help="If present will replace existing tree of sepcified name",
+
+    # tick config
+    tick_config_parser = command_parser.add_argument_group(
+                                    "tick_configuration",
+                                    "specify tick configuration")
+    tick_config_parser.add_argument(
+        "-tc",
+        "--tick_config",
         type=str,
-        default=""
+        choices=enumerate_choices(TickConfiguration),
+        help="specify how the tree will be ticked"
+    )
+    tick_config_parser.add_argument(
+        '-d',
+        "--tick_delay_ms",
+        help="specify tick delay (~period of ticking) in milliseconds",
+        type=int
     )
 
     # ack node
@@ -134,28 +145,29 @@ class SequencerClient:
                     pass
                 elif command_t == CommandType.LOAD_NEW_TREE:
                     LNT_mess = LoadNewTreeMessage()
-                    # should replace is true then
-                    if self.args.replace_existing_tree != "":
-                        LNT_mess.should_replace_existing_tree = True
-                        LNT_mess.tree_to_replace = self.args.replace_existing_tree
-                    else:
-                        # in this case we will have the service just launch a new process for a new tree, forest in bound!!
-                        LNT_mess.should_replace_existing_tree = False  # default but whatever
+                    LNT_mess.tree_file_path = self.args.new_tree_filepath
+                    # make tick config
+                    tc = TickConfigurationMessage()
+                    tc.tick_config = unwrap_protobuf_enum_wrapper(TickConfiguration, self.args.tick_config)
+                    tc.delay_ms = self.args.tick_delay_ms
+                    # pack em up
+                    LNT_mess.tick_spec.CopyFrom(tc)
                     command_m.load_new_tree.CopyFrom(LNT_mess)
                 # TODO other messages
                 # elif command_t == MessageType.CHANGE_TICK_RATE_OF_TREE:
-                #     change_tick_mess = ChangeTickConfigurationMessage()
+                #     change_tick_mess = TickConfigurationMessage()
 
                 print(command_m)
                 response = stub.EnqueueCommand(command_m)
 
             logger.debug(response)
+            logger.debug(response.reply_timestamp)
 
 
 if __name__ == "__main__":
     # TODO: determine what we want here.  Does it have its own logging
     # process and file?
-    setup_logging(logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
     args = parse_arguments()
     client = SequencerClient(args)
     client.run()

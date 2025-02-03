@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class RPCHandler(BEAMS_rpcServicer, Worker):
-    def __init__(self, sync_manager: Manager = Manager(), dictionary_of_trees: dict[str, TreeTicker] = dict()):
+    def __init__(self, sync_manager: Manager = Manager()):
         # GRPC server launching things from docs: https://grpc.io/docs/languages/python/basics/#starting-the-server
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=10)
         self.server = grpc.server(self.thread_pool)
@@ -34,27 +34,32 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
 
         # process safe dictionary given by BEAMSService so we can appropriately respond with heartbeat
         self.sync_man = sync_manager
-        self.tree_dict = dictionary_of_trees
+        self.sync_man.connect()
+        self.sync_man.register("get_tree_dict")
 
         # queue for owning object to grab commands s
         self.incoming_command_queue = Queue()
         self.command_ready_sem = Semaphore(value=0)
 
     def attempt_to_get_tree_update(self, tree_name: str) -> Optional[BehaviorTreeUpdateMessage]:
-        with self.sync_man:
-            if tree_name in self.tree_dict:
-                return self.tree_dict[tree_name].get_behavior_tree_update()
+        logger.debug("got hereXX")
+        with self.sync_man as my_boy:
+            tree_dict = my_boy.get_tree_dict()
+            logger.debug("not hereXX")
+            if tree_name in tree_dict.keys():
+                return tree_dict.get(tree_name).get_behavior_tree_update()
             else:
                 logger.error(f"Unable to find tree of name {tree_name} currently being tickde")
                 return None
 
     def get_all_tree_updates(self) -> Optional[List[BehaviorTreeUpdateMessage]]:
-        with self.sync_man:
+        with self.sync_man as your_boy:
+            tree_dict = your_boy.get_tree_dict()
             # if dictionary empty return none
-            if not bool(self.tree_dict):
+            if not bool(tree_dict):
                 return None
 
-            updates = [tree.get_behavior_tree_update() for tree in self.tree_dict.values()]
+            updates = [tree.get_behavior_tree_update() for tree in tree_dict.values()]
             return updates
 
     def EnqueueCommand(self, request, context) -> HeartBeatReply:
@@ -67,34 +72,31 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             self.command_ready_sem.release()
 
         bt_update = self.attempt_to_get_tree_update(request.tree_name)
+        hbeat_message = HeartBeatReply(mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT)
+        hbeat_message.reply_timestamp.GetCurrentTime()
 
         if bt_update is None:
-            return HeartBeatReply(
-                mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT,
-                reply_timestamp=Timestamp(),
-            )
+            return hbeat_message
         else:
-            return HeartBeatReply(
-                    mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT,
-                    reply_timestamp=Timestamp(),
-                    behavior_tree_update=[bt_update]
-            )
+            hbeat_message.behavior_tree_update.extend(bt_update)
+            return 
 
     def RequestHeartBeat(self, request, context) -> HeartBeatReply:
         # assumption that hitting this service endpoint means you want to know ALL the trees this service is currently ticking
 
         # TODO: it is placing like here that I am not happy with the distance of the py_trees vs GRPC object, reflect on this
         # for example: how could we keep thee py_tree treename and this one aligned?
+        logger.debug("GOT HBEAT")
         updates = self.get_all_tree_updates()
         if updates is None:
             return HeartBeatReply(
                 mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT,
-                reply_timestamp=Timestamp(),
+                reply_timestamp=Timestamp().GetCurrentTime(),
             )
         else:
             return HeartBeatReply(
                 mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT,
-                reply_timestamp=Timestamp(),
+                reply_timestamp=Timestamp().GetCurrentTime(),
                 behavior_tree_update=updates
             )
 

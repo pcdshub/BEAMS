@@ -112,9 +112,10 @@ def parse_arguments():
     return parser.parse_args()
 
 
-class SequencerClient:
+class RPCClient:
     def __init__(self, args):
         self.args = args
+        self.response = None
 
     def run(self):
         def p_message_info(mtype, mvalue):
@@ -129,7 +130,7 @@ class SequencerClient:
             # build the message
             if self.args.hbeat:
                 print("hbeat")
-                response = stub.RequestHeartBeat(Empty())
+                self.response = stub.RequestHeartBeat(Empty())
             else:
                 # unapack the command type from arg parse
                 command_m = CommandMessage(mess_t=MessageType.MESSAGE_TYPE_COMMAND_MESSAGE)
@@ -158,10 +159,9 @@ class SequencerClient:
                 #     change_tick_mess = TickConfigurationMessage()
 
                 print(command_m)
-                response = stub.EnqueueCommand(command_m)
+                self.response = stub.EnqueueCommand(command_m)
 
-            logger.debug(response)
-            logger.debug(response.reply_timestamp)
+            logger.debug(self.response)
 
 
 if __name__ == "__main__":
@@ -169,5 +169,5 @@ if __name__ == "__main__":
     # process and file?
     logging.basicConfig(level=logging.DEBUG)
     args = parse_arguments()
-    client = SequencerClient(args)
+    client = RPCClient(args)
     client.run()

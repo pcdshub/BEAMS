@@ -60,12 +60,16 @@ class TestProtos:
                 tick_config=TickConfigurationMessage(tick_config=TickConfiguration.CONTINOUS, 
                                                      delay_ms=5)
             )
+        lnt_mess = LoadNewTreeMessage(tree_file_path="beams/tests/artificats/eggs.json")
+        lnt_mess.tick_spec.CopyFrom(TickConfigurationMessage(
+            tick_config=TickConfiguration.CONTINOUS,
+            delay_ms=5
+        ))
         com2 = CommandMessage(
                 mess_t=MessageType.MESSAGE_TYPE_COMMAND_MESSAGE,
                 command_t=CommandType.LOAD_NEW_TREE,
                 tree_name="Tree2",
-                load_new_tree=LoadNewTreeMessage(should_replace_existing_tree=True,
-                                                 tree_to_replace="Tree1"))
+                load_new_tree=lnt_mess)
 
         assert com1.tree_name == "Tree1"
         assert not com2.HasField("ack_node")  # this is more useful in a strongly typed langauge but we should still leverage

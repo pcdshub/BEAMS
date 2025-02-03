@@ -1,10 +1,9 @@
 import time
 from types import SimpleNamespace
 
-from beams.service.rpc_handler import RPCHandler
-from beams.service.rpc_client import RPCClient
-
 from beams.service.remote_calls.generic_message_pb2 import MessageType
+from beams.service.rpc_client import RPCClient
+from beams.service.rpc_handler import RPCHandler
 
 
 class TestRPC:

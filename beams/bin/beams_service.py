@@ -1,12 +1,11 @@
 import logging
-from multiprocessing.managers import BaseManager
 import time
+from multiprocessing.managers import BaseManager
 
 from beams.service.helpers.worker import Worker
+from beams.service.remote_calls.command_pb2 import CommandType
 from beams.service.rpc_handler import RPCHandler
 from beams.service.tree_ticker import TreeTicker
-
-from beams.service.remote_calls.command_pb2 import CommandType
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +15,7 @@ logger = logging.getLogger(__name__)
 class BeamsService(Worker):
     def __init__(self):
         super().__init__("BeamsService")
-        
+
         class MyManager(BaseManager):
           pass
 
@@ -43,7 +42,7 @@ class BeamsService(Worker):
 
                     if (request.command_t == CommandType.LOAD_NEW_TREE):
                         with self.MyManager as man:
-                          # relegated to user space to makesure the fil 
+                          # relegated to user space to makesure the fil
                           logger.debug("got here")
                           x = man.TreeTicker(request.load_new_tree.tree_file_path)
                           logger.debug("what about here")

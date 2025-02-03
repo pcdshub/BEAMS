@@ -4,11 +4,11 @@ Contains logic for 'threads' which need to tick behavior trees
 
 import logging
 import time
-from functools import partial
-from pathlib import Path
-from multiprocessing import Value
-from ctypes import c_char_p, c_bool, c_uint
+from ctypes import c_bool, c_char_p, c_uint
 from dataclasses import dataclass
+from functools import partial
+from multiprocessing import Value
+from pathlib import Path
 
 from py_trees.console import read_single_keypress
 from py_trees.display import unicode_blackboard, unicode_tree
@@ -16,12 +16,11 @@ from py_trees.trees import BehaviourTree
 from py_trees.visitors import SnapshotVisitor
 
 from beams.logging import LoggingVisitor
-from beams.tree_config import get_tree_from_path
 from beams.service.helpers.worker import Worker
-from beams.service.helpers.enum import SharedEnum
-
+from beams.service.remote_calls.behavior_tree_pb2 import (
+    BehaviorTreeUpdateMessage, TickConfiguration, TickStatus)
 from beams.service.remote_calls.generic_message_pb2 import MessageType
-from beams.service.remote_calls.behavior_tree_pb2 import (TickStatus, TickConfiguration, BehaviorTreeUpdateMessage)
+from beams.tree_config import get_tree_from_path
 
 logger = logging.getLogger(__name__)
 
@@ -116,11 +115,11 @@ class TreeTicker(Worker):
     @dataclass
     class TreeState():
         current_node = Value(c_char_p, b"")
-        tick_current_tree = Value(c_bool, True)  # setting False will allow, stop_work / unloading 
+        tick_current_tree = Value(c_bool, True)  # setting False will allow, stop_work / unloading
         tick_delay_ms = Value(c_uint, 5)
         tick_interactive = Value(c_bool, False)
         pause_tree = Value(c_bool, True)  # start in paused state
-        tick_config = Value(c_uint, TickConfiguration.UNKNOWN)  # don't forget protobuf enums are just int wrappers 
+        tick_config = Value(c_uint, TickConfiguration.UNKNOWN)  # don't forget protobuf enums are just int wrappers
         tree: BehaviourTree = None  # don't know if this will pickle...
 
     def get_behavior_tree_update(self) -> BehaviorTreeUpdateMessage:

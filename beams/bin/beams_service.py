@@ -10,7 +10,8 @@ from beams.service.tree_ticker import TreeTicker
 logger = logging.getLogger(__name__)
 
 # toss arg parse here to start
-
+import sys
+import os
 
 class BeamsService(Worker):
     def __init__(self):
@@ -22,11 +23,12 @@ class BeamsService(Worker):
         # remote manager: https://docs.python.org/3/library/multiprocessing.html#using-a-remote-manager
         self.tree_dict = {}
         MyManager.register("TreeTicker", TreeTicker)
+        MyManager.register("TreeState", TreeTicker.TreeState)  # , exposed=('current_node', "tick_config", "tick_delay_ms")
         MyManager.register("get_tree_dict", callable=lambda: self.tree_dict)
 
         self.MyManager = MyManager()
-        logger.debug(f"Sync Man starting at: {self.MyManager.address}")
         self.MyManager.start()
+        logger.debug(f"Sync Man starting at: {self.MyManager.address}")
 
     def work_func(self):
         self.grpc_service = RPCHandler(sync_manager=self.MyManager)
@@ -42,9 +44,13 @@ class BeamsService(Worker):
 
                     if (request.command_t == CommandType.LOAD_NEW_TREE):
                         with self.MyManager as man:
-                          # relegated to user space to makesure the fil
-                          logger.debug("got here")
-                          x = man.TreeTicker(request.load_new_tree.tree_file_path)
+                          tick_config_mess = request.load_new_tree.tick_spec
+                          init_state = man.TreeState(
+                            tick_delay_ms=tick_config_mess.delay_ms,
+                            tick_config=tick_config_mess.tick_config
+                          )
+                          x = man.TreeTicker(filepath=request.load_new_tree.tree_file_path,
+                                             init_tree_state=init_state)
                           logger.debug("what about here")
                           tree_dict = man.get_tree_dict()
                           tree_dict.update({request.tree_name : x})
@@ -55,7 +61,23 @@ class BeamsService(Worker):
                                        " explciit START_TREE command will need to be issued for it to begin")
 
             except Exception as e:
-                logger.error(e)
+                e_type, e_object, e_traceback = sys.exc_info()
+
+                e_filename = os.path.split(
+                    e_traceback.tb_frame.f_code.co_filename
+                )[1]
+
+                e_message = str(e)
+
+                e_line_number = e_traceback.tb_lineno
+
+                logger.error(f'exception type: {e_type}')
+
+                logger.error(f'exception filename: {e_filename}')
+
+                logger.error(f'exception line number: {e_line_number}')
+
+                logger.error(f'exception message: {e_message}')
         self.grpc_service.stop_work()
 
 

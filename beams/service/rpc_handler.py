@@ -32,8 +32,11 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         self.sync_man = sync_manager
         if sync_manager is not None:  # for testing modularity purposes
             # process safe dictionary given by BEAMSService so we can appropriately respond with heartbeat
+            logger.debug(f"Connecting to sync_man at: {self.sync_man.address}")
             self.sync_man.connect()
             self.sync_man.register("get_tree_dict")
+            self.sync_man.register("TreeTicker")
+            self.sync_man.register("TreeState")
 
         # queue for owning object to grab commands s
         self.incoming_command_queue = Queue()
@@ -59,10 +62,11 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         with self.sync_man as your_boy:
             tree_dict = your_boy.get_tree_dict()
             # if dictionary empty return none
-            if not bool(tree_dict):
+            if len(tree_dict.items()) == 0:
                 return None
 
             updates = [tree.get_behavior_tree_update() for tree in tree_dict.values()]
+
             return updates
 
     def enqueue_command(self, request, context) -> HeartBeatReply:
@@ -85,7 +89,7 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             return hbeat_message
         else:
             hbeat_message.behavior_tree_update.extend(bt_update)
-            return
+            return hbeat_message
 
     def request_heartbeat(self, request, context) -> HeartBeatReply:
         # assumption that hitting this service endpoint means you want to know ALL the trees this service is currently ticking
@@ -99,8 +103,9 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
 
         if updates is None:
             return hbeat_message
-        else:
-            return hbeat_message.extend(updates)
+        else: 
+            hbeat_message.behavior_tree_update.extend(updates)
+            return hbeat_message
 
     def work_func(self):
         logger.debug(f"{self.proc_name} running")

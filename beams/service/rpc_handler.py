@@ -42,14 +42,14 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         self.command_ready_sem = Semaphore(value=0)
 
     # NOTE: these could also live and work in a process spawned by beams service..
-
-    def attempt_to_get_tree_update(self, tree_name: str) -> Optional[BehaviorTreeUpdateMessage]:
+    # returns a single bt update as a list...
+    def attempt_to_get_tree_update(self, tree_name: str) -> Optional[List[BehaviorTreeUpdateMessage]]:
         if self.sync_man is None:  # for testing modularity
             return None
         with self.sync_man as my_boy:
             tree_dict = my_boy.get_tree_dict()
             if tree_name in tree_dict.keys():
-                return tree_dict.get(tree_name).get_behavior_tree_update()
+                return [tree_dict.get(tree_name).get_behavior_tree_update()]
             else:
                 logger.error(f"Unable to find tree of name {tree_name} currently being tickde")
                 return None
@@ -103,7 +103,7 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
 
         if updates is None:
             return hbeat_message
-        else: 
+        else:
             hbeat_message.behavior_tree_update.extend(updates)
             return hbeat_message
 

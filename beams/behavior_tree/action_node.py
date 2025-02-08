@@ -58,8 +58,8 @@ class ActionNode(py_trees.behaviour.Behaviour):
         """
         Initialise configures and resets the behaviour ready for (repeated) execution
         """
-        logger.debug(f"{self.name}.initialise [{self.status.name}->RUNNING]")
         self.volatile_status.set_value(py_trees.common.Status.RUNNING)
+        logger.debug(f"{self.name}.initialise [{self.status.name}->RUNNING]")
         self.work_gate.set()
 
     def update(self) -> py_trees.common.Status:
@@ -87,3 +87,4 @@ class ActionNode(py_trees.behaviour.Behaviour):
             "%s.terminate [%s->%s]"
             % (self.name, self.status.name, new_status.name)
         )
+        logger.debug("Work process joined")

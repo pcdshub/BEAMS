@@ -89,3 +89,4 @@ class ActionNode(py_trees.behaviour.Behaviour):
             "%s.terminate [%s->%s]"
             % (self.name, self.status.name, new_status.name)
         )
+        logger.debug("Work process joined")

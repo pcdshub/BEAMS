@@ -1,3 +1,4 @@
+# toss arg parse here to start
 import logging
 import os
 import sys
@@ -33,11 +34,11 @@ class BeamsService(Worker):
 
     def join_all_trees(self):
         with self.sync_man as man:
-          tree_dict = man.get_tree_dict()
-          for tree_name, tree in tree_dict.items():
-              print(f"Cleaning up tree of name {tree_name}")
-              tree.stop_work()
-              tree.shutdown()
+            tree_dict = man.get_tree_dict()
+            for tree_name, tree in tree_dict.items():
+                logger.debug(f"Cleaning up tree of name {tree_name}")
+                tree.stop_work()
+                tree.shutdown()
 
     def work_func(self):
         self.grpc_service = RPCHandler(sync_manager=self.sync_man)

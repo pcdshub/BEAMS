@@ -2,14 +2,6 @@
 Contains logic for 'threads' which need to tick behavior trees
 """
 from __future__ import annotations
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
->>>>>>> 27d49aa (feat: loading trees into memory and reflecting that in the heartbeat)
-=======
-
->>>>>>> d0aa23b (feat: ticking through trees loaded in memory!)
 import logging
 import os
 import time

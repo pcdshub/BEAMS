@@ -7,7 +7,6 @@ import logging
 import os
 import time
 from ctypes import c_bool, c_char_p, c_uint
-from dataclasses import dataclass
 from functools import partial
 from multiprocessing import Value
 from pathlib import Path
@@ -108,9 +107,45 @@ def run_from_file_tree_tick_work_func(
                 break
 
 
+class TreeState():
+    def __init__(self, tick_delay_ms: c_uint, tick_config: TickConfiguration):
+        self.current_node = Value(c_char_p, b"")   # potentially best accesible through self.tree and not this....
+        # Consitutes a TickConfigurationMessage
+        self.tick_delay_ms = Value(c_uint, tick_delay_ms)
+        self.tick_config = Value(c_uint, tick_config)  # don't forget protobuf enums are just int wrappers
+        # Control Flow Variables of Should I and How Should I tick this tree
+        self.tick_current_tree = Value(c_bool, True)  # setting False will allow, stop_work / unloading
+        self.pause_tree = Value(c_bool, True)  # start in paused state
+
+    # because I'm bad with @dataclass, and SyncManager.register only exposes "public", non __**__ functions these need public getters
+    # TODO: someone smart do better, i feel like you can add __get__ to exposed...
+    def get_node_name(self):
+        return self.current_node.value.decode()
+
+    def get_tick_config(self):
+        return self.tick_config.value
+
+    def get_tick_delay_ms(self):
+        return self.tick_delay_ms.value
+
+    def set_pause_tree(self, value):
+        logger.debug(f"setting pause tree on thread: {os.getpid()}")
+        self.pause_tree.value = value
+
+    def get_pause_tree(self):
+        logger.debug(f"checking pause tree on thread: {os.getpid()}")
+        return self.pause_tree.value
+
+    def get_tick_current_tree(self):
+        return self.tick_current_tree.value
+
+    def get_tick_interactive(self):
+        return self.tick_config.value
+
+
 class TreeTicker(Worker):
     def __init__(self, filepath: str,
-                 init_tree_state: TreeTicker.TreeState = None,
+                 init_tree_state: TreeState = None,
                  sync_man=None):
         super().__init__("TreeTicker")
         self.fp = filepath
@@ -126,7 +161,7 @@ class TreeTicker(Worker):
         self.tree = get_tree_from_path(fp)
 
         if init_tree_state is None:
-            self.state = TreeTicker.TreeState()
+            self.state = TreeState()
         else:
             self.state = init_tree_state
 
@@ -136,50 +171,8 @@ class TreeTicker(Worker):
     def get_tree_state(self):
         return self.state
 
-    def update_tree_state(self, new_state: TreeTicker.TreeState):
+    def update_tree_state(self, new_state: TreeState):
         self.state = new_state
-
-    @dataclass
-    class TreeState():
-        current_node : str = ""   # potentially best accesible through self.tree and not this....
-        # Control Flow Variables of Should I and How Should I tick this tree
-        tick_current_tree = True  # setting False will allow, stop_work / unloading
-        pause_tree = True  # start in paused state
-        # Consitutes a TickConfigurationMessage
-        tick_delay_ms = 5
-        tick_config = TickConfiguration.UNKNOWN  # don't forget protobuf enums are just int wrappers
-
-        def __init__(self, tick_delay_ms: c_uint, tick_config: TickConfiguration):
-            self.tick_delay_ms = Value(c_uint, tick_delay_ms)
-            self.tick_config = Value(c_uint, tick_config)
-            self.current_node = Value(c_char_p, b"")
-            self.tick_current_tree = Value(c_bool, True)
-            self.pause_tree = Value(c_bool, True)
-
-        # because I'm bad with @dataclass, and SyncManager.register only exposes "public", non __**__ functions these need public getters
-        # TODO: someone smart do better, i feel like you can add __get__ to exposed...
-        def get_node_name(self):
-            return self.current_node.value.decode()
-
-        def get_tick_config(self):
-            return self.tick_config.value
-
-        def get_tick_delay_ms(self):
-            return self.tick_delay_ms.value
-
-        def set_pause_tree(self, value):
-            logger.debug(f"setting pause tree on thread: {os.getpid()}")
-            self.pause_tree.value = value
-
-        def get_pause_tree(self):
-            logger.debug(f"checking pause tree on thread: {os.getpid()}")
-            return self.pause_tree.value
-
-        def get_tick_current_tree(self):
-            return self.tick_current_tree.value
-
-        def get_tick_interactive(self):
-            return self.tick_config.value
 
     def get_behavior_tree_update(self) -> BehaviorTreeUpdateMessage:
         # translate py_trees enum right quick

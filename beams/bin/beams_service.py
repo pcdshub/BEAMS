@@ -9,7 +9,7 @@ from beams.logging import setup_logging
 from beams.service.helpers.worker import Worker
 from beams.service.remote_calls.command_pb2 import CommandType
 from beams.service.rpc_handler import RPCHandler
-from beams.service.tree_ticker import TreeTicker
+from beams.service.tree_ticker import TreeTicker, TreeState
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class BeamsService(Worker):
         # remote manager: https://docs.python.org/3/library/multiprocessing.html#using-a-remote-manager
         self.tree_dict = {}
         sync_man.register("TreeTicker", TreeTicker)
-        sync_man.register("TreeState", TreeTicker.TreeState)  # , exposed=('current_node', "tick_config", "tick_delay_ms")
+        sync_man.register("TreeState", TreeState)
         sync_man.register("get_tree_dict", callable=lambda: self.tree_dict)
 
         self.sync_man = sync_man()

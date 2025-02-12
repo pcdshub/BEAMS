@@ -9,7 +9,7 @@ from beams.logging import setup_logging
 from beams.service.helpers.worker import Worker
 from beams.service.remote_calls.command_pb2 import CommandType
 from beams.service.rpc_handler import RPCHandler
-from beams.service.tree_ticker import TreeTicker, TreeState
+from beams.service.tree_ticker import TreeState, TreeTicker
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class BeamsService(Worker):
           tree.stop_work()
           tree.shutdown()
 
-    def work_func(self):
+    def work_func(self):  # noqa: C901, sorry I want this standalone PR to be a good case study, will remove in next
         self.grpc_service = RPCHandler(sync_manager=self.sync_man)
         self.grpc_service.start_work()
 
@@ -91,6 +91,18 @@ class BeamsService(Worker):
                           continue
                         tree_to_start = tree_dict.get(tree_name)
                         tree_to_start.pause_tree()
+                    elif (request.command_t == CommandType.TICK_TREE):
+                      with self.sync_man as man:
+                        # get tree, again for now this is tree specified in json file,
+                        # disambugiate this later
+                        tree_name = request.tree_name
+                        # get tree
+                        tree_dict = man.get_tree_dict()
+                        if (tree_name not in tree_dict.keys()):
+                          logging.error(f"Sorry fam {tree_name} is not in tree_dictionary: {tree_dict}")
+                          continue
+                        tree_to_start = tree_dict.get(tree_name)
+                        tree_to_start.command_tick()
 
             except Exception as e:
                 e_type, e_object, e_traceback = sys.exc_info()

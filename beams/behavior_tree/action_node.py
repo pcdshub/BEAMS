@@ -49,7 +49,7 @@ class ActionNode(py_trees.behaviour.Behaviour):
         )  # TODO(josh): make sure this cleans up resources when it dies
         self.is_set_up = True
 
-    # https://py-trees.readthedocs.io/en/devel/modules.html#py_trees.behaviour.Behaviour.shutdown 
+    # https://py-trees.readthedocs.io/en/devel/modules.html#py_trees.behaviour.Behaviour.shutdown
     def shutdown(self) -> None:
         if self.is_set_up:
             self.worker.stop_work()
@@ -89,4 +89,3 @@ class ActionNode(py_trees.behaviour.Behaviour):
             "%s.terminate [%s->%s]"
             % (self.name, self.status.name, new_status.name)
         )
-        

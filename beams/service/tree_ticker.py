@@ -7,7 +7,7 @@ import os
 import time
 from ctypes import c_bool, c_char_p, c_uint
 from functools import partial
-from multiprocessing import Value
+from multiprocessing import Semaphore, Value
 from pathlib import Path
 
 from py_trees.console import read_single_keypress
@@ -165,6 +165,8 @@ class TreeTicker(Worker):
         # don't forget to null check this
         self.sync_man = sync_man
 
+        self.tick_sem = Semaphore(value=0)
+
     def shutdown(self):
         self.tree.shutdown()
 
@@ -189,6 +191,14 @@ class TreeTicker(Worker):
 
         return mess
 
+    def tick_tree(self):
+        if self.state.get_tick_interactive() == TickConfiguration.INTERACTIVE:
+            got_tick = self.tick_sem.acquire(timeout=0.2)
+            if got_tick:
+                self.tree.tick()
+        else:
+            self.tree.tick()
+
     def work_func(self):
         while (self.do_work.value):
             self.tree.visitors.append(LoggingVisitor(print_status=True))
@@ -205,7 +215,8 @@ class TreeTicker(Worker):
                 while (self.state.get_pause_tree()):
                     time.sleep(self.state.get_tick_delay_ms())  # reusing this here.... could use a semaphore...
 
-                tick_tree(self.tree, self.state.get_tick_interactive() == TickConfiguration.INTERACTIVE, self.state.get_tick_delay_ms())
+                self.tick_tree()
+                time.sleep(self.state.get_tick_delay_ms())
 
     def start_tree(self):
         # if tree is in unpaused state throw error
@@ -225,3 +236,7 @@ class TreeTicker(Worker):
             logging.error(f"Tree off name {self.tree.root.name} is already paused!!")
         self.state.set_pause_tree(True)
         logger.debug(f"Pausing tree of name {self.tree.root.name}")
+
+    def command_tick(self):
+        logger.debug(f"Tree: {self.tree.root.name} got command to tick")
+        self.tick_sem.release()

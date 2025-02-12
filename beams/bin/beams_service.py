@@ -31,6 +31,14 @@ class BeamsService(Worker):
         self.sync_man.start()
         logger.debug(f"Sync Man starting at: {self.sync_man.address}")
 
+    def join_all_trees(self):
+      with self.sync_man as man:
+        tree_dict = man.get_tree_dict()
+        for tree_name, tree in tree_dict.items():
+          print(f"Cleaning up tree of name {tree_name}")
+          tree.stop_work()
+          tree.shutdown()
+
     def work_func(self):
         self.grpc_service = RPCHandler(sync_manager=self.sync_man)
         self.grpc_service.start_work()
@@ -71,6 +79,18 @@ class BeamsService(Worker):
                           continue
                         tree_to_start = tree_dict.get(tree_name)
                         tree_to_start.start_tree()
+                    elif (request.command_t == CommandType.PAUSE_TREE):
+                      with self.sync_man as man:
+                        # get tree, again for now this is tree specified in json file,
+                        # disambugiate this later
+                        tree_name = request.tree_name
+                        # get tree
+                        tree_dict = man.get_tree_dict()
+                        if (tree_name not in tree_dict.keys()):
+                          logging.error(f"Sorry fam {tree_name} is not in tree_dictionary: {tree_dict}")
+                          continue
+                        tree_to_start = tree_dict.get(tree_name)
+                        tree_to_start.pause_tree()
 
             except Exception as e:
                 e_type, e_object, e_traceback = sys.exc_info()
@@ -99,6 +119,7 @@ def main(*args, **kwargs):
 
     while (input("press q to kill") != 'q'):
       time.sleep(1)
+    x.join_all_trees()
     x.stop_work()
 
 

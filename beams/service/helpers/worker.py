@@ -5,6 +5,7 @@
 * Optional arg `stop_func` run on process termination before joining work process.
 """
 import logging
+import os
 import time
 from ctypes import c_bool
 from multiprocessing import Process, Value
@@ -39,14 +40,18 @@ class Worker():
                                      name=self.proc_name,
                                      args=(self.do_work, *self.add_args,))
         self.stop_func = stop_func
+        logger.debug(f"{self.proc_name} Instantiated on proc id: {os.getpid()}")
 
     def start_work(self):
         if self.do_work.value:
             logger.error(f"({self.proc_name}) -->>: Already working, cannot start")
             return
         self.do_work.value = True
+        logger.debug(f"Starting, parent proceess id is: {self.work_proc._parent_pid}")
         self.work_proc.start()
+        logger.debug(f"ON PROCESS {os.getpid()}")
         logger.debug(f"({self.proc_name}) -->>: Starting work")
+        logger.debug(f"Starting work for {self.proc_name} on proc id: {self.work_proc.pid}")
 
     def stop_work(self):
         logger.debug(f"({self.proc_name}) -->>: Calling stop work")

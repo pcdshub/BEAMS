@@ -1,11 +1,12 @@
 """
 Contains logic for 'threads' which need to tick behavior trees
 """
+from __future__ import annotations
 
 import logging
+import os
 import time
 from ctypes import c_bool, c_char_p, c_uint
-from dataclasses import dataclass
 from functools import partial
 from multiprocessing import Value
 from pathlib import Path
@@ -106,56 +107,124 @@ def run_from_file_tree_tick_work_func(
                 break
 
 
+class TreeState():
+    def __init__(self, tick_delay_ms: c_uint, tick_config: TickConfiguration):
+        self.current_node = Value(c_char_p, b"")   # potentially best accesible through self.tree and not this....
+        # Consitutes a TickConfigurationMessage
+        self.tick_delay_ms = Value(c_uint, tick_delay_ms)
+        self.tick_config = Value(c_uint, tick_config)  # don't forget protobuf enums are just int wrappers
+        # Control Flow Variables of Should I and How Should I tick this tree
+        self.tick_current_tree = Value(c_bool, True)  # setting False will allow, stop_work / unloading
+        self.pause_tree = Value(c_bool, True)  # start in paused state
+
+    # because I'm bad with @dataclass, and SyncManager.register only exposes "public", non __**__ functions these need public getters
+    # TODO: someone smart do better, i feel like you can add __get__ to exposed...
+    def get_node_name(self):
+        return self.current_node.value.decode()
+
+    def get_tick_config(self):
+        return self.tick_config.value
+
+    def get_tick_delay_ms(self):
+        return self.tick_delay_ms.value
+
+    def set_pause_tree(self, value):
+        logger.debug(f"setting pause tree on thread: {os.getpid()}")
+        self.pause_tree.value = value
+
+    def get_pause_tree(self):
+        logger.debug(f"checking pause tree on thread: {os.getpid()}")
+        return self.pause_tree.value
+
+    def get_tick_current_tree(self):
+        return self.tick_current_tree.value
+
+    def get_tick_interactive(self):
+        return self.tick_config.value
+
+
 class TreeTicker(Worker):
-    def __init__(self, filepath):
+    def __init__(self, filepath: str,
+                 init_tree_state: TreeState = None,
+                 sync_man=None):
         super().__init__("TreeTicker")
-        self.state = TreeTicker.TreeState()
         self.fp = filepath
 
-    @dataclass
-    class TreeState():
-        current_node = Value(c_char_p, b"")
-        tick_current_tree = Value(c_bool, True)  # setting False will allow, stop_work / unloading
-        tick_delay_ms = Value(c_uint, 5)
-        tick_interactive = Value(c_bool, False)
-        pause_tree = Value(c_bool, True)  # start in paused state
-        tick_config = Value(c_uint, TickConfiguration.UNKNOWN)  # don't forget protobuf enums are just int wrappers
-        tree: BehaviourTree = None  # don't know if this will pickle...
+        # load new tree
+        logger.info(f"Loading tree at {self.fp}")
+        # grab config
+        fp = Path(self.fp).resolve()
+        if not fp.is_file():
+            logging.error(f"Provided filepath: {self.fp} is not a file")
+            raise ValueError("Provided filepath is not a file")
+
+        self.tree = get_tree_from_path(fp)
+
+        if init_tree_state is None:
+            self.state = TreeState()
+        else:
+            self.state = init_tree_state
+
+        # don't forget to null check this
+        self.sync_man = sync_man
+
+    def shutdown(self):
+        self.tree.shutdown()
+
+    def get_tree_state(self):
+        return self.state
+
+    def update_tree_state(self, new_state: TreeState):
+        self.state = new_state
 
     def get_behavior_tree_update(self) -> BehaviorTreeUpdateMessage:
+        # translate py_trees enum right quick
+        tick_state = dict(TickStatus.items())[self.tree.root.status.value]
+
         mess = BehaviorTreeUpdateMessage(
                 mess_t=MessageType.MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE,
-                # tree_name=self.state.tree.name,  # again, atm nothing is strictly holding these in line
-                node_name=self.state.current_node.value.decode(),
-                tick_status=TickStatus.RUNNING,  # TOOD: josh actually plumb this up, next commit
-                tick_config=self.state.tick_config.value,
-                tick_delay_ms=self.state.tick_delay_ms.value
+                tree_name=self.tree.root.name,  # again, atm nothing is strictly holding these in line
+                tick_status=tick_state,
+                node_name=self.state.get_node_name(),  # TOOD: josh figure out how we're going to pipe this...
+                tick_config=self.state.get_tick_config(),
+                tick_delay_ms=self.state.get_tick_delay_ms()
             )
 
         return mess
 
     def work_func(self):
         while (self.do_work.value):
-            # load new tree
-            logger.info(f"Running behavior tree at {self.fp}")
-            # grab config
-            fp = Path(self.fp).resolve()
-            if not fp.is_file():
-                raise ValueError("Provided filepath is not a file")
-
-            self.state.tree = get_tree_from_path(fp)
-            self.state.tree.visitors.append(LoggingVisitor(print_status=True))
+            self.tree.visitors.append(LoggingVisitor(print_status=True))
 
             snapshot_visitor = SnapshotVisitor()
-            self.state.tree.add_post_tick_handler(
+            self.tree.add_post_tick_handler(
                 partial(snapshot_post_tick_handler,
                         snapshot_visitor,
                         True,
                         False)
             )
-            self.state.tree.setup()
 
-            while (self.state.tick_current_tree.value):
-                while (self.state.pause_tree.value):
-                    time.sleep(self.state.tick_delay_ms.value)
-                tick_tree(self.state.tree, self.state.tick_interactive.value, self.state.tick_delay_ms.value)
+            while (self.state.get_tick_current_tree()):
+                while (self.state.get_pause_tree()):
+                    time.sleep(self.state.get_tick_delay_ms())  # reusing this here.... could use a semaphore...
+
+                tick_tree(self.tree, self.state.get_tick_interactive() == TickConfiguration.INTERACTIVE, self.state.get_tick_delay_ms())
+
+    def start_tree(self):
+        # if tree is in unpaused state throw error
+        if (not self.state.get_pause_tree()):
+            logging.error(f"Tree of name {self.tree.root.name} is already unpaused")
+            return
+        self.state.set_pause_tree(False)
+        # NOTE: this was moved here as the os.getpid() of the owning Process object
+        # was instantiated within the sync manager pid, this ensures we start()
+        # from the same pid we created the object in. Is this flawless, no. Move at your own risk
+        self.tree.setup()
+        self.start_work()
+
+    def pause_tree(self):
+        # if tree is already paused log error
+        if (self.state.get_pause_tree()):
+            logging.error(f"Tree off name {self.tree.root.name} is already paused!!")
+        self.state.set_pause_tree(True)
+        logger.debug(f"Pausing tree of name {self.tree.root.name}")

@@ -49,17 +49,19 @@ class ActionNode(py_trees.behaviour.Behaviour):
         )  # TODO(josh): make sure this cleans up resources when it dies
         self.is_set_up = True
 
+    # https://py-trees.readthedocs.io/en/devel/modules.html#py_trees.behaviour.Behaviour.shutdown 
     def shutdown(self) -> None:
         if self.is_set_up:
             self.worker.stop_work()
+            logger.debug("Work process joined")
             self.is_set_up = False
 
     def initialise(self) -> None:
         """
         Initialise configures and resets the behaviour ready for (repeated) execution
         """
-        logger.debug(f"{self.name}.initialise [{self.status.name}->RUNNING]")
         self.volatile_status.set_value(py_trees.common.Status.RUNNING)
+        logger.debug(f"{self.name}.initialise [{self.status.name}->RUNNING]")
         self.work_gate.set()
 
     def update(self) -> py_trees.common.Status:
@@ -87,3 +89,4 @@ class ActionNode(py_trees.behaviour.Behaviour):
             "%s.terminate [%s->%s]"
             % (self.name, self.status.name, new_status.name)
         )
+        

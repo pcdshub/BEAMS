@@ -117,8 +117,6 @@ class TreeState():
         self.tick_current_tree = Value(c_bool, True)  # setting False will allow, stop_work / unloading
         self.pause_tree = Value(c_bool, True)  # start in paused state
 
-    # because I'm bad with @dataclass, and SyncManager.register only exposes "public", non __**__ functions these need public getters
-    # TODO: someone smart do better, i feel like you can add __get__ to exposed...
     def get_node_name(self):
         return self.current_node.value.decode()
 
@@ -168,6 +166,9 @@ class TreeTicker(Worker):
         # don't forget to null check this
         self.sync_man = sync_man
 
+    def shutdown(self):
+        self.tree.shutdown()
+
     def get_tree_state(self):
         return self.state
 
@@ -210,7 +211,7 @@ class TreeTicker(Worker):
     def start_tree(self):
         # if tree is in unpaused state throw error
         if (not self.state.get_pause_tree()):
-            logging.error(f"Tree of name {self.tree.root.name}")
+            logging.error(f"Tree of name {self.tree.root.name} is already unpaused")
             return
         self.state.set_pause_tree(False)
         # NOTE: this was moved here as the os.getpid() of the owning Process object
@@ -218,3 +219,10 @@ class TreeTicker(Worker):
         # from the same pid we created the object in. Is this flawless, no. Move at your own risk
         self.tree.setup()
         self.start_work()
+
+    def pause_tree(self):
+        # if tree is already paused log error
+        if (self.state.get_pause_tree()):
+            logging.error(f"Tree off name {self.tree.root.name} is already paused!!")
+        self.state.set_pause_tree(True)
+        logger.debug(f"Pausing tree of name {self.tree.root.name}")

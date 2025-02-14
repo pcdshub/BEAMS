@@ -1,7 +1,5 @@
 # toss arg parse here to start
 import logging
-import os
-import sys
 import time
 from multiprocessing.managers import BaseManager
 
@@ -20,15 +18,15 @@ class BeamsService(Worker):
         super().__init__("BeamsService", grace_window_before_terminate_seconds=0.5)
 
         # remote manager: https://docs.python.org/3/library/multiprocessing.html#using-a-remote-manager
-        class sync_man(BaseManager):
+        class SyncMan(BaseManager):
           pass
 
         self.tree_dict = {}
-        sync_man.register("TreeTicker", TreeTicker)
-        sync_man.register("TreeState", TreeState)
-        sync_man.register("get_tree_dict", callable=lambda: self.tree_dict)
+        SyncMan.register("TreeTicker", TreeTicker)
+        SyncMan.register("TreeState", TreeState)
+        SyncMan.register("get_tree_dict", callable=lambda: self.tree_dict)
 
-        self.sync_man = sync_man()
+        self.sync_man = SyncMan()
         self.sync_man.start()
         logger.debug(f"Sync Man starting at: {self.sync_man.address}")
 
@@ -86,7 +84,7 @@ class BeamsService(Worker):
                             # get tree
                             tree_dict = man.get_tree_dict()
                             if (tree_name not in tree_dict.keys()):
-                                logging.error(f"Sorry fam {tree_name} is not in tree_dictionary: {tree_dict}")
+                                logging.error(f"{tree_name} is not in tree_dictionary: {tree_dict}")
                                 continue
                             tree_to_start = tree_dict.get(tree_name)
                             tree_to_start.pause_tree()
@@ -98,29 +96,13 @@ class BeamsService(Worker):
                             # get tree
                             tree_dict = man.get_tree_dict()
                             if (tree_name not in tree_dict.keys()):
-                                logging.error(f"Sorry fam {tree_name} is not in tree_dictionary: {tree_dict}")
+                                logging.error(f"{tree_name} is not in tree_dictionary: {tree_dict}")
                                 continue
                             tree_to_start = tree_dict.get(tree_name)
                             tree_to_start.command_tick()
 
-            except Exception as e:
-                e_type, e_object, e_traceback = sys.exc_info()
-
-                e_filename = os.path.split(
-                    e_traceback.tb_frame.f_code.co_filename
-                )[1]
-
-                e_message = str(e)
-
-                e_line_number = e_traceback.tb_lineno
-
-                logger.error(f'exception type: {e_type}')
-
-                logger.error(f'exception filename: {e_filename}')
-
-                logger.error(f'exception line number: {e_line_number}')
-
-                logger.error(f'exception message: {e_message}')
+            except Exception:
+                logger.exception('Exception caught')
         self.grpc_service.stop_work()
 
 

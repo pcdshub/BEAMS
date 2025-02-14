@@ -53,7 +53,7 @@ class ActionNode(py_trees.behaviour.Behaviour):
     def shutdown(self) -> None:
         if self.is_set_up:
             self.worker.stop_work()
-            logger.debug("Work process joined")
+            logger.debug(f"Work process for node {self.name} joined")
             self.is_set_up = False
 
     def initialise(self) -> None:

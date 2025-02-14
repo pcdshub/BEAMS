@@ -8,7 +8,7 @@ import os
 import time
 from ctypes import c_bool, c_char_p, c_uint
 from functools import partial
-from multiprocessing import Value
+from multiprocessing import Semaphore, Value
 from pathlib import Path
 
 from py_trees.console import read_single_keypress
@@ -117,8 +117,6 @@ class TreeState():
         self.tick_current_tree = Value(c_bool, True)  # setting False will allow, stop_work / unloading
         self.pause_tree = Value(c_bool, True)  # start in paused state
 
-    # because I'm bad with @dataclass, and SyncManager.register only exposes "public", non __**__ functions these need public getters
-    # TODO: someone smart do better, i feel like you can add __get__ to exposed...
     def get_node_name(self):
         return self.current_node.value.decode()
 
@@ -168,6 +166,8 @@ class TreeTicker(Worker):
         # don't forget to null check this
         self.sync_man = sync_man
 
+        self.tick_sem = Semaphore(value=0)
+
     def shutdown(self):
         self.tree.shutdown()
 
@@ -208,7 +208,18 @@ class TreeTicker(Worker):
                 while (self.state.get_pause_tree()):
                     time.sleep(self.state.get_tick_delay_ms())  # reusing this here.... could use a semaphore...
 
-                tick_tree(self.tree, self.state.get_tick_interactive() == TickConfiguration.INTERACTIVE, self.state.get_tick_delay_ms())
+                # If we are in interactive mode
+                if self.state.get_tick_interactive() == TickConfiguration.INTERACTIVE:
+                    # wait till the semaphore gets incremented, this is the IPC method to communicate a tick_interactive
+                    got_tick = self.tick_sem.acquire(timeout=0.2)
+                    # because of the timeout (makes cleaning up thread easier) we need to check how it timeodout
+                    if got_tick:
+                        self.tree.tick()
+                # otherwise we are in continous mode, tick the tree as normal!
+                else:
+                    self.tree.tick()
+
+                time.sleep(self.state.get_tick_delay_ms())
 
     def start_tree(self):
         # if tree is in unpaused state throw error
@@ -228,3 +239,7 @@ class TreeTicker(Worker):
             logging.error(f"Tree off name {self.tree.root.name} is already paused!!")
         self.state.set_pause_tree(True)
         logger.debug(f"Pausing tree of name {self.tree.root.name}")
+
+    def command_tick(self):
+        logger.debug(f"Tree: {self.tree.root.name} got command to tick")
+        self.tick_sem.release()

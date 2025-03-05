@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+enum MessageType {
+  MESSAGE_TYPE_UNKOWN = 0;
+  MESSAGE_TYPE_HEARTBEAT = 1;
+  MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE = 2;
+  MESSAGE_TYPE_COMMAND_MESSAGE = 3;
+}
+
+// For when we use a real programming language
+message GenericMessage {
+  MessageType mess_t = 1;
+}
+
+// Inspired by: https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/empty.proto
+message Empty{
+
+}

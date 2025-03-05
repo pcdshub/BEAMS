@@ -1,7 +1,7 @@
 import time
 from multiprocessing import Value
 
-from beams.sequencer.helpers.worker import Worker
+from beams.service.helpers.worker import Worker
 
 
 class TestTask:

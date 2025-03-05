@@ -7,9 +7,9 @@ from threading import Thread
 
 import py_trees
 
-from beams.sequencer.helpers.worker import Worker
-from beams.sequencer.server import SequenceServer
-from beams.sequencer.state import SequencerState
+from beams.service.helpers.worker import Worker
+from beams.service.rpc_handler import RPCHandler
+from beams.service.state import SequencerState
 from beams.tree_generator.TreeGenerator import GenerateTreeFromRequest
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class Sequencer(Worker):
     def __init__(self):
-        super().__init__("Sequencer")
+        super().__init__("GRPCServer")
         # state maintenece object
         self.state = SequencerState()
         self.job_queue = Queue()
@@ -47,7 +47,7 @@ class Sequencer(Worker):
         """
         logger.debug(f"{self.proc_name} running")
         # GRPC server object
-        self.sequence_server = SequenceServer(self.state)
+        self.sequence_server = RPCHandler(self.state)
         self.sequence_server.start_work()  # TODO: move to work thread
         # Message Handler thread
         self.message_worker = Thread(name="message_handler", target=self.message_thread)

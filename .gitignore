@@ -116,4 +116,4 @@ Thumbs.db
 /beams/_version.py
 
 # GRPC artifact files
-beams/sequencer/remote_calls/*_pb2*.py*
+beams/service/remote_calls/*_pb2*.py*

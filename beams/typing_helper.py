@@ -19,7 +19,7 @@ Evaluatable = Callable[..., bool]
 
 # Defines signature for an ActionNode work loop function handle.
 # This is necessitated by how beams.behavior_tree.ActionWoker expects to spawn
-# the work process via base class beams.sequencer.helpers.Worker
+# the work process via base class beams.service.helpers.Worker
 # Parameter Types:
 #   Synchronized: volatile Value indicating work remains to be performed
 #                (tree is still ticking, program still running)

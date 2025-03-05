@@ -23,8 +23,8 @@ from epics.multiproc import CAProcess
 
 from beams.behavior_tree.volatile_status import VolatileStatus
 from beams.logging import LOGGER_QUEUE, worker_logging_configurer
-from beams.sequencer.helpers.timer import Timer
-from beams.sequencer.helpers.worker import Worker
+from beams.service.helpers.timer import Timer
+from beams.service.helpers.worker import Worker
 from beams.typing_helper import (ActionNodeWorkFunction, ActionNodeWorkLoop,
                                  Evaluatable)
 

@@ -1,25 +1,33 @@
 syntax = "proto3";
 
-import "generic_message.proto"; // MESSAGE_TYPE_COMMAND_MESSAGE
+import "beams/service/remote_calls/generic_message.proto"; // MESSAGE_TYPE_COMMAND_MESSAGE
+import "beams/service/remote_calls/behavior_tree.proto"; // TickConfiguration
 
 // First pass schema of commands.
 // Very well could decompose into further optional messages
 
 enum CommandType {
   UNKOWN_COMMAND = 0;
+  // At some point these could become a TREE_EXECUTION_CONTROL type with related message
   PAUSE_TREE = 1;
   TICK_TREE = 2;
-  STOP_TREE = 3;
-  START_TREE = 4;
+  START_TREE = 3;
+  //
+  // Could be their own logical group
+  UNLOAD_TREE = 4;
   LOAD_NEW_TREE = 5;
+  //
+  // Again its own logical group
   CHANGE_TICK_RATE_OF_TREE = 6;
-  ACK_NODE = 7;
+  CHANGE_TICK_CONFIGURATION = 7;
+  //
+  ACK_NODE = 8;
 }
 
 // Optional messages for commands
 message LoadNewTreeMessage {
-  bool should_replace_existing_tree = 1;
-  optional string tree_to_replace = 2;
+  string tree_file_path = 1;
+  TickConfigurationMessage tick_spec = 2;
 }
 
 message AckNodeMessage {
@@ -27,12 +35,18 @@ message AckNodeMessage {
   string user_acking_node = 6;
 }
 
+message TickConfigurationMessage {
+  TickConfiguration tick_config = 1;
+  optional uint32 delay_ms = 2;
+}
+
 message CommandMessage {
   MessageType mess_t = 1; // MESSAGE_TYPE_COMMAND_MESSAGE
   CommandType command_t = 2; // informs which option to try deser
   // May want to add notion of priority here
-  optional string tree_name = 3;
+  string tree_name = 3;
   optional int32 tick_rate_ms = 4;
   optional AckNodeMessage ack_node = 5;
   optional LoadNewTreeMessage load_new_tree = 6;
+  optional TickConfigurationMessage tick_config = 7;
 }

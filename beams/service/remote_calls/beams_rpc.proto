@@ -7,8 +7,8 @@ import "beams/service/remote_calls/command.proto"; // CommandMessage
 // Sequencer Service Definition
 service BEAMS_rpc {
   // Enqueue a sequence command of varying priority
-  rpc EnqueueCommand (CommandMessage) returns (HeartBeatReply) {}
+  rpc enqueue_command (CommandMessage) returns (HeartBeatReply) {}
 
   // Heart beat message for clients
-  rpc RequestHeartBeat(Empty) returns (HeartBeatReply) {}
+  rpc request_heartbeat (Empty) returns (HeartBeatReply) {}
 }

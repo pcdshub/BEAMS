@@ -9,17 +9,17 @@ from beams.service.tree_ticker import TreeTicker
 
 logger = logging.getLogger(__name__)
 
-# toss arg parse here to start
-
 
 class BeamsService(Worker):
     def __init__(self):
+        # TODO: make a singleton. Make process safe by leaving artifact file
         super().__init__("BeamsService", grace_window_before_terminate_seconds=0.5)
 
+        # pattern inheritted:
+        # remote manager: https://docs.python.org/3/library/multiprocessing.html#using-a-remote-manager
         class MyManager(BaseManager):
           pass
 
-        # remote manager: https://docs.python.org/3/library/multiprocessing.html#using-a-remote-manager
         self.tree_dict = {}
         MyManager.register("TreeTicker", TreeTicker)
         MyManager.register("get_tree_dict", callable=lambda: self.tree_dict)
@@ -43,13 +43,9 @@ class BeamsService(Worker):
                     if (request.command_t == CommandType.LOAD_NEW_TREE):
                         with self.MyManager as man:
                           # relegated to user space to makesure the fil
-                          logger.debug("got here")
                           x = man.TreeTicker(request.load_new_tree.tree_file_path)
-                          logger.debug("what about here")
                           tree_dict = man.get_tree_dict()
                           tree_dict.update({request.tree_name : x})
-                          logger.debug("not here")
-                          # self.tree_procs[request.tree_name].start_work()
                           logger.debug(f"Loaded tree of name {request.tree_name}" +
                                        f" from filepath: {request.load_new_tree.tree_file_path}" +
                                        " explciit START_TREE command will need to be issued for it to begin")

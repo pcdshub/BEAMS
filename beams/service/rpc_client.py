@@ -129,7 +129,7 @@ class RPCClient:
             # build the message
             if self.args.hbeat:
                 print("hbeat")
-                self.response = stub.RequestHeartBeat(Empty())
+                self.response = stub.request_heartbeat(Empty())
             else:
                 # unapack the command type from arg parse
                 command_m = CommandMessage(mess_t=MessageType.MESSAGE_TYPE_COMMAND_MESSAGE)
@@ -144,15 +144,15 @@ class RPCClient:
                 if command_t in tree_execution_control_commands + [CommandType.UNLOAD_TREE]:
                     pass
                 elif command_t == CommandType.LOAD_NEW_TREE:
-                    LNT_mess = LoadNewTreeMessage()
-                    LNT_mess.tree_file_path = self.args.new_tree_filepath
+                    load_new_tree_mesg = LoadNewTreeMessage()
+                    load_new_tree_mesg.tree_file_path = self.args.new_tree_filepath
                     # make tick config
                     tc = TickConfigurationMessage()
                     tc.tick_config = unwrap_protobuf_enum_wrapper(TickConfiguration, self.args.tick_config)
                     tc.delay_ms = self.args.tick_delay_ms
                     # pack em up
-                    LNT_mess.tick_spec.CopyFrom(tc)
-                    command_m.load_new_tree.CopyFrom(LNT_mess)
+                    load_new_tree_mesg.tick_spec.CopyFrom(tc)
+                    command_m.load_new_tree.CopyFrom(load_new_tree_mesg)
 
                 elif command_t == CommandType.ACK_NODE:
                     ack_node_mess = AckNodeMessage(
@@ -161,7 +161,7 @@ class RPCClient:
                     )
                     command_m.ack_node.CopyFrom(ack_node_mess)
                 print(command_m)
-                self.response = stub.EnqueueCommand(command_m)
+                self.response = stub.enqueue_command(command_m)
 
             logger.debug(self.response)
 

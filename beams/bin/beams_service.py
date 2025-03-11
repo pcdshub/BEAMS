@@ -5,7 +5,7 @@ from multiprocessing.managers import BaseManager
 
 from beams.logging import setup_logging
 from beams.service.helpers.worker import Worker
-from beams.service.remote_calls.command_pb2 import CommandType
+from beams.service.remote_calls.command_pb2 import CommandMessage, CommandType
 from beams.service.rpc_handler import RPCHandler
 from beams.service.tree_ticker import TreeState, TreeTicker
 
@@ -38,7 +38,7 @@ class BeamsService(Worker):
                 tree.stop_work()
                 tree.shutdown()
 
-    def work_func(self):  # noqa: C901, sorry I want this standalone PR to be a good case study, will remove in next
+    def work_func(self):
         self.grpc_service = RPCHandler(sync_manager=self.sync_man)
         self.grpc_service.start_work()
 
@@ -51,59 +51,71 @@ class BeamsService(Worker):
                     logger.debug(f"inbound command {request}")
 
                     if (request.command_t == CommandType.LOAD_NEW_TREE):
-                        with self.sync_man as man:
-                            tick_config_mess = request.load_new_tree.tick_spec
-                            init_state = man.TreeState(
-                                tick_delay_ms=tick_config_mess.delay_ms,
-                                tick_config=tick_config_mess.tick_config
-                            )
-                            x = man.TreeTicker(filepath=request.load_new_tree.tree_file_path,
-                                               init_tree_state=init_state)
-                            tree_dict = man.get_tree_dict()
-                            tree_dict.update({request.tree_name : x})
-                            logger.debug(f"Loaded tree of name {request.tree_name}" +
-                                         f" from filepath: {request.load_new_tree.tree_file_path}" +
-                                         " explciit START_TREE command will need to be issued for it to begin")
+                        self.load_new_tree(request)
                     elif (request.command_t == CommandType.START_TREE):
-                        with self.sync_man as man:
-                            # get tree, again for now this is tree specified in json file,
-                            # disambugiate this later
-                            tree_name = request.tree_name
-                            # get tree
-                            tree_dict = man.get_tree_dict()
-                            if (tree_name not in tree_dict.keys()):
-                                logging.error(f"{tree_name} is not in tree_dictionary: {tree_dict}")
-                                continue
-                            tree_to_start = tree_dict.get(tree_name)
-                            tree_to_start.start_tree()
+                        self.start_tree(request)
                     elif (request.command_t == CommandType.PAUSE_TREE):
-                        with self.sync_man as man:
-                            # get tree, again for now this is tree specified in json file,
-                            # disambugiate this later
-                            tree_name = request.tree_name
-                            # get tree
-                            tree_dict = man.get_tree_dict()
-                            if (tree_name not in tree_dict.keys()):
-                                logging.error(f"{tree_name} is not in tree_dictionary: {tree_dict}")
-                                continue
-                            tree_to_start = tree_dict.get(tree_name)
-                            tree_to_start.pause_tree()
+                        self.pause_tree(request)
                     elif (request.command_t == CommandType.TICK_TREE):
-                        with self.sync_man as man:
-                            # get tree, again for now this is tree specified in json file,
-                            # disambugiate this later
-                            tree_name = request.tree_name
-                            # get tree
-                            tree_dict = man.get_tree_dict()
-                            if (tree_name not in tree_dict.keys()):
-                                logging.error(f"{tree_name} is not in tree_dictionary: {tree_dict}")
-                                continue
-                            tree_to_start = tree_dict.get(tree_name)
-                            tree_to_start.command_tick()
+                        self.tick_tree(request)
 
             except Exception:
                 logger.exception('Exception caught')
         self.grpc_service.stop_work()
+
+    def load_new_tree(self, request: CommandMessage) -> None:
+        with self.sync_man as man:
+            tick_config_mess = request.load_new_tree.tick_spec
+            init_state = man.TreeState(
+                tick_delay_ms=tick_config_mess.delay_ms,
+                tick_config=tick_config_mess.tick_config
+            )
+            x = man.TreeTicker(filepath=request.load_new_tree.tree_file_path,
+                               init_tree_state=init_state)
+            tree_dict = man.get_tree_dict()
+            tree_dict.update({request.tree_name : x})
+            logger.debug(f"Loaded tree of name {request.tree_name}" +
+                         f" from filepath: {request.load_new_tree.tree_file_path}" +
+                         " explciit START_TREE command will need to be issued for it to begin")
+
+    def start_tree(self, request: CommandMessage) -> None:
+        with self.sync_man as man:
+            # get tree, again for now this is tree specified in json file,
+            # disambugiate this later
+            tree_name = request.tree_name
+            # get tree
+            tree_dict = man.get_tree_dict()
+            if (tree_name not in tree_dict.keys()):
+                logging.error(f"{tree_name} is not in tree_dictionary: {tree_dict}")
+                return
+            tree_to_start = tree_dict.get(tree_name)
+            tree_to_start.start_tree()
+
+    def pause_tree(self, request: CommandMessage) -> None:
+        with self.sync_man as man:
+            # get tree, again for now this is tree specified in json file,
+            # disambugiate this later
+            tree_name = request.tree_name
+            # get tree
+            tree_dict = man.get_tree_dict()
+            if (tree_name not in tree_dict.keys()):
+                logging.error(f"{tree_name} is not in tree_dictionary: {tree_dict}")
+                return
+            tree_to_start = tree_dict.get(tree_name)
+            tree_to_start.pause_tree()
+
+    def tick_tree(self, request: CommandMessage) -> None:
+        with self.sync_man as man:
+            # get tree, again for now this is tree specified in json file,
+            # disambugiate this later
+            tree_name = request.tree_name
+            # get tree
+            tree_dict = man.get_tree_dict()
+            if (tree_name not in tree_dict.keys()):
+                logging.error(f"{tree_name} is not in tree_dictionary: {tree_dict}")
+                return
+            tree_to_start = tree_dict.get(tree_name)
+            tree_to_start.command_tick()
 
 
 def main(*args, **kwargs):

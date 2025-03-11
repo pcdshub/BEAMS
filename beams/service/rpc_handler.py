@@ -18,10 +18,11 @@ logger = logging.getLogger(__name__)
 
 
 class RPCHandler(BEAMS_rpcServicer, Worker):
-    def __init__(self, sync_manager: Manager = None):
+    def __init__(self, sync_manager: Manager = None, port=50051):
         # GRPC server launching things from docs: https://grpc.io/docs/languages/python/basics/#starting-the-server
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=10)
         self.server = grpc.server(self.thread_pool)
+        self.server_port = port
 
         # calling Worker's super
         super().__init__(proc_name="RPCHandler",
@@ -64,7 +65,7 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             updates = [tree.get_behavior_tree_update() for tree in tree_dict.values()]
             return updates
 
-    def EnqueueCommand(self, request, context) -> HeartBeatReply:
+    def enqueue_command(self, request, context) -> HeartBeatReply:
         mess_t = request.mess_t
         if mess_t != MessageType.MESSAGE_TYPE_COMMAND_MESSAGE:
             logger.error("You seriously messed up, reevlauate your life choices")
@@ -86,12 +87,11 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             hbeat_message.behavior_tree_update.extend(bt_update)
             return
 
-    def RequestHeartBeat(self, request, context) -> HeartBeatReply:
+    def request_heartbeat(self, request, context) -> HeartBeatReply:
         # assumption that hitting this service endpoint means you want to know ALL the trees this service is currently ticking
 
         # TODO: it is placing like here that I am not happy with the distance of the py_trees vs GRPC object, reflect on this
         # for example: how could we keep thee py_tree treename and this one aligned?
-        logger.debug("GOT HBEAT")
         updates = self.get_all_tree_updates()
 
         hbeat_message = HeartBeatReply(mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT)
@@ -104,20 +104,20 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
 
     def work_func(self):
         logger.debug(f"{self.proc_name} running")
-        port = "50051"
         add_BEAMS_rpcServicer_to_server(self, self.server)
-        self.server.add_insecure_port("[::]:" + port)
+        self.server.add_insecure_port(f"[::]:{self.server_port}")  # note: binding to localhost implicitly
         self.server.start()
-        logger.debug("Server started, listening on " + port)
+        logger.debug("Server started, listening on " + str(self.server_port))
         while self.do_work.value:
             time.sleep(0.1)
         logger.debug("RPCHandler work_func exitted")
 
 
 if __name__ == "__main__":
+    # TODO: pull this out into its own entrypoint for testing purposes
     logging.basicConfig()
     p = RPCHandler()
     p.start_work()
 
-    time.sleep(100)
+    time.sleep(100)  # callout magic number for debugging grave
     p.stop_work()

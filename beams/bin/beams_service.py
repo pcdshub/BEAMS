@@ -30,6 +30,7 @@ class BeamsService(Worker):
         self.sync_man.start()
         logger.debug(f"Sync Man starting at: {self.sync_man.address}")
 
+    # mechanism to send shutdown signal to trees
     def join_all_trees(self):
         with self.sync_man as man:
             tree_dict = man.get_tree_dict()
@@ -38,6 +39,15 @@ class BeamsService(Worker):
                 tree.stop_work()
                 tree.shutdown()
 
+    # check's if tree_name is in the tree dictionary
+    def tree_name_in_tree_dict(self, tree_name) -> bool:
+        with self.sync_man as man:
+            tree_dict = man.get_tree_dict()
+            if (tree_name not in tree_dict.keys()):
+                logging.error(f"{tree_name} is not in tree_dictionary: {tree_dict}")
+                return False
+            return True
+
     def work_func(self):
         self.grpc_service = RPCHandler(sync_manager=self.sync_man)
         self.grpc_service.start_work()
@@ -45,8 +55,7 @@ class BeamsService(Worker):
         # the job of this work function will be to consume messages and update the managed trees
         while (self.do_work.value):
             try:
-                got_message = self.grpc_service.command_ready_sem.acquire(timeout=0.2)  # block untill we get something to work on
-                if got_message:
+                if self.grpc_service.command_ready_sem.acquire(timeout=0.2):  # block untill we get something to work on
                     request = self.grpc_service.incoming_command_queue.get()
                     logger.debug(f"inbound command {request}")
 
@@ -79,41 +88,33 @@ class BeamsService(Worker):
                          " explciit START_TREE command will need to be issued for it to begin")
 
     def start_tree(self, request: CommandMessage) -> None:
+        tree_name = request.tree_name
+        if not self.tree_name_in_tree_dict(tree_name):
+            return
         with self.sync_man as man:
-            # get tree, again for now this is tree specified in json file,
-            # disambugiate this later
-            tree_name = request.tree_name
             # get tree
             tree_dict = man.get_tree_dict()
-            if (tree_name not in tree_dict.keys()):
-                logging.error(f"{tree_name} is not in tree_dictionary: {tree_dict}")
-                return
             tree_to_start = tree_dict.get(tree_name)
             tree_to_start.start_tree()
 
     def pause_tree(self, request: CommandMessage) -> None:
+        tree_name = request.tree_name
+        if not self.tree_name_in_tree_dict(tree_name):
+            return
         with self.sync_man as man:
-            # get tree, again for now this is tree specified in json file,
-            # disambugiate this later
-            tree_name = request.tree_name
             # get tree
             tree_dict = man.get_tree_dict()
-            if (tree_name not in tree_dict.keys()):
-                logging.error(f"{tree_name} is not in tree_dictionary: {tree_dict}")
-                return
             tree_to_start = tree_dict.get(tree_name)
             tree_to_start.pause_tree()
 
     def tick_tree(self, request: CommandMessage) -> None:
+        tree_name = request.tree_name
+        if not self.tree_name_in_tree_dict(tree_name):
+            return
         with self.sync_man as man:
             # get tree, again for now this is tree specified in json file,
             # disambugiate this later
-            tree_name = request.tree_name
-            # get tree
             tree_dict = man.get_tree_dict()
-            if (tree_name not in tree_dict.keys()):
-                logging.error(f"{tree_name} is not in tree_dictionary: {tree_dict}")
-                return
             tree_to_start = tree_dict.get(tree_name)
             tree_to_start.command_tick()
 

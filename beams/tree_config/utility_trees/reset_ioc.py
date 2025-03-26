@@ -59,18 +59,7 @@ class ResetIOCItem(BaseItem):
                                      loop_period_sec=0.1,  # this is greater than work_timeout period, should only happen once.
                                      termination_check=reset_success_termination_condiiton)
 
-        # get the current heartbeat of IOC
-        @wrapped_action_work(loop_period_sec=0.1)
-        def reset_cache_hbeat_wfunc(comp_condition: Evaluatable) -> py_trees.common.Status:
-            self.hbeat_val.set_value(-1)
-            logger.debug(f"<<-- Resetting cached ioc hbeat for tree: {self.ioc_prefix}")
-
-            return py_trees.common.Status.SUCCESS
-        reset_heartbeat_cache = ActionNode(name=f"{self.ioc_prefix}_reset_heartbeat_cache",
-                                           work_func=reset_cache_hbeat_wfunc,
-                                           completion_condition=lambda : self.hbeat_val.get_value() == -1)
-
         root = Sequence(name=self.name,
                         memory=True,
-                        children=[cache_current_heartbeat, send_reset.get_tree(), reset_heartbeat_cache])
+                        children=[cache_current_heartbeat, send_reset.get_tree()])
         return root

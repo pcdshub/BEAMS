@@ -1,12 +1,13 @@
 import logging
 import operator
+from typing import List
 from dataclasses import dataclass, field
 from enum import Enum
 
 from beams.behavior_tree.condition_node import ConditionNode
 from beams.serialization import as_tagged_union
 from beams.tree_config.base import BaseItem
-from beams.tree_config.value import BaseValue, FixedValue
+from beams.tree_config.value import BaseValue, FixedValue, ProcessBoolValue
 from beams.typing_helper import Evaluatable
 
 logger = logging.getLogger(__name__)
@@ -77,5 +78,26 @@ class BoundedConditionItem(BaseConditionItem):
     def get_condition_function(self) -> Evaluatable:
         def cond_func():
             return self.lower_bound.get_value() < self.value.get_value() < self.upper_bound.get_value()
+
+        return cond_func
+
+
+@dataclass
+class AcknowledgeConditionItem(BaseConditionItem):
+    is_acknowledged: ProcessBoolValue = field(default_factory=lambda: ProcessBoolValue(value=False))
+    permisible_user_list: List[str] = field(default_factory=list)
+    acknowleding_user: str = ""
+
+    def acknowledge_node(self, user_name):
+        if user_name in self.permisible_user_list:
+            self.is_acknowledged.set_value(True)
+            self.acknowleding_user = user_name
+            logger.debug(f"User: {user_name} successfully acknowledged")
+        else:
+            logger.debug(f"User: {user_name} failed to acknowledged, not in permisible_user_list: {self.permisible_user_list}")
+
+    def get_condition_function(self) -> Evaluatable:
+        def cond_func():
+            return self.is_acknowledged.get_value()
 
         return cond_func

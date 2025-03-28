@@ -31,8 +31,8 @@ message LoadNewTreeMessage {
 }
 
 message AckNodeMessage {
-  string node_name_to_ack = 5;
-  string user_acking_node = 6;
+  string node_name_to_ack = 1;
+  string user_acking_node = 2;
 }
 
 message TickConfigurationMessage {

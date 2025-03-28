@@ -221,6 +221,10 @@ class TreeTicker(Worker):
 
                 time.sleep(self.state.get_tick_delay_ms())
 
+    '''
+    Hooks for CommandMessages
+    '''
+
     def start_tree(self):
         # if tree is in unpaused state throw error
         if (not self.state.get_pause_tree()):
@@ -243,3 +247,15 @@ class TreeTicker(Worker):
     def command_tick(self):
         logger.debug(f"Tree: {self.tree.root.name} got command to tick")
         self.tick_sem.release()
+
+    def acknowledge_node(self, node_name: str, user_name: str):
+        logger.debug(f"Tree: {self.tree.root.name} got command to ack node: {node_name} from user: {user_name}")
+        # find Node
+        node = None
+        for i in self.tree.root.iterate():
+            if (i.name == node_name):
+                node = i
+                node.acknowledge_node(user_name)
+                logger.debug("Node found and acknowledged")
+        if node is None:
+            logger.error(f"Could not find node of name: {node_name} in tree")

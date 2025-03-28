@@ -68,6 +68,8 @@ class BeamsService(Worker):
                         self.pause_tree(request)
                     elif (request.command_t == CommandType.TICK_TREE):
                         self.tick_tree(request)
+                    elif (request.command_t == CommandType.ACK_NODE):
+                        self.acknowledge_node(request)
 
             except Exception:
                 logger.exception('Exception caught')
@@ -118,6 +120,18 @@ class BeamsService(Worker):
             tree_dict = man.get_tree_dict()
             tree_to_start = tree_dict.get(tree_name)
             tree_to_start.command_tick()
+
+    def acknowledge_node(self, request: CommandMessage):
+        tree_name = request.tree_name
+        node_name_to_ack = request.ack_node.node_name_to_ack
+        user_acking_node = request.ack_node.user_acking_node
+
+        if not self.tree_name_in_tree_dict(tree_name):
+            return
+        with self.sync_man as man:
+            tree_dict = man.get_tree_dict()
+            tree_to_start = tree_dict.get(tree_name)
+            tree_to_start.acknowledge_node(node_name_to_ack, user_acking_node)
 
 
 def main(*args, **kwargs):

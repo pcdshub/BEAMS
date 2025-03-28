@@ -13,8 +13,10 @@ from beams.tree_config.base import BehaviorTreeItem
 from beams.tree_config.composite import SequenceItem
 from beams.tree_config.condition import (BinaryConditionItem,
                                          BoundedConditionItem,
-                                         ConditionOperator)
+                                         ConditionOperator,
+                                         AcknowledgeConditionItem)
 from beams.tree_config.idiom import CheckAndDoItem
+from beams.tree_config.utility_trees.wait_for_ack import WaitForAckNodeItem
 from beams.tree_config.py_trees import (RunningItem, StatusQueueItem,
                                         SuccessItem)
 from beams.tree_config.value import EPICSValue, FixedValue
@@ -181,8 +183,26 @@ def create_im2l0_test(write: bool = False):
     return root_item
 
 
+def create_test_ack(write: bool = False):
+    ack_cond_item = AcknowledgeConditionItem(
+        name="test_ack_node",
+        permisible_user_list=["silke", "barry"]
+    )
+    egg = WaitForAckNodeItem(ack_cond_item=ack_cond_item, wait_time_out=1)
+    
+    root_item = BehaviorTreeItem(root=egg)
+    if write:
+        with open(Path(__file__).parent / "wait_for_ack.json", 'w') as fd:
+            ser = serialize(BehaviorTreeItem, root_item)
+            json.dump(ser, fd, indent=2)
+            fd.write('\n')
+
+    return root_item
+
+
 if __name__ == "__main__":
     create_egg_1(write=True)
     create_egg_2(write=True)
     create_eternal_guard(write=True)
     create_im2l0_test(write=True)
+    create_test_ack(write=True)

@@ -4,43 +4,46 @@ import py_trees
 
 from beams.tree_config.condition import AcknowledgeConditionItem
 
-from beams.tree_config.utility_trees.wait_for_ack import WaitForAckNode
+from beams.tree_config.utility_trees.wait_for_ack import WaitForAckNodeItem
 
 
-# def test_acknowledge(bt_cleaner):
-#     ack_cond_node = AcknowledgeConditionItem(
-#         name="test ack node",
-#         permisible_user_list=["robert", "zach"]
-#     )
+def test_acknowledge(bt_cleaner):
+    ack_cond_node = AcknowledgeConditionItem(
+        name="test ack node",
+        permisible_user_list=["robert", "zach"]
+    )
 
-#     root = ack_cond_node.get_tree()
+    root = ack_cond_node.get_tree()
 
-#     root.acknowledge_node("josh")
+    root.acknowledge_node("josh")
 
-#     i = 0
-#     while (root.status != py_trees.common.Status.SUCCESS and i < 2):
-#         for n in root.tick():
-#             i += 1
-#             print(n)
+    i = 0
+    while (root.status != py_trees.common.Status.SUCCESS and i < 2):
+        for n in root.tick():
+            i += 1
+            print(n)
 
-#     assert (root.status == py_trees.common.Status.FAILURE)
+    assert (root.status == py_trees.common.Status.FAILURE)
 
-#     root.acknowledge_node("robert")
-#     i = 0
-#     while (root.status != py_trees.common.Status.SUCCESS and i < 2):
-#         for n in root.tick():
-#             i += 1
-#             print(n)
+    root.acknowledge_node("robert")
+    i = 0
+    while (root.status != py_trees.common.Status.SUCCESS and i < 2):
+        for n in root.tick():
+            i += 1
+            print(n)
 
-#     assert (root.status == py_trees.common.Status.SUCCESS)
+    assert (root.status == py_trees.common.Status.SUCCESS)
 
 
 def test_wait_and_acknowledge(bt_cleaner):
-    ack_cond_item = AcknowledgeConditionItem(
+    ack_cond_item = ack_cond_item = AcknowledgeConditionItem(
         name="test_ack_node",
         permisible_user_list=["silke", "barry"]
     )
-    egg = WaitForAckNode(ack_cond_item=ack_cond_item, wait_time_out=2)
+    egg = WaitForAckNodeItem(ack_cond_item=ack_cond_item, wait_time_out=1)(
+        name="test_ack_node",
+        permisible_user_list=["silke", "barry"]
+    )
     root = egg.get_tree()
     bt_cleaner.register(root)
 
@@ -50,7 +53,7 @@ def test_wait_and_acknowledge(bt_cleaner):
     while root.status not in (
         py_trees.common.Status.SUCCESS,
         py_trees.common.Status.FAILURE,
-    ) and i < 10:
+    ) and i < 5:
         i += 1
         print(i)
         for n in root.tick():

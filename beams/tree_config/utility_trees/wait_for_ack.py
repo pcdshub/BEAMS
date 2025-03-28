@@ -9,15 +9,14 @@ from beams.behavior_tree.check_and_do import CheckAndDo
 
 from beams.tree_config.base import BaseItem
 from beams.tree_config.condition import AcknowledgeConditionItem
-from beams.tree_config.value import ProcessBoolValue
 from beams.typing_helper import Evaluatable
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
-class WaitForAckNode(BaseItem):
-    ack_cond_item: AcknowledgeConditionItem = field(default_factory=AcknowledgeConditionItem())
+class WaitForAckNodeItem(BaseItem):
+    ack_cond_item: AcknowledgeConditionItem = field(default_factory=AcknowledgeConditionItem)
     wait_time_out: int = 60
 
     def get_tree(self) -> Selector:

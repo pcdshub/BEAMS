@@ -1,5 +1,5 @@
 import logging
-from ctypes import c_int
+from ctypes import c_int, c_bool
 from dataclasses import dataclass
 from multiprocessing import Value
 from typing import Any
@@ -38,16 +38,30 @@ class EPICSValue(BaseValue):
 
 
 @dataclass
-class ProcessIntValue():
+class ProcessIntValue(BaseValue):
     value: int = 0
 
     def __post_init__(self):
         self._value = Value(c_int, self.value, lock=True)
 
-    def set_value(self, value):
+    def set_value(self, value: int):
         self._value.value = value
 
-    def get_value(self) -> Any:
+    def get_value(self) -> int:
+        return self._value.value
+
+
+@dataclass
+class ProcessBoolValue(BaseValue):
+    value: bool = False
+
+    def __post_init__(self):
+        self._value = Value(c_bool, self.value, lock=True)
+
+    def set_value(self, value: bool):
+        self._value.value = value
+
+    def get_value(self) -> bool:
         return self._value.value
 
 

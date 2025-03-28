@@ -1,12 +1,13 @@
 import logging
 import operator
+from typing import List
 from dataclasses import dataclass, field
 from enum import Enum
 
-from beams.behavior_tree.condition_node import ConditionNode
+from beams.behavior_tree.condition_node import ConditionNode, AckConditionNode
 from beams.serialization import as_tagged_union
 from beams.tree_config.base import BaseItem
-from beams.tree_config.value import BaseValue, FixedValue
+from beams.tree_config.value import BaseValue, FixedValue, ProcessBoolValue
 from beams.typing_helper import Evaluatable
 
 logger = logging.getLogger(__name__)
@@ -48,10 +49,6 @@ class BinaryConditionItem(BaseConditionItem):
     right_value: BaseValue = field(default_factory=lambda: FixedValue(0))
     operator: ConditionOperator = ConditionOperator.equal
 
-    def get_tree(self) -> ConditionNode:
-        cond_func = self.get_condition_function()
-        return ConditionNode(self.name, cond_func)
-
     def get_condition_function(self) -> Evaluatable:
         op = getattr(operator, self.operator.value)
 
@@ -79,3 +76,11 @@ class BoundedConditionItem(BaseConditionItem):
             return self.lower_bound.get_value() < self.value.get_value() < self.upper_bound.get_value()
 
         return cond_func
+
+
+@dataclass
+class AcknowledgeConditionItem(BaseItem):
+    permisible_user_list: List[str] = field(default_factory=list)
+
+    def get_tree(self) -> AckConditionNode:
+        return AckConditionNode(self.name, self.permisible_user_list)

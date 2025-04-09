@@ -3,7 +3,6 @@ import time
 import py_trees
 
 from beams.tree_config.condition import AcknowledgeConditionItem
-
 from beams.tree_config.utility_trees.wait_for_ack import WaitForAckNodeItem
 
 

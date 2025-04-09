@@ -1,5 +1,5 @@
 import logging
-from ctypes import c_int, c_bool
+from ctypes import c_bool, c_int
 from dataclasses import dataclass
 from multiprocessing import Value
 from typing import Any

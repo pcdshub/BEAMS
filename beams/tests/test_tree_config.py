@@ -21,10 +21,10 @@ from beams.tree_config.action import IncPVActionItem, SetPVActionItem
 from beams.tree_config.base import BaseItem
 from beams.tree_config.composite import (ParallelItem, SelectorItem,
                                          SequenceConditionItem, SequenceItem)
-from beams.tree_config.condition import (BaseConditionItem,
+from beams.tree_config.condition import (AcknowledgeConditionItem,
+                                         BaseConditionItem,
                                          BinaryConditionItem,
                                          BoundedConditionItem,
-                                         AcknowledgeConditionItem,
                                          DummyConditionItem)
 from beams.tree_config.idiom import CheckAndDoItem, UseCheckConditionItem
 from beams.tree_config.py_trees import (BlackboardToStatusItem,

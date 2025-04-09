@@ -12,6 +12,7 @@ import beams.tree_config.composite  # noqa: F401
 import beams.tree_config.condition  # noqa: F401
 import beams.tree_config.idiom  # noqa: F401
 import beams.tree_config.py_trees  # noqa: F401
+import beams.tree_config.utility_trees.wait_for_ack  # noqa: F401
 from beams.tree_config.base import BaseItem, BehaviorTreeItem
 
 

@@ -1,7 +1,7 @@
 import logging
-from typing import Callable, List
-from multiprocessing import Value
 from ctypes import c_bool
+from multiprocessing import Value
+from typing import Callable, List
 
 import py_trees
 
@@ -55,4 +55,4 @@ class AckConditionNode(py_trees.behaviour.Behaviour):
             status = py_trees.common.Status.FAILURE
         logger.debug(f"{self.name}.update [{status.name}]")
 
-        return status  
+        return status

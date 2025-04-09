@@ -6,7 +6,6 @@ from py_trees.composites import Selector
 
 from beams.behavior_tree.action_node import ActionNode, wrapped_action_work
 from beams.behavior_tree.check_and_do import CheckAndDo
-
 from beams.tree_config.base import BaseItem
 from beams.tree_config.condition import AcknowledgeConditionItem
 from beams.typing_helper import Evaluatable
@@ -20,7 +19,7 @@ class WaitForAckNodeItem(BaseItem):
     wait_time_out: int = 60
 
     def get_tree(self) -> Selector:
-        
+
         check_node = self.ack_cond_item.get_tree()
 
         # check if node is acked

@@ -1,0 +1,17 @@
+{
+  "root": {
+    "WaitForAckNodeItem": {
+      "name": "",
+      "description": "",
+      "ack_cond_item": {
+        "name": "test_ack_node",
+        "description": "",
+        "permisible_user_list": [
+          "silke",
+          "barry"
+        ]
+      },
+      "wait_time_out": 1
+    }
+  }
+}

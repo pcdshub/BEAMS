@@ -11,14 +11,14 @@ from apischema import serialize
 from beams.tree_config.action import IncPVActionItem, SetPVActionItem
 from beams.tree_config.base import BehaviorTreeItem
 from beams.tree_config.composite import SequenceItem
-from beams.tree_config.condition import (BinaryConditionItem,
+from beams.tree_config.condition import (AcknowledgeConditionItem,
+                                         BinaryConditionItem,
                                          BoundedConditionItem,
-                                         ConditionOperator,
-                                         AcknowledgeConditionItem)
+                                         ConditionOperator)
 from beams.tree_config.idiom import CheckAndDoItem
-from beams.tree_config.utility_trees.wait_for_ack import WaitForAckNodeItem
 from beams.tree_config.py_trees import (RunningItem, StatusQueueItem,
                                         SuccessItem)
+from beams.tree_config.utility_trees.wait_for_ack import WaitForAckNodeItem
 from beams.tree_config.value import EPICSValue, FixedValue
 
 
@@ -189,7 +189,7 @@ def create_test_ack(write: bool = False):
         permisible_user_list=["silke", "barry"]
     )
     egg = WaitForAckNodeItem(ack_cond_item=ack_cond_item, wait_time_out=1)
-    
+
     root_item = BehaviorTreeItem(root=egg)
     if write:
         with open(Path(__file__).parent / "wait_for_ack.json", 'w') as fd:

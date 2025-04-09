@@ -1,13 +1,13 @@
 import logging
 import operator
-from typing import List
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import List
 
-from beams.behavior_tree.condition_node import ConditionNode, AckConditionNode
+from beams.behavior_tree.condition_node import AckConditionNode, ConditionNode
 from beams.serialization import as_tagged_union
 from beams.tree_config.base import BaseItem
-from beams.tree_config.value import BaseValue, FixedValue, ProcessBoolValue
+from beams.tree_config.value import BaseValue, FixedValue
 from beams.typing_helper import Evaluatable
 
 logger = logging.getLogger(__name__)

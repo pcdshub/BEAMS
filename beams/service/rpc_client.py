@@ -157,7 +157,7 @@ class RPCClient:
                 elif command_t == CommandType.ACK_NODE:
                     ack_node_mess = AckNodeMessage(
                                         node_name_to_ack=self.args.node_name,
-                                        user_acking_ndoe=self.args.user
+                                        user_acking_node=self.args.user
                     )
                     command_m.ack_node.CopyFrom(ack_node_mess)
                 print(command_m)

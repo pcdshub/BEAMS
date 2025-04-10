@@ -19,25 +19,26 @@ logger = logging.getLogger(__name__)
 class ResetIOCItem(BaseItem):
     ioc_prefix: str = ""
     # semi static member objects
-    HEARTBEAT_POSTFIX: str = ":HEARTBEAT"
-    SYSRESET_POSTFIX: str = ":SysReset"
+    HEARTBEAT_SUFFIX: str = ":HEARTBEAT"
+    SYSRESET_SUFFIX: str = ":SysReset"
     HEARTBEAT_KEY_NAME: str = "heartbeat"
 
     def __post_init__(self):
         # non dataclass PVss
         self.hbeat_val = ProcessIntValue(value=-1)  # set to unachievable heartbeat val
-        self.name = f"{self.ioc_prefix}_reset_tree"
+        if not self.name:
+            self.name = f"{self.ioc_prefix}_reset_tree"
 
     def get_tree(self) -> Sequence:
         def check_acquired_current_hbeat():
-            val = self.hbeat_val.get_value() != -1  # set to unachievable heartbeat val
-            logger.debug(f"Heartbeat cached as {val}, {self.hbeat_val.get_value()}")
-            return val
+            has_hearbeat_been_cached = self.hbeat_val.get_value() != -1  # set to unachievable heartbeat val
+            logger.debug(f"Heartbeat cached as {has_hearbeat_been_cached}, {self.hbeat_val.get_value()}")
+            return has_hearbeat_been_cached
 
         # get the current heartbeat of IOC
         @wrapped_action_work(loop_period_sec=0.1)
         def cache_hbeat_wfunc(comp_condition: Evaluatable) -> py_trees.common.Status:
-            current_hbeat = caget(self.ioc_prefix+self.HEARTBEAT_POSTFIX)
+            current_hbeat = caget(self.ioc_prefix+self.HEARTBEAT_SUFFIX)
             self.hbeat_val.set_value(current_hbeat)
             logger.debug(f"<<-- Aquired ioc hbeat: {self.ioc_prefix} hbeat count: {current_hbeat}")
 
@@ -50,14 +51,17 @@ class ResetIOCItem(BaseItem):
 
         # send the reset command
         reset_success_termination_condiiton = BinaryConditionItem(
-                                                left_value=EPICSValue(pv_name=f"{self.ioc_prefix+self.HEARTBEAT_POSTFIX}"),
-                                                right_value=self.hbeat_val,
-                                                operator=ConditionOperator.less)
-        send_reset = SetPVActionItem(name=f"reset_{self.ioc_prefix}",
-                                     pv=f"{self.ioc_prefix}:SysReset",
-                                     value=1,
-                                     loop_period_sec=0.1,  # this is greater than work_timeout period, should only happen once.
-                                     termination_check=reset_success_termination_condiiton)
+            left_value=EPICSValue(pv_name=f"{self.ioc_prefix+self.HEARTBEAT_SUFFIX}"),
+            right_value=self.hbeat_val,
+            operator=ConditionOperator.less
+        )
+        send_reset = SetPVActionItem(
+            name=f"reset_{self.ioc_prefix}",
+            pv=f"{self.ioc_prefix}{self.SYSRESET_SUFFIX}",
+            value=1,
+            loop_period_sec=0.1,  # this is greater than work_timeout period, should only happen once.
+            termination_check=reset_success_termination_condiiton
+        )
 
         root = Sequence(name=self.name,
                         memory=True,

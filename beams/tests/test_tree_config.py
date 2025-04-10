@@ -15,7 +15,7 @@ from py_trees.composites import Parallel, Selector, Sequence
 
 from beams.behavior_tree.action_node import ActionNode
 from beams.behavior_tree.check_and_do import CheckAndDo
-from beams.behavior_tree.condition_node import ConditionNode, AckConditionNode
+from beams.behavior_tree.condition_node import AckConditionNode, ConditionNode
 from beams.serialization import get_all_subclasses, is_tagged_union
 from beams.tree_config.action import IncPVActionItem, SetPVActionItem
 from beams.tree_config.base import BaseItem
@@ -27,6 +27,7 @@ from beams.tree_config.condition import (AcknowledgeConditionItem,
                                          BoundedConditionItem,
                                          DummyConditionItem)
 from beams.tree_config.idiom import CheckAndDoItem, UseCheckConditionItem
+from beams.tree_config.prebuilt.wait_for_ack import WaitForAckNodeItem
 from beams.tree_config.py_trees import (BlackboardToStatusItem,
                                         CheckBlackboardVariableExistsItem,
                                         CheckBlackboardVariableValueItem,
@@ -37,7 +38,6 @@ from beams.tree_config.py_trees import (BlackboardToStatusItem,
                                         UnsetBlackboardVariableItem,
                                         WaitForBlackboardVariableItem,
                                         WaitForBlackboardVariableValueItem)
-from beams.tree_config.prebuilt.wait_for_ack import WaitForAckNodeItem
 
 ITEM_TO_BEHAVIOUR = [
     (ParallelItem, Parallel),

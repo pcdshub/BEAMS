@@ -3,7 +3,7 @@ import time
 import py_trees
 from caproto.tests.conftest import run_example_ioc
 
-from beams.tree_config.utility_trees.reset_ioc import ResetIOCItem
+from beams.tree_config.prebuilt.reset_ioc import ResetIOCItem
 
 
 def test_sys_reset(request, bt_cleaner):

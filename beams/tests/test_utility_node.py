@@ -3,7 +3,7 @@ import time
 import py_trees
 
 from beams.tree_config.condition import AcknowledgeConditionItem
-from beams.tree_config.utility_trees.wait_for_ack import WaitForAckNodeItem
+from beams.tree_config.prebuilt.wait_for_ack import WaitForAckNodeItem
 
 
 def test_acknowledge(bt_cleaner):
@@ -39,10 +39,7 @@ def test_wait_and_acknowledge(bt_cleaner):
         name="test_ack_node",
         permisible_user_list=["silke", "barry"]
     )
-    egg = WaitForAckNodeItem(ack_cond_item=ack_cond_item, wait_time_out=1)(
-        name="test_ack_node",
-        permisible_user_list=["silke", "barry"]
-    )
+    egg = WaitForAckNodeItem(ack_cond_item=ack_cond_item, wait_time_out=1)
     root = egg.get_tree()
     bt_cleaner.register(root)
 

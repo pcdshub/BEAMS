@@ -18,7 +18,7 @@ from beams.tree_config.condition import (AcknowledgeConditionItem,
 from beams.tree_config.idiom import CheckAndDoItem
 from beams.tree_config.py_trees import (RunningItem, StatusQueueItem,
                                         SuccessItem)
-from beams.tree_config.utility_trees.wait_for_ack import WaitForAckNodeItem
+from beams.tree_config.prebuilt.wait_for_ack import WaitForAckNodeItem
 from beams.tree_config.value import EPICSValue, FixedValue
 
 

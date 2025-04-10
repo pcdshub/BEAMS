@@ -1,7 +1,7 @@
 {
   "root": {
     "WaitForAckNodeItem": {
-      "name": "",
+      "name": "WaitForAckNode Test",
       "description": "",
       "ack_cond_item": {
         "name": "test_ack_node",
@@ -11,7 +11,10 @@
           "barry"
         ]
       },
-      "wait_time_out": 1
+      // keeping this short so our test suite runs at a reasonable clip, 
+      // just means that we have to be careful when testing this "as a service"
+      // meaning when tested as a service we should do so in interactive mode
+      "wait_time_out": 1 
     }
   }
 }

@@ -253,7 +253,7 @@ class TreeTicker(Worker):
         # find Node
         node = None
         for i in self.tree.root.iterate():
-            logger.debug(f"Checking against node: {i.name}") # note this enumeration for very large trees may be spammy
+            logger.debug(f"Checking against node: {i.name}")  # note this enumeration for very large trees may be spammy
             if (i.name == node_name):
                 node = i
                 node.acknowledge_node(user_name)

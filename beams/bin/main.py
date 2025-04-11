@@ -12,12 +12,13 @@ from beams.logging import configure_log_directory, setup_logging
 
 DESCRIPTION = __doc__
 
-
+# module should have a xxx.py with `build_arg_parser`, `main` functions.
+# costly imports should be contained within `main,`
 COMMAND_TO_MODULE = {
     "run": "run",
     "validate": "validate",
     "gen_test_ioc": "gen_test_ioc",
-    # "beams_service" : "beams_service"  # NOT SURE WHY THIS IS NOT ADDING< CONVULTED
+    "service" : "service"
 }
 
 

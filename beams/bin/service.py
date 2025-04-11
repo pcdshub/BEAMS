@@ -1,5 +1,5 @@
 """
-Start the beams service.
+Start the beams service.  Service will persist until closed with a q+enter command
 
 beams service
 """

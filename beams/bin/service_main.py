@@ -124,7 +124,7 @@ def main(*args, **kwargs):
     service = BeamsService()
     service.start_work()
 
-    while (input("press q to kill") != 'q'):
+    while (input("press q+<enter> to kill") != 'q'):
         time.sleep(1)
     service.join_all_trees()
     service.stop_work()

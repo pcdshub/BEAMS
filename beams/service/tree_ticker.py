@@ -21,6 +21,8 @@ from beams.service.helpers.worker import Worker
 from beams.service.remote_calls.behavior_tree_pb2 import (
     BehaviorTreeUpdateMessage, TickConfiguration, TickStatus)
 from beams.service.remote_calls.generic_message_pb2 import MessageType
+
+from beams.behavior_tree.condition_node import AckConditionNode
 from beams.tree_config import get_tree_from_path
 
 logger = logging.getLogger(__name__)
@@ -252,9 +254,10 @@ class TreeTicker(Worker):
         logger.debug(f"Tree: {self.tree.root.name} got command to ack node: {node_name} from user: {user_name}")
         # find Node
         node = None
+        # NOTE: (josh & zach) may well be a more effecient way to iterate through the tree
         for i in self.tree.root.iterate():
             logger.debug(f"Checking against node: {i.name}")  # note this enumeration for very large trees may be spammy
-            if (i.name == node_name):
+            if (i.name == node_name and isinstance(i,AckConditionNode)):
                 node = i
                 node.acknowledge_node(user_name)
                 logger.debug("Node found and acknowledged")

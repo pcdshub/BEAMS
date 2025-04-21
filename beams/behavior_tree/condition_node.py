@@ -25,7 +25,10 @@ class ConditionNode(py_trees.behaviour.Behaviour):
 
         return status
 
-# Specialty Condition Node that waits for external programatic ACK to continue
+
+'''
+Specialty Condition Node that waits for external programatic ACK to continue
+'''
 
 
 class AckConditionNode(py_trees.behaviour.Behaviour):

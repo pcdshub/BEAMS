@@ -26,7 +26,7 @@ class WaitForAckNodeItem(BaseItem):
         def check_acked() -> bool:
             return check_node.check_ack()
 
-        # build waiting action node #TODO: probably put timeout here
+        # build waiting action node
         @wrapped_action_work(loop_period_sec=0.1, work_function_timeout_period_sec=self.wait_time_out)
         def wait_for_ack_work(comp_condition: Evaluatable) -> py_trees.common.Status:
             if comp_condition():

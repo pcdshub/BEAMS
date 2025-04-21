@@ -16,13 +16,12 @@ from py_trees.display import unicode_blackboard, unicode_tree
 from py_trees.trees import BehaviourTree
 from py_trees.visitors import SnapshotVisitor
 
+from beams.behavior_tree.condition_node import AckConditionNode
 from beams.logging import LoggingVisitor
 from beams.service.helpers.worker import Worker
 from beams.service.remote_calls.behavior_tree_pb2 import (
     BehaviorTreeUpdateMessage, TickConfiguration, TickStatus)
 from beams.service.remote_calls.generic_message_pb2 import MessageType
-
-from beams.behavior_tree.condition_node import AckConditionNode
 from beams.tree_config import get_tree_from_path
 
 logger = logging.getLogger(__name__)
@@ -223,9 +222,7 @@ class TreeTicker(Worker):
 
                 time.sleep(self.state.get_tick_delay_ms())
 
-    '''
-    Hooks for CommandMessages
-    '''
+    # Hooks for CommandMessages
 
     def start_tree(self):
         # if tree is in unpaused state throw error
@@ -257,9 +254,9 @@ class TreeTicker(Worker):
         # NOTE: (josh & zach) may well be a more effecient way to iterate through the tree
         for i in self.tree.root.iterate():
             logger.debug(f"Checking against node: {i.name}")  # note this enumeration for very large trees may be spammy
-            if (i.name == node_name and isinstance(i,AckConditionNode)):
+            if (i.name == node_name and isinstance(i, AckConditionNode)):
                 node = i
                 node.acknowledge_node(user_name)
                 logger.debug("Node found and acknowledged")
         if node is None:
-            logger.error(f"Could not find node of name: {node_name} in tree")
+            logger.error(f"Could not find node of name: {node_name} in tree: {self.tree.root.name}")

@@ -3,10 +3,11 @@ import time
 import py_trees
 from caproto.tests.conftest import run_example_ioc
 
-from beams.tree_config.prebuilt.reset_ioc import ResetIOCItem
-from beams.tree_config.condition import AcknowledgeConditionItem
-from beams.tree_config.prebuilt.wait_for_ack import WaitForAckNodeItem
 from beams.behavior_tree.condition_node import AckConditionNode
+from beams.tree_config.condition import AcknowledgeConditionItem
+from beams.tree_config.prebuilt.reset_ioc import ResetIOCItem
+from beams.tree_config.prebuilt.wait_for_ack import WaitForAckNodeItem
+
 
 def test_sys_reset(request, bt_cleaner):
     reset_ioc_tree = ResetIOCItem(
@@ -31,6 +32,7 @@ def test_sys_reset(request, bt_cleaner):
             time.sleep(0.01)
 
     assert reset_ioc_tree.status == py_trees.common.Status.SUCCESS
+
 
 def test_acknowledge(bt_cleaner):
     ack_cond_node = AcknowledgeConditionItem(
@@ -88,7 +90,7 @@ def test_wait_and_acknowledge(bt_cleaner):
     node_name = "test_ack_node"
     node_to_ack = None
     for i in root.iterate():
-        if (i.name == node_name and isinstance(i,AckConditionNode)):
+        if (i.name == node_name and isinstance(i, AckConditionNode)):
             node_to_ack = i
 
     assert node_to_ack is not None

@@ -1,5 +1,4 @@
 import time
-from types import SimpleNamespace
 
 from beams.service.remote_calls.generic_message_pb2 import MessageType
 from beams.service.rpc_client import RPCClient
@@ -13,9 +12,8 @@ class TestRPC:
 
         time.sleep(1)
 
-        args = SimpleNamespace(hbeat=True)
-        c = RPCClient(args)
-        c.run()
+        c = RPCClient()
+        c.run(command="get_heartbeat")
 
         p.stop_work()
 

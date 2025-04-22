@@ -17,7 +17,6 @@ import argparse
 import logging
 
 from beams.service.remote_calls.behavior_tree_pb2 import TickConfiguration
-from beams.service.rpc_client import enumerate_choices
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +63,7 @@ def build_arg_parser(argparser=None):
         "-tc",
         "--tick_config",
         type=str,
-        choices=enumerate_choices(TickConfiguration),
+        choices=TickConfiguration.keys(),
         help="specify how the tree will be ticked"
     )
     tick_config_parser.add_argument(
@@ -106,6 +105,8 @@ def main(*args, **kwargs):
     if kwargs["command"] is None:
         print("No command provided")
         return
+
     from beams.service.rpc_client import RPCClient
-    client = RPCClient()
-    client.run(*args, **kwargs)
+    cmd = kwargs.pop("command")
+    client = RPCClient()  # TODO: gather client from config
+    client.run(cmd, *args, **kwargs)

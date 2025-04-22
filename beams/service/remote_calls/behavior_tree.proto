@@ -14,7 +14,7 @@ enum TickStatus {
 enum TickConfiguration {
   UNKNOWN = 0;
   INTERACTIVE = 1;
-  CONTINOUS = 2;
+  CONTINUOUS = 2;
 }
 
 message BehaviorTreeUpdateMessage {

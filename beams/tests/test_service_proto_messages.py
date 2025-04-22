@@ -62,12 +62,12 @@ class TestProtos:
                 mess_t=MessageType.MESSAGE_TYPE_COMMAND_MESSAGE,
                 command_t=CommandType.CHANGE_TICK_CONFIGURATION,
                 tree_name="Tree1",
-                tick_config=TickConfigurationMessage(tick_config=TickConfiguration.CONTINOUS,
+                tick_config=TickConfigurationMessage(tick_config=TickConfiguration.CONTINUOUS,
                                                      delay_ms=5)
             )
         lnt_mess = LoadNewTreeMessage(tree_file_path="beams/tests/artificats/eggs.json")
         lnt_mess.tick_spec.CopyFrom(TickConfigurationMessage(
-            tick_config=TickConfiguration.CONTINOUS,
+            tick_config=TickConfiguration.CONTINUOUS,
             delay_ms=5
         ))
         com2 = CommandMessage(

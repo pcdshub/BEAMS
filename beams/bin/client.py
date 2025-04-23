@@ -104,13 +104,15 @@ def build_arg_parser(argparser=None):
         "-n",
         '--node_name',
         type=str,
-        help="name of node to acknowledge"
+        help="name of node to acknowledge",
+        default="",
     )
     ack_node_parser.add_argument(
         "-u",
         "--user",
         type=str,
-        help="user sending acknowledge"
+        help="user sending acknowledge",
+        default="me"
     )
 
     # Basic parsers (only tree-name needed)

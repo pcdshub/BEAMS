@@ -8,7 +8,7 @@ from pathlib import Path
 import py_trees
 from apischema import serialize
 
-from beams.tree_config.action import IncPVActionItem, SetPVActionItem
+from beams.tree_config.action.pv_action import IncPVActionItem, SetPVActionItem
 from beams.tree_config.base import BehaviorTreeItem
 from beams.tree_config.composite import SequenceItem
 from beams.tree_config.condition import (AcknowledgeConditionItem,

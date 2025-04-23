@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from beams.tree_config import save_tree_item_to_path
-from beams.tree_config.action import SetPVActionItem
+from beams.tree_config.action.pv_action import SetPVActionItem
 from beams.tree_config.composite import (SelectorItem, SequenceConditionItem,
                                          SequenceItem)
 from beams.tree_config.condition import (BinaryConditionItem,

@@ -47,7 +47,7 @@ class RPCClient:
         tree_name = kwargs.get("tree_name") or ""
         # These commands only need captured tree name and command itself
         if command in self.BASE_COMMANDS:
-            getattr(self, CommandType.Name(command))(tree_name)
+            getattr(self, f"_{CommandType.Name(command).lower()}")(tree_name)
         elif command == CommandType.LOAD_NEW_TREE:
             self._load_new_tree(
                 tree_name=tree_name,

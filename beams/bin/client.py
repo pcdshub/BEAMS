@@ -23,6 +23,9 @@ logger = logging.getLogger(__name__)
 DESCRIPTION = __doc__
 
 
+# subcommands here are identified by the same string as their CommandType enum
+# aliases.  "True" command names are stored under the "commnand" default in each
+# subparser
 def build_arg_parser(argparser=None):
     if argparser is None:
         argparser = argparse.ArgumentParser()
@@ -31,7 +34,7 @@ def build_arg_parser(argparser=None):
     argparser.formatter_class = argparse.RawTextHelpFormatter
 
     subparsers = argparser.add_subparsers(
-        help="client subcommands", dest="command"
+        help="client subcommands"
     )
 
     # get heartbeat
@@ -43,6 +46,7 @@ def build_arg_parser(argparser=None):
         aliases=["LOAD_NEW_TREE", "load"],
         help="command for specifying new tree"
     )
+    load_new_tree_parser.set_defaults(command="load_new_tree")
     load_new_tree_parser.add_argument(
         "new_tree_filepath",
         help="filepath of tree to be loaded",
@@ -71,6 +75,7 @@ def build_arg_parser(argparser=None):
         aliases=["CHANGE_TICK_CONFIGURATION", "change_tick_cfg"],
         help="specify tick configuration"
     )
+    tick_config_parser.set_defaults(command="change_tick_configuration")
     tick_config_parser.add_argument(
         "-m",
         "--tick_mode",
@@ -94,6 +99,7 @@ def build_arg_parser(argparser=None):
         aliases=["ACK_NODE"],
         help="specify node to send use ack to"
     )
+    ack_node_parser.set_defaults(command="ack_node")
     ack_node_parser.add_argument(
         "-n",
         '--node_name',
@@ -107,31 +113,34 @@ def build_arg_parser(argparser=None):
         help="user sending acknowledge"
     )
 
-    # TODO: Start Tree
+    # Basic parsers (only tree-name needed)
     start_parser = subparsers.add_parser(
         "start_tree",
         aliases=["START_TREE", "start"],
         help="Start a tree that has been loaded"
     )
-    # TODO: Tick Tree
+    start_parser.set_defaults(command="start_tree")
+
     tick_parser = subparsers.add_parser(
         "tick_tree",
         aliases=["TICK_TREE", "tick"],
         help="Tick a running tree"
     )
-    # TODO: Pause Tree
+    tick_parser.set_defaults(command="tick_tree")
+
     pause_parser = subparsers.add_parser(
         "pause_tree",
         aliases=["PAUSE_TREE", "pause"],
         help="Pause a running tree"
     )
-    # TODO: Unload Tree
+    pause_parser.set_defaults(command="pause_tree")
+
     unload_parser = subparsers.add_parser(
         "unload_tree",
         aliases=["UNLOAD_TREE", "unload"],
         help="Unload a loaded tree"
     )
-    # TODO: Change Tick Rate
+    unload_parser.set_defaults(command="unload_tree")
 
     # apply required tree identification arg for applicable subcommands
     for sub in [start_parser, load_new_tree_parser, tick_config_parser,

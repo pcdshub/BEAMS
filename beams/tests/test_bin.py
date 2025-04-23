@@ -3,6 +3,7 @@ import itertools
 import logging
 import subprocess
 from pathlib import Path
+from unittest.mock import patch
 
 import caproto.server
 import caproto.server.server
@@ -21,7 +22,7 @@ from beams.tree_config.value import EPICSValue
 
 logger = logging.getLogger(__name__)
 
-SUBCOMMANDS = ["", "run",]
+SUBCOMMANDS = ["", "run", "gen_test_ioc", "service", "validate", "client"]
 
 
 def arg_variants(variants: tuple[tuple[tuple[str]]]):
@@ -231,3 +232,59 @@ def test_validate_artifacts_inproc(artifact: str, return_code: int):
     args = ["beams", "validate", str(test_cfg)]
     with cli_args(args), restore_logging():
         assert main() == return_code
+
+
+LOAD_ARGS = (
+    (("-m", "INTERACTIVE"), ("--tick_mode", "INTERACTIVE"), ("-m", "CONTINUOUS"),
+     ("--tick_mode", "CONTINUOUS"), ()),
+    (("-d", "3"), ("--tick_delay_ms", "3"), ()),
+    (("tree_filepath",),),
+    (("tree_name",),),
+)
+
+
+@patch("beams.service.rpc_client.RPCClient")
+@pytest.mark.parametrize("subcommand", ("load_new_tree", "LOAD_NEW_TREE", "load"))
+@pytest.mark.parametrize("added_args", tuple(arg_variants(LOAD_ARGS)))
+def test_client_load(MockClient, subcommand: str, added_args: tuple[str]):
+    args = ["beams", "client", subcommand]
+    args.extend(added_args)
+    print(args)
+    with cli_args(args), restore_logging():
+        main()
+
+
+TICK_CONFIG_ARGS = (
+    (("-m", "INTERACTIVE"), ("--tick_mode", "INTERACTIVE"), ("-m", "CONTINUOUS"),
+     ("--tick_mode", "CONTINUOUS"), ()),
+    (("-d", "3"), ("--tick_delay_ms", "3"), ()),
+    (("tree_name",),),
+)
+
+
+@patch("beams.service.rpc_client.RPCClient")
+@pytest.mark.parametrize("subcommand", (
+    "change_tick_configuration", "CHANGE_TICK_CONFIGURATION", "change_tick_cfg"
+))
+@pytest.mark.parametrize("added_args", tuple(arg_variants(TICK_CONFIG_ARGS)))
+def test_client_tick_cfg(MockClient, subcommand: str, added_args: tuple[str]):
+    args = ["beams", "client", subcommand]
+    args.extend(added_args)
+    print(args)
+    with cli_args(args), restore_logging():
+        main()
+
+
+@patch("beams.service.rpc_client.RPCClient")
+@pytest.mark.parametrize("subcommand", (
+    "ack_node", "ACK_NODE",
+    "start_tree", "START_TREE", "start",
+    "tick_tree", "TICK_TREE", "tick",
+    "pause_tree", "PAUSE_TREE", "pause",
+    "unload_tree", "UNLOAD_TREE", "unload"
+))
+def test_client_simple_subcommands(MockClient, subcommand: str):
+    args = ["beams", "client", subcommand, "tree_name"]
+    print(args)
+    with cli_args(args), restore_logging():
+        main()

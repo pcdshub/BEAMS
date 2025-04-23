@@ -1,6 +1,8 @@
 from __future__ import print_function
 
 import logging
+from functools import wraps
+from typing import Optional
 
 import grpc
 
@@ -17,75 +19,120 @@ logger = logging.getLogger(__name__)
 
 
 class RPCClient:
-    TREE_CTRL_CMDS = [
-        CommandType.PAUSE_TREE,
-        CommandType.TICK_TREE,
+    BASE_COMMANDS: list[CommandType] = [
         CommandType.START_TREE,
+        CommandType.TICK_TREE,
+        CommandType.PAUSE_TREE,
         CommandType.UNLOAD_TREE,
     ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, server_address: str = "localhost:50051", **kwargs):
         self.response = None
+        self.server_address = server_address
 
     def run(self, command: str, **kwargs):
         def p_message_info(mtype, mvalue):
             logger.debug(f"Sending message of type:({mtype}), value:({mvalue})")
 
-        command = command.upper()
-        if command not in CommandType.keys() + ["GET_HEARTBEAT"]:
+        if command.upper() == "GET_HEARTBEAT":
+            self._get_heartbeat()
+            logger.debug(self.response)
+            return
+
+        command = getattr(CommandType, command.upper())
+        if command not in CommandType.values():
             raise ValueError(f"Unsupported command provided: {command}")
 
-        with grpc.insecure_channel(
-            "localhost:50051"
-        ) as channel:  # TODO: obviously not this. Grab from config
-            stub = BEAMS_rpcStub(channel)
+        # TODO: deal with none as tree name
+        tree_name = kwargs.get("tree_name") or ""
+        # These commands only need captured tree name and command itself
+        if command in self.BASE_COMMANDS:
+            getattr(self, CommandType.Name(command))(tree_name)
+        elif command == CommandType.LOAD_NEW_TREE:
+            self._load_new_tree(
+                tree_name=tree_name,
+                new_tree_filepath=kwargs["new_tree_filepath"],
+                tick_config=kwargs["tick_mode"],
+                tick_delay_ms=kwargs["tick_delay_ms"]
+            )
+        elif command == CommandType.LOAD_NEW_TREE:
+            self._load_new_tree(
+                tree_name=tree_name,
+                new_tree_filepath=kwargs["new_tree_filepath"],
+                tick_config=kwargs["tick_mode"],
+                tick_delay_ms=kwargs["tick_delay_ms"],
+            )
+        elif command == CommandType.ACK_NODE:
+            self._ack_node(
+                tree_name=tree_name,
+                node_name=kwargs["node_name"], user=kwargs["user"],
+            )
 
-            if command == "GET_HEARTBEAT":
-                self._get_heartbeat(stub)
-                logger.debug(self.response)
-                return
+        print(self.response)
+        logger.debug(self.response)
 
-            # TODO: deal with none as tree name
-            cmd_msg = self.construct_msg(command, kwargs.get("tree_name") or "")
-
-            # These commands only need captured tree name and command itself
-            if cmd_msg.command_t in self.TREE_CTRL_CMDS:
-                pass
-            elif cmd_msg.command_t == CommandType.LOAD_NEW_TREE:
-                self._load_new_tree(
-                    stub, cmd_msg,
-                    new_tree_filepath=kwargs["new_tree_filepath"],
-                    tick_config=kwargs["tick_config"],
-                    tick_delay_ms=kwargs["tick_delay_ms"],
-                )
-            elif cmd_msg.command_t == CommandType.ACK_NODE:
-                self._ack_node(
-                    stub, cmd_msg,
-                    node_name=kwargs["node_name"], user=kwargs["user"],
-                )
-
-            logger.debug(self.response)
-
-    def construct_msg(self, command: str, tree_name: str) -> CommandMessage:
+    def construct_msg(self, command: CommandType, tree_name: str) -> CommandMessage:
         # unpack the command type from arg parse
         cmd_msg = CommandMessage(mess_t=MessageType.MESSAGE_TYPE_COMMAND_MESSAGE)
-        cmd_type = getattr(CommandType, command)
-        cmd_msg.command_t = cmd_type
+        cmd_msg.command_t = command
         cmd_msg.tree_name = tree_name
         return cmd_msg
 
-    def _get_heartbeat(self, stub: BEAMS_rpcStub) -> None:
-        print("hbeat")
+    def with_server_stub(func):
+        """
+        Create rpc stub inside the grpc context as a decorator for commands
+        If stub is provided, then the context already exists, run as normal
+        """
+        @wraps(func)
+        def wrapper(self, *args, stub: Optional[BEAMS_rpcStub] = None, **kwargs):
+            if not isinstance(self, RPCClient):
+                raise ValueError("with_server_stub must decorate a method of "
+                                 f"{type(RPCClient)}, not {type(self)}")
+
+            if stub is None:
+                # TODO: obviously not this. Grab from config
+                with grpc.insecure_channel(self.server_address) as channel:
+                    stub = BEAMS_rpcStub(channel)
+                    return func(self, stub=stub, *args, **kwargs)
+            else:
+                return func(self, stub=stub, *args, **kwargs)
+
+        return wrapper
+
+    @with_server_stub
+    def _get_heartbeat(self, stub: Optional[BEAMS_rpcStub] = None) -> None:
         self.response = stub.request_heartbeat(Empty())
 
+    @with_server_stub
+    def _start_tree(self, tree_name: str, stub: Optional[BEAMS_rpcStub] = None) -> None:
+        cmd_msg = self.construct_msg(CommandType.START_TREE, tree_name)
+        self.response = stub.enqueue_command(cmd_msg)
+
+    @with_server_stub
+    def _tick_tree(self, tree_name: str, stub: Optional[BEAMS_rpcStub] = None) -> None:
+        cmd_msg = self.construct_msg(CommandType.TICK_TREE, tree_name)
+        self.response = stub.enqueue_command(cmd_msg)
+
+    @with_server_stub
+    def _pause_tree(self, tree_name: str, stub: Optional[BEAMS_rpcStub] = None) -> None:
+        cmd_msg = self.construct_msg(CommandType.PAUSE_TREE, tree_name)
+        self.response = stub.enqueue_command(cmd_msg)
+
+    @with_server_stub
+    def _unload_tree(self, tree_name: str, stub: Optional[BEAMS_rpcStub] = None) -> None:
+        cmd_msg = self.construct_msg(CommandType.UNLOAD_TREE, tree_name)
+        self.response = stub.enqueue_command(cmd_msg)
+
+    @with_server_stub
     def _load_new_tree(
         self,
-        stub: BEAMS_rpcStub,
-        cmd_msg: CommandMessage,
+        tree_name: str,
         new_tree_filepath: str,
         tick_config: str,
-        tick_delay_ms: int
+        tick_delay_ms: int,
+        stub: Optional[BEAMS_rpcStub] = None,
     ) -> None:
+        cmd_msg = self.construct_msg(CommandType.LOAD_NEW_TREE, tree_name)
         load_new_tree_mesg = LoadNewTreeMessage()
         load_new_tree_mesg.tree_file_path = new_tree_filepath
         # make tick config
@@ -99,13 +146,15 @@ class RPCClient:
         # persist response
         self.response = stub.enqueue_command(cmd_msg)
 
+    @with_server_stub
     def _ack_node(
         self,
-        stub: BEAMS_rpcStub,
-        cmd_msg: CommandMessage,
+        tree_name: str,
         node_name: str,
         user: str,
+        stub: Optional[BEAMS_rpcStub] = None,
     ) -> None:
+        cmd_msg = self.construct_msg(CommandType.ACK_NODE, tree_name)
         # TODO: grab user from kerberos?  Verify that user is who they say they are?
         ack_node_mess = AckNodeMessage(
             node_name_to_ack=node_name, user_acking_node=user

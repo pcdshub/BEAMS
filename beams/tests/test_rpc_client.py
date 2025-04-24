@@ -2,6 +2,8 @@ from unittest.mock import patch
 
 import pytest
 
+from beams.service.rpc_client import RPCClient
+
 
 class MockStub:
     def __init__(self, *args, **kwargs):
@@ -15,13 +17,6 @@ class MockStub:
         return "heartbeat requested"
 
 
-# Mock the rpc stub before it is loaded into the Client class
-patch("beams.service.remote_calls.beams_rpc_pb2_grpc.BEAMS_rpcStub", MockStub).start()
-
-
-from beams.service.rpc_client import RPCClient  # NOQA: E402
-
-
 @pytest.fixture(scope="function")
 def client() -> RPCClient:
     cl = RPCClient()
@@ -29,11 +24,13 @@ def client() -> RPCClient:
     return cl
 
 
+@patch("beams.service.rpc_client.BEAMS_rpcStub", MockStub)
 def test_heartbeat(client: RPCClient):
-    client._get_heartbeat()
+    client.get_heartbeat()
     assert client.response == "heartbeat requested"
 
 
+@patch("beams.service.rpc_client.BEAMS_rpcStub", MockStub)
 @pytest.mark.parametrize("command,kwargs", [
     ("START_TREE", {"tree_name": "my_tree"}),
     ("TICK_TREE", {"tree_name": "my_tree"}),
@@ -44,12 +41,13 @@ def test_heartbeat(client: RPCClient):
     ("ACK_NODE", {"tree_name": "my_tree", "node_name": "that_node", "user": "me"}),
 ])
 def test_command_no_stub(client: RPCClient, command: str, kwargs):
-    method = getattr(client, f"_{command.lower()}")
+    method = getattr(client, f"{command.lower()}")
     method(**kwargs)
     assert "queued" in client.response
     assert "command" in client.response
 
 
+@patch("beams.service.rpc_client.BEAMS_rpcStub", MockStub)
 @pytest.mark.parametrize("command,kwargs", [
     ("START_TREE", {"tree_name": "my_tree"}),
     ("TICK_TREE", {"tree_name": "my_tree"}),
@@ -60,7 +58,7 @@ def test_command_no_stub(client: RPCClient, command: str, kwargs):
     ("ACK_NODE", {"tree_name": "my_tree", "node_name": "that_node", "user": "me"}),
 ])
 def test_command_with_stub(client: RPCClient, command: str, kwargs):
-    method = getattr(client, f"_{command.lower()}")
+    method = getattr(client, f"{command.lower()}")
     stub = MockStub()
     method(stub=stub, **kwargs)
     assert "queued" in client.response

@@ -1,7 +1,10 @@
 from __future__ import print_function
 
+import configparser
 import logging
+import os
 from functools import wraps
+from pathlib import Path
 from typing import Optional
 
 import grpc
@@ -27,9 +30,112 @@ class RPCClient:
         CommandType.UNLOAD_TREE,
     ]
 
-    def __init__(self, *args, server_address: str = "localhost:50051", **kwargs):
+    def __init__(
+        self,
+        *args,
+        address: str = "localhost",
+        port: int = 50051,
+        **kwargs
+    ):
         self.response = None
-        self.server_address = server_address
+        self.server_address = f"{address}:{port}"
+
+    @classmethod
+    def from_config(cls, cfg: Optional[Path] = None):
+        """
+        Create a client from the configuration file specification.
+
+        Configuration file should be of an "ini" format.  The accepted keys are:
+        - server
+            - address: str
+            - port: int
+
+        For example:
+
+        .. code::
+
+            [server]
+            address = localhost
+            port = 50051
+
+        Parameters
+        ----------
+        cfg : Path, optional
+            Path to the configuration file, by default None.  If omitted,
+            :meth:`.find_config` will be used to find one.
+
+        Raises
+        ------
+        RuntimeError
+            If a configuration file cannot be found
+        """
+        if not cfg:
+            cfg = cls.find_config()
+        if not os.path.exists(cfg):
+            raise RuntimeError(f"BEAMS configuration file not found: {cfg}")
+
+        cfg_parser = configparser.ConfigParser()
+        cfg_parser.read(cfg)
+        logger.debug(f"Loading configuration file at ({cfg})")
+        return cls.from_parsed_config(cfg_parser, cfg)
+
+    @classmethod
+    def from_parsed_config(cls, cfg_parser: configparser.ConfigParser, cfg_path=""):
+        """
+        Initializes Client using a ConfigParser that has already read in a config.
+        This method enables the caller to edit a config after parsing but before
+        Client initialization.
+        """
+        # server address information
+        if "server" in cfg_parser.sections():
+            server_address = cfg_parser["server"]["address"]
+            server_port = int(cfg_parser["server"]["port"])
+        else:
+            logger.debug("No address information found")
+            server_address = "localhost"
+            server_port = 50051
+
+        return cls(address=server_address, port=server_port)
+
+    @staticmethod
+    def find_config() -> Path:
+        """
+        Search for a ``beams`` configuation file.  Searches in the following
+        locations in order
+        - ``$BEAMS_CFG`` (a full path to a config file)
+        - ``$XDG_CONFIG_HOME/{beams.cfg, .beams.cfg}`` (either filename)
+        - ``~/.config/{beams.cfg, .beams.cfg}``
+
+        Returns
+        -------
+        path : str
+            Absolute path to the configuration file
+
+        Raises
+        ------
+        OSError
+            If no configuration file can be found by the described methodology
+        """
+        # Point to with an environment variable
+        if os.environ.get('BEAMS_CFG', False):
+            beams_cfg = os.environ.get('BEAMS_CFG')
+            logger.debug("Found $BEAMS_CFG specification for Client "
+                         "configuration at %s", beams_cfg)
+            return beams_cfg
+        # Search in the current directory and home directory
+        else:
+            config_dirs = [os.environ.get('XDG_CONFIG_HOME', "."),
+                           os.path.expanduser('~/.config'),]
+            for directory in config_dirs:
+                logger.debug('Searching for beams config in %s', directory)
+                for path in ('.beams.cfg', 'beams.cfg'):
+                    full_path = os.path.join(directory, path)
+
+                    if os.path.exists(full_path):
+                        logger.debug("Found configuration file at %r", full_path)
+                        return full_path
+        # If found nothing
+        raise OSError("No beams configuration file found. Check BEAMS_CFG.")
 
     def run(self, command: str, **kwargs):
         """

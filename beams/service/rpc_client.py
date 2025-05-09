@@ -178,13 +178,6 @@ class RPCClient:
                 tick_config=kwargs["tick_mode"],
                 tick_delay_ms=kwargs["tick_delay_ms"]
             )
-        elif command == CommandType.LOAD_NEW_TREE:
-            self.load_new_tree(
-                tree_name=tree_name,
-                new_tree_filepath=kwargs["new_tree_filepath"],
-                tick_config=kwargs["tick_mode"],
-                tick_delay_ms=kwargs["tick_delay_ms"],
-            )
         elif command == CommandType.ACK_NODE:
             self.ack_node(
                 tree_name=tree_name,

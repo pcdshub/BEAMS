@@ -6,7 +6,7 @@ from epics import caget
 from py_trees.composites import Sequence
 
 from beams.behavior_tree.action_node import ActionNode, wrapped_action_work
-from beams.tree_config.action import SetPVActionItem
+from beams.tree_config.action.pv_action import SetPVActionItem
 from beams.tree_config.base import BaseItem
 from beams.tree_config.condition import BinaryConditionItem, ConditionOperator
 from beams.tree_config.value import EPICSValue, ProcessIntValue

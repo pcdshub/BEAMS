@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Union
 
 from beams.behavior_tree.check_and_do import CheckAndDo
-from beams.tree_config.action import IncPVActionItem, SetPVActionItem
+from beams.tree_config.action.pv_action import IncPVActionItem, SetPVActionItem
 from beams.tree_config.base import BaseItem
 from beams.tree_config.condition import BaseConditionItem, DummyConditionItem
 

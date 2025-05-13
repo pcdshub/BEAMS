@@ -13,14 +13,14 @@
               "BinaryConditionItem": {
                 "name": "check_reticule_state",
                 "description": "",
-                "left_value": {
-                  "EPICSValue": {
+                "target": {
+                  "PVTarget": {
                     "pv_name": "IM2L0:XTES:MMS:STATE:GET_RBV",
                     "as_string": true
                   }
                 },
-                "right_value": {
-                  "FixedValue": {
+                "target_value": {
+                  "ValueTarget": {
                     "value": "OUT"
                   }
                 },
@@ -30,7 +30,7 @@
             "do": {
               "name": "set_reticule_state_to_out",
               "description": "",
-              "pv": "IM2L0:XTES:MMS:STATE:GET_RBV",
+              "pv": "IM2L0:XTES:MMS:STATE:SET",
               "value": "OUT",
               "loop_period_sec": 0.01,
               "termination_check": {
@@ -47,21 +47,21 @@
             "name": "zoom_motor",
             "description": "",
             "check": {
-              "BoundedConditionItem": {
+              "ThresholdConditionItem": {
                 "name": "check_zoom_motor",
                 "description": "",
                 "lower_bound": {
-                  "FixedValue": {
-                    "value": 24.8
+                  "ValueTarget": {
+                    "value": 24.7
                   }
                 },
                 "upper_bound": {
-                  "FixedValue": {
+                  "ValueTarget": {
                     "value": 25.2
                   }
                 },
-                "value": {
-                  "EPICSValue": {
+                "target": {
+                  "PVTarget": {
                     "pv_name": "IM2L0:XTES:CLZ.RBV",
                     "as_string": false
                   }
@@ -71,7 +71,7 @@
             "do": {
               "name": "set_zoom_motor",
               "description": "",
-              "pv": "IM2L0:XTES:CLZ.RBV",
+              "pv": "IM2L0:XTES:CLZ.VAL",
               "value": 25,
               "loop_period_sec": 0.01,
               "termination_check": {
@@ -88,33 +88,74 @@
             "name": "focus_motor",
             "description": "",
             "check": {
-              "BinaryConditionItem": {
+              "ThresholdConditionItem": {
                 "name": "check_focus_motor",
                 "description": "",
-                "left_value": {
-                  "EPICSValue": {
+                "lower_bound": {
+                  "ValueTarget": {
+                    "value": 49.9
+                  }
+                },
+                "upper_bound": {
+                  "ValueTarget": {
+                    "value": 50.2
+                  }
+                },
+                "target": {
+                  "PVTarget": {
                     "pv_name": "IM2L0:XTES:CLF.RBV",
                     "as_string": false
                   }
-                },
-                "right_value": {
-                  "FixedValue": {
-                    "value": 50
-                  }
-                },
-                "operator": "eq"
+                }
               }
             },
             "do": {
               "name": "set_focus_motor",
               "description": "",
-              "pv": "IM2L0:XTES:CLF.RBV",
+              "pv": "IM2L0:XTES:CLF.VAL",
               "value": 50,
               "loop_period_sec": 0.01,
               "termination_check": {
                 "UseCheckConditionItem": {
                   "name": "set_focus_motor_termination_check",
                   "description": "Use parent's check node: check_focus_motor"
+                }
+              }
+            }
+          }
+        },
+        {
+          "CheckAndDoItem": {
+            "name": "filter_wheel",
+            "description": "",
+            "check": {
+              "BinaryConditionItem": {
+                "name": "check_filter_wheel",
+                "description": "",
+                "target": {
+                  "PVTarget": {
+                    "pv_name": "IM2L0:XTES:MFW:GET_RBV",
+                    "as_string": true
+                  }
+                },
+                "target_value": {
+                  "ValueTarget": {
+                    "value": "T100"
+                  }
+                },
+                "operator": "eq"
+              }
+            },
+            "do": {
+              "name": "set_filter_wheel",
+              "description": "",
+              "pv": "IM2L0:XTES:MFW:GET_RBV",
+              "value": "T100",
+              "loop_period_sec": 0.01,
+              "termination_check": {
+                "UseCheckConditionItem": {
+                  "name": "set_filter_wheel_termination_check",
+                  "description": "Use parent's check node: check_filter_wheel"
                 }
               }
             }

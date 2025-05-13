@@ -9,9 +9,11 @@ from typing import Callable
 
 import numpy as np
 from ophyd.areadetector.plugins import ImagePlugin
+from ophyd.areadetector.base import EpicsSignalWithRBV
+
 from ophyd.device import Component as Cpt
 from ophyd.device import Device
-from ophyd.signal import AttributeSignal, EpicsSignalRO, Signal
+from ophyd.signal import AttributeSignal, EpicsSignalRO, Signal, EpicsSignal
 
 
 class Marker(Device):
@@ -106,6 +108,9 @@ class YagCamera(Device):
 
     image1 = Cpt(LCLSImagePlugin, "IMAGE1:")
     coords = Cpt(CamViewerCoords, "")
+    led = Cpt(EpicsSignal, ':CIL:PWR')
+    exposure = Cpt(EpicsSignalWithRBV, 'AcquireTime', kind='config')
+    acquire = Cpt(EpicsSignal, 'Acquire', kind='normal')
 
 
 class FakeMarker(Marker):

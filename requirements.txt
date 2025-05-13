@@ -4,3 +4,5 @@ jinja2
 py-trees
 pyepics
 pyyaml
+ophyd
+numpy

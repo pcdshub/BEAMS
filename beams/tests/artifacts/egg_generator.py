@@ -10,7 +10,7 @@ from apischema import serialize
 
 from beams.tree_config.action import IncPVActionItem, SetPVActionItem
 from beams.tree_config.base import BehaviorTreeItem
-from beams.tree_config.composite import SequenceItem
+from beams.tree_config.composite import SequenceItem, SelectorItem
 from beams.tree_config.condition import (AcknowledgeConditionItem,
                                          BinaryConditionItem,
                                          BoundedConditionItem,
@@ -198,6 +198,59 @@ def create_test_ack(write: bool = False):
             fd.write('\n')
 
     return root_item
+
+
+def sl1k0_at1k0_state_resolution(write: bool = False):
+    sl1k0_root = SequenceItem(name="SL1K0 Root")
+
+    # build first child
+    case_1_root = SequenceItem(name="Case 1")
+    check_at1k0_case_1 = BinaryConditionItem(
+        name="check_at1k0_case_1",
+        left_value=EPICSValue(pv_name="AT1K0:GAS_MMA:01:Y:STATE:GET_RBV"),
+        right_value=FixedValue(value=1),
+        operator=ConditionOperator.equal
+    )
+
+    # check if SL1k0 in case 1 needs attention
+    sl1k0_case_1 = SelectorItem(name="SL1K0 Case 1")
+    s1lk0_case_1_check_x_and_y = SequenceItem("s1lk0_case_1_check_x")
+    s1lk0_case_1_check_x = BinaryConditionItem(
+        name="s1lk0_case_1_check_x",
+        left_value=EPICSValue(pv_name="SL1K0:POWER:ACTUAL_XWIDTH_RBV"),
+        right_value=FixedValue(value=2),
+        operator=ConditionOperator.less
+    )
+    s1lk0_case_1_check_y = BinaryConditionItem(
+        name="s1lk0_case_1_check_y",
+        left_value=EPICSValue(pv_name="SL1K0:POWER:ACTUAL_YWIDTH_RBV"),
+        right_value=FixedValue(value=2),
+        operator=ConditionOperator.less
+    )
+    s1lk0_case_1_check_x_and_y.children = [s1lk0_case_1_check_x, s1lk0_case_1_check_y]
+    sl1k0_case_1.children.append(check_at1k0_case_1)
+    sl1k0_case_1.children.append(s1lk0_case_1_check_x_and_y)
+
+    should_do_action_or_warn_case_1 = SelectorItem(name="should_do_action_case_1")
+    should_do_action = SequenceItem(nam="should_do_action")
+
+    # build wait for action
+    ack_cond_item = AcknowledgeConditionItem(
+        name="test_ack_node",
+        permisible_user_list=["tmoopr"]
+    )
+
+    wait_for_action_case_1 = WaitForAckNodeItem(ack_cond_item=ack_cond_item, wait_time_out=600)
+    should_do_action.children.append(wait_for_action_case_1)
+
+    # build action for success case
+    do_open_sl1k0_x = SetPVActionItem(
+        name="do_open_sl1k0_x",
+        loop_period_sec=0.1,
+        pv="IM2L0:XTES:CLZ.RBV",
+        value=25,
+    )
+    should_do_action.children.append(do_open_sl1k0_x)
 
 
 if __name__ == "__main__":

@@ -106,9 +106,9 @@ class YagCamera(Device):
     Customized with what is most useful for us during an optimization routine.
     """
 
-    image1 = Cpt(LCLSImagePlugin, "IMAGE1:")
+    image1 = Cpt(LCLSImagePlugin, "CAM:IMAGE1:")
     coords = Cpt(CamViewerCoords, "")
-    led = Cpt(EpicsSignal, ':CIL:PWR')
+    led = Cpt(EpicsSignal, 'CIL:PWR')
     exposure = Cpt(EpicsSignalWithRBV, 'AcquireTime', kind='config')
     acquire = Cpt(EpicsSignal, 'Acquire', kind='normal')
 

@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 import time
 
 import numpy as np
+import cv2 as cv
 
 import py_trees
 from epics import caget, caput
@@ -33,10 +34,30 @@ class FindReticuleTransform(BaseItem):
         # configure camera to acquire an image
         cam.led.put(1)
         cam.exposure.put(0.001)
-        target = 'RETICLE'
         cam.acquire.put(1)
         # should check frequency being reported by camera
-        time.sleep(2)
 
-        self.image_frame = cam.image1.image
+        for i in range(20):  # TODO make average configurable
+          self.image_frame += cam.image1.image
+          time.sleep(0.1)  # TODO: can do it the same way as camviewer which accumulates at cam freq
+        self.image_frame /= 20
+
         cam.led.put(0)
+
+        normalized = np.zeros((1024, 1024))
+        normalized = cv.normalize(self.image_frame, normalized, 0, 190, cv.NORM_MINIMAX).astype('uint8')
+
+        blur = cv.medianBlur(normalized, 5)
+
+        # adaptive threshold
+        thresh = cv.adaptiveThreshold(blur, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 71, -9)
+
+        # morph_open: more noise reduction
+        open_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3))
+        opened = cv.morphologyEx(thresh, cv.MORPH_OPEN, open_kernel)
+        
+        # morph_close: expand fiducials into full squares
+        dilate_kernel = cv.getStructuringElement(cv.MORPH_RECT, (12, 12))
+        dilate = cv.morphologyEx(opened, cv.MORPH_DILATE, dilate_kernel)
+
+        edges = cv.Canny(dilate, 50, 150)

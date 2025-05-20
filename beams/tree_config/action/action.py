@@ -46,18 +46,29 @@ class FindReticuleTransform(BaseItem):
 
         normalized = np.zeros((1024, 1024))
         normalized = cv.normalize(self.image_frame, normalized, 0, 190, cv.NORM_MINIMAX).astype('uint8')
-
-        blur = cv.medianBlur(normalized, 5)
-
-        # adaptive threshold
-        thresh = cv.adaptiveThreshold(blur, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 71, -9)
-
-        # morph_open: more noise reduction
-        open_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3))
-        opened = cv.morphologyEx(thresh, cv.MORPH_OPEN, open_kernel)
         
-        # morph_close: expand fiducials into full squares
-        dilate_kernel = cv.getStructuringElement(cv.MORPH_RECT, (12, 12))
-        dilate = cv.morphologyEx(opened, cv.MORPH_DILATE, dilate_kernel)
+        # intial pass clean up
+        blur = cv.medianBlur(normalized, 5)
+        thresh = cv.adaptiveThreshold(blur, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 71, -9)
+        
+        # further noise rejection
+        open_kern = cv.getStructuringElement(cv.MORPH_ELIPSE, ((3, 3,)))
+        opened = cv.morphologyEx(thresh, cv.MORPH_OPEN, open_kern)
 
-        edges = cv.Canny(dilate, 50, 150)
+        dialate_kern = cv.getStructuringElement(cv.MORPH_RECT, ((12, 12)))
+        dialated = cv.morphologyEx(opened, cv.MORPH_DIALATE, dialate_kern)
+
+        edge = cv.Canny(dialated, 50, 150)
+
+        contours = cv.findContours(edge, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+
+        # contours[0] is a list of np array tuples defining the contours
+        mu = [None] * len(contours[0])
+        for i in range(contours[0]):
+          mu[i] = cv.moments(contours[0][i])
+        
+        mc = [None] * len(contours[0])
+        for i in range(contours[0]):
+          mc[i] = (mu[i]['m10'] / (mu[i]['m00'] + 1e-5), mu[i]['m01'] / (mu[i]['m00'] + 1e-5))
+
+        #mc now is a list of centers of contour objects: mc[i][0] gives center x with m[i][1] giving center i y

@@ -207,20 +207,23 @@ class TreeTicker(Worker):
 
             while (self.state.get_tick_current_tree()):
                 while (self.state.get_pause_tree()):
-                    time.sleep(self.state.get_tick_delay_ms())  # reusing this here.... could use a semaphore...
+                    # reusing this here.... could use a semaphore...
+                    time.sleep(self.state.get_tick_delay_ms() / 1000)
 
                 # If we are in interactive mode
                 if self.state.get_tick_interactive() == TickConfiguration.INTERACTIVE:
-                    # wait till the semaphore gets incremented, this is the IPC method to communicate a tick_interactive
+                    # wait till the semaphore gets incremented, this is the IPC
+                    # method to communicate a tick_interactive
                     got_tick = self.tick_sem.acquire(timeout=0.2)
-                    # because of the timeout (makes cleaning up thread easier) we need to check how it timeodout
+                    # because of the timeout (makes cleaning up thread easier)
+                    # we need to check how it timed out
                     if got_tick:
                         self.tree.tick()
                 # otherwise we are in continous mode, tick the tree as normal!
                 else:
                     self.tree.tick()
 
-                time.sleep(self.state.get_tick_delay_ms())
+                time.sleep(self.state.get_tick_delay_ms() / 1000)
 
     # Hooks for CommandMessages
 

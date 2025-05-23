@@ -126,11 +126,19 @@ class TreeState():
         self.tick_current_tree = Value(c_bool, True)  # setting False will allow, stop_work / unloading
         self.pause_tree = Value(c_bool, True)  # start in paused state
 
-    def get_node_name(self):
-        return self.current_node.value.decode()
+    def get_node_name(self) -> Optional[str]:
+        """
+        Returns the name of the node that ended the current tick.  This will
+        be the "tip" of the tree, provided by py_trees
+        """
+        if self.current_node.value is not None:
+            return self.current_node.value.decode()
 
-    def get_tick_config(self):
-        return self.tick_config.value
+    def set_node_name(self, name: str) -> None:
+        self.current_node.value = name.encode()
+
+    def get_tick_config(self) -> TickConfiguration:
+        return getattr(TickConfiguration, TickConfiguration.Name(self.tick_config.value))
 
     def get_tick_delay_ms(self) -> int:
         return int(self.tick_delay_ms.value)
@@ -193,7 +201,7 @@ class TreeTicker(Worker):
                 mess_t=MessageType.MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE,
                 tree_name=self.tree.root.name,  # again, atm nothing is strictly holding these in line
                 tick_status=tick_state,
-                node_name=self.state.get_node_name(),  # TOOD: josh figure out how we're going to pipe this...
+                node_name=self.state.get_node_name(),
                 tick_config=self.state.get_tick_config(),
                 tick_delay_ms=self.state.get_tick_delay_ms()
             )
@@ -230,6 +238,8 @@ class TreeTicker(Worker):
                 else:
                     self.tree.tick()
 
+                # grab the last node before traversal reversal
+                self.state.set_node_name(getattr(self.tree.tip(), "name", ""))
                 time.sleep(self.state.get_tick_delay_ms() / 1000)
 
     # Hooks for CommandMessages

@@ -13,6 +13,7 @@ from multiprocessing.managers import BaseManager
 from pathlib import Path
 from typing import Optional
 
+from py_trees.common import Status
 from py_trees.console import read_single_keypress
 from py_trees.display import unicode_blackboard, unicode_tree
 from py_trees.trees import BehaviourTree
@@ -114,8 +115,10 @@ class TreeState():
         tick_delay_ms: int = 1000,
         tick_config: TickConfiguration = TickConfiguration.CONTINUOUS
     ):
-        # potentially best accesible through self.tree and not this....
+        # Trees are ticked in worker subprocess, must pass relevant information
+        # to the Ticker worker
         self.current_node = Value(c_char_p, b"")
+        self.current_status = Value(c_char_p, b"")  # Name of TickStatus enum
 
         # Consitutes a TickConfigurationMessage
         self.tick_delay_ms = Value(c_uint, tick_delay_ms)
@@ -136,6 +139,15 @@ class TreeState():
 
     def set_node_name(self, name: str) -> None:
         self.current_node.value = name.encode()
+
+    def get_root_status(self) -> TickStatus:
+        status_name = getattr(self.current_status, "value", b"").decode()
+        status = getattr(TickStatus, status_name)
+
+        return status
+
+    def set_root_status(self, status: Status) -> None:
+        self.current_status.value = status.name.encode()
 
     def get_tick_config(self) -> TickConfiguration:
         return getattr(TickConfiguration, TickConfiguration.Name(self.tick_config.value))
@@ -194,13 +206,10 @@ class TreeTicker(Worker):
         self.state = new_state
 
     def get_behavior_tree_update(self) -> BehaviorTreeUpdateMessage:
-        # translate py_trees enum right quick
-        tick_state = dict(TickStatus.items())[self.tree.root.status.value]
-
         mess = BehaviorTreeUpdateMessage(
                 mess_t=MessageType.MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE,
-                tree_name=self.tree.root.name,  # again, atm nothing is strictly holding these in line
-                tick_status=tick_state,
+                tree_name=self.tree.root.name,
+                tick_status=self.state.get_root_status(),
                 node_name=self.state.get_node_name(),
                 tick_config=self.state.get_tick_config(),
                 tick_delay_ms=self.state.get_tick_delay_ms()
@@ -240,6 +249,7 @@ class TreeTicker(Worker):
 
                 # grab the last node before traversal reversal
                 self.state.set_node_name(getattr(self.tree.tip(), "name", ""))
+                self.state.set_root_status(self.tree.root.status)
                 time.sleep(self.state.get_tick_delay_ms() / 1000)
 
     # Hooks for CommandMessages

@@ -39,6 +39,7 @@ def build_arg_parser(argparser=None):
 
     # get heartbeat
     sub = subparsers.add_parser("get_heartbeat")
+    sub.set_defaults(command="get_heartbeat")
 
     # load new tree
     load_new_tree_parser = subparsers.add_parser(

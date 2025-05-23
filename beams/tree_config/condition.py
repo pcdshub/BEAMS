@@ -81,6 +81,7 @@ class BoundedConditionItem(BaseConditionItem):
 @dataclass
 class AcknowledgeConditionItem(BaseItem):
     permisible_user_list: List[str] = field(default_factory=list)
+    unset_acknowledge_on_check: bool = True
 
     def get_tree(self) -> AckConditionNode:
-        return AckConditionNode(self.name, self.permisible_user_list)
+        return AckConditionNode(self.name, self.permisible_user_list, self.unset_acknowledge_on_check)

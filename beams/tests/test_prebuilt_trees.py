@@ -97,3 +97,31 @@ def test_wait_and_acknowledge(bt_cleaner):
     if node_to_ack is not None:
         node_to_ack.acknowledge_node("silke")
         assert node_to_ack.check_ack()
+
+
+def test_unacknowledge(bt_cleaner):
+    ack_cond_node = AcknowledgeConditionItem(
+        name="test ack node",
+        permisible_user_list=["wilhelm", "billhelm"]
+    )
+
+    root = ack_cond_node.get_tree()
+
+    root.acknowledge_node("wilhelm")
+
+    i = 0
+    while (root.status != py_trees.common.Status.SUCCESS and i < 2):
+        for n in root.tick():
+            i += 1
+            print(n)
+
+    assert (root.status == py_trees.common.Status.SUCCESS)
+
+    # tick to check again
+    i = 0
+    while (i < 2):
+        for n in root.tick():
+            i += 1
+            print(n)
+
+    assert (root.status == py_trees.common.Status.FAILURE)

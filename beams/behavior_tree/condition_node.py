@@ -32,11 +32,12 @@ Specialty Condition Node that waits for external programatic ACK to continue
 
 
 class AckConditionNode(py_trees.behaviour.Behaviour):
-    def __init__(self, name, permisible_user_list):
+    def __init__(self, name, permisible_user_list, unset_on_check):
         super().__init__(name)
         self.permisible_users: List[str] = permisible_user_list
         self.is_acknowledged = Value(c_bool, False)
         self.acknowleding_user = "NO USER"
+        self.unset_on_check = unset_on_check
 
     def acknowledge_node(self, user_name):
         if user_name in self.permisible_users:
@@ -47,7 +48,11 @@ class AckConditionNode(py_trees.behaviour.Behaviour):
             logger.debug(f"User: {user_name} failed to acknowledged node: {self.name}, not in permisible_user_list: {self.permisible_users}")
 
     def check_ack(self):
-        return self.is_acknowledged.value
+        return_value = self.is_acknowledged.value
+        if self.unset_on_check:
+            logger.debug(f"Ack node: {self.name} has been checked with value {return_value} and reset.")
+            self.is_acknowledged.value = False
+        return return_value
 
     def update(self):
         ack = self.check_ack()

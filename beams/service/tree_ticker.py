@@ -9,7 +9,9 @@ import time
 from ctypes import c_bool, c_char_p, c_uint
 from functools import partial
 from multiprocessing import Semaphore, Value
+from multiprocessing.managers import BaseManager
 from pathlib import Path
+from typing import Optional
 
 from py_trees.console import read_single_keypress
 from py_trees.display import unicode_blackboard, unicode_tree
@@ -65,9 +67,6 @@ def tick_tree(tree: BehaviourTree, interactive: bool, tick_delay: float):
         time.sleep(tick_delay)
 
 
-'''one shot', will only ever load in one tree from file path '''
-
-
 def run_from_file_tree_tick_work_func(
     filepath: str,
     tick_count: int,
@@ -77,6 +76,7 @@ def run_from_file_tree_tick_work_func(
     show_tree: bool,
     show_blackboard: bool,
 ):
+    """one shot', will only ever load in one tree from file path"""
     logger.info(f"Running behavior tree at {filepath}")
     # grab config
     fp = Path(filepath).resolve()
@@ -109,11 +109,19 @@ def run_from_file_tree_tick_work_func(
 
 
 class TreeState():
-    def __init__(self, tick_delay_ms: c_uint, tick_config: TickConfiguration):
-        self.current_node = Value(c_char_p, b"")   # potentially best accesible through self.tree and not this....
+    def __init__(
+        self,
+        tick_delay_ms: int = 1000,
+        tick_config: TickConfiguration = TickConfiguration.CONTINUOUS
+    ):
+        # potentially best accesible through self.tree and not this....
+        self.current_node = Value(c_char_p, b"")
+
         # Consitutes a TickConfigurationMessage
         self.tick_delay_ms = Value(c_uint, tick_delay_ms)
-        self.tick_config = Value(c_uint, tick_config)  # don't forget protobuf enums are just int wrappers
+        # don't forget protobuf enums are just int wrappers
+        self.tick_config = Value(c_uint, tick_config)
+
         # Control Flow Variables of Should I and How Should I tick this tree
         self.tick_current_tree = Value(c_bool, True)  # setting False will allow, stop_work / unloading
         self.pause_tree = Value(c_bool, True)  # start in paused state
@@ -124,28 +132,25 @@ class TreeState():
     def get_tick_config(self):
         return self.tick_config.value
 
-    def get_tick_delay_ms(self):
-        return self.tick_delay_ms.value
+    def get_tick_delay_ms(self) -> int:
+        return int(self.tick_delay_ms.value)
 
-    def set_pause_tree(self, value):
+    def set_pause_tree(self, value: bool):
         logger.debug(f"setting pause tree on thread: {os.getpid()}")
         self.pause_tree.value = value
 
-    def get_pause_tree(self):
+    def get_pause_tree(self) -> bool:
         logger.debug(f"checking pause tree on thread: {os.getpid()}")
         return self.pause_tree.value
 
-    def get_tick_current_tree(self):
+    def get_tick_current_tree(self) -> bool:
         return self.tick_current_tree.value
-
-    def get_tick_interactive(self):
-        return self.tick_config.value
 
 
 class TreeTicker(Worker):
     def __init__(self, filepath: str,
-                 init_tree_state: TreeState = None,
-                 sync_man=None):
+                 init_tree_state: Optional[TreeState] = None,
+                 sync_man: Optional[BaseManager] = None):
         super().__init__("TreeTicker")
         self.fp = filepath
 
@@ -165,6 +170,8 @@ class TreeTicker(Worker):
             self.state = init_tree_state
 
         # don't forget to null check this
+        # This is currently not used.  Presumably we would need to expose
+        # the port and address for clients to connect to this.
         self.sync_man = sync_man
 
         self.tick_sem = Semaphore(value=0)
@@ -211,7 +218,7 @@ class TreeTicker(Worker):
                     time.sleep(self.state.get_tick_delay_ms() / 1000)
 
                 # If we are in interactive mode
-                if self.state.get_tick_interactive() == TickConfiguration.INTERACTIVE:
+                if self.state.get_tick_config() == TickConfiguration.INTERACTIVE:
                     # wait till the semaphore gets incremented, this is the IPC
                     # method to communicate a tick_interactive
                     got_tick = self.tick_sem.acquire(timeout=0.2)
@@ -256,7 +263,8 @@ class TreeTicker(Worker):
         node = None
         # NOTE: (josh & zach) may well be a more effecient way to iterate through the tree
         for i in self.tree.root.iterate():
-            logger.debug(f"Checking against node: {i.name}")  # note this enumeration for very large trees may be spammy
+            # note this enumeration for very large trees may be spammy
+            logger.debug(f"Checking against node: {i.name}")
             if (i.name == node_name and isinstance(i, AckConditionNode)):
                 node = i
                 node.acknowledge_node(user_name)

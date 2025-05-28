@@ -2,16 +2,37 @@ from __future__ import annotations
 
 import logging
 import os
+import subprocess
 import sys
+import time
 from contextlib import contextmanager
 from copy import copy
+from pathlib import Path
+from typing import Callable, Generator
 
 import py_trees.logging
 import pytest
 from py_trees.behaviour import Behaviour
 from py_trees.trees import BehaviourTree
 
+from beams.bin.service_main import BeamsService
 from beams.logging import setup_logging
+from beams.service.rpc_client import RPCClient
+
+
+def pytest_configure():
+    """
+    Regenerate the grpc python files from protos.  This ensures generated
+    files exist and are up-to-date for the test suite.  This is itself a test,
+    as if rpc files are generated incorrectly, the test suite will fail to
+    gather the tests due to import errors.
+
+    This is a specially named function that gets run before pytest gathers the
+    tests.  This cannot happen in a fixture, since some tests may try to import
+    from the generated python files.
+    """
+    root_dir = Path(__file__).parent.parent.parent
+    subprocess.run(args=["make", "gen_grpc"], cwd=root_dir, check=True)
 
 
 @pytest.fixture(autouse=True)
@@ -91,3 +112,50 @@ def restore_logging():
     prev_handlers = copy(logging.root.handlers)
     yield
     logging.root.handlers = prev_handlers
+
+
+@pytest.fixture(scope="function")
+def rpc_server() -> Generator[BeamsService, None, None]:
+    handler = BeamsService()
+    handler.start_work()
+
+    yield handler
+
+    # blocking until handler is joined
+    handler.join_all_trees()
+    handler.stop_work()
+
+
+@pytest.fixture(scope="function")
+def rpc_client(rpc_server):
+    """
+    Creates a RPCClient instance, and also starts the a server process to back it
+    """
+    client = RPCClient()
+
+    assert rpc_server.work_proc.is_alive
+
+    def try_get_heartbeat():
+        try:
+            client.get_heartbeat()
+        except Exception:
+            return False
+        else:
+            return True
+
+    # Wait until the rpc server is ready to receive responses
+    # I actually don't know what to wait on, but too fast gives 111 errors
+    wait_until(try_get_heartbeat)
+
+    return client
+
+
+def wait_until(condition: Callable[[], bool], timeout=5, polling_period=0.5):
+    start_time = time.monotonic()
+    while (time.monotonic() - start_time) < timeout:
+        if condition():
+            return
+
+        time.sleep(polling_period)
+
+    raise TimeoutError(f"Condition failed to resolve within timeout ({timeout} s)")

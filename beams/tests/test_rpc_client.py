@@ -71,7 +71,7 @@ def test_find_config(beams_cfg: str):
 @patch("beams.service.rpc_client.BEAMS_rpcStub", MockStub)
 def test_heartbeat(client: RPCClient):
     client.get_heartbeat()
-    assert client.response == "heartbeat requested"
+    assert client.last_response == "heartbeat requested"
 
 
 @patch("beams.service.rpc_client.BEAMS_rpcStub", MockStub)
@@ -87,8 +87,8 @@ def test_heartbeat(client: RPCClient):
 def test_command_no_stub(client: RPCClient, command: str, kwargs):
     method = getattr(client, f"{command.lower()}")
     method(**kwargs)
-    assert "queued" in client.response
-    assert "command" in client.response
+    assert "queued" in client.last_response
+    assert "command" in client.last_response
 
 
 @patch("beams.service.rpc_client.BEAMS_rpcStub", MockStub)
@@ -105,5 +105,5 @@ def test_command_with_stub(client: RPCClient, command: str, kwargs):
     method = getattr(client, f"{command.lower()}")
     stub = MockStub()
     method(stub=stub, **kwargs)
-    assert "queued" in client.response
-    assert "command" in client.response
+    assert "queued" in client.last_response
+    assert "command" in client.last_response

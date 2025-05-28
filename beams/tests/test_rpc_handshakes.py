@@ -44,7 +44,7 @@ def test_load_run_continuous_tree(rpc_client: RPCClient):
     # tree name taken from json, not our setting
     resp1 = rpc_client.get_heartbeat()
     assert resp1.behavior_tree_update[0].tree_name == "Eternal Guard"
-    assert resp1.behavior_tree_update[0].tick_status is not TickStatus.INVALID
+    wait_until(partial(assert_valid_tick_status_at_idx, rpc_client, 0))
 
 
 def test_load_interactive_tree(rpc_client: RPCClient):

@@ -124,7 +124,7 @@ class RPCClient:
         if env_path:
             logger.debug("Found $BEAMS_CFG specification for Client "
                          "configuration at %s", env_path)
-            return Path(env_path).expanduser().resolve()
+            return Path(env_path)
         # Search in the current directory and home directory
         else:
             config_dirs = [os.environ.get('XDG_CONFIG_HOME', "."),
@@ -136,7 +136,7 @@ class RPCClient:
 
                     if os.path.exists(full_path):
                         logger.debug("Found configuration file at %r", full_path)
-                        return Path(full_path).expanduser().resolve()
+                        return Path(full_path)
         # If found nothing
         raise OSError("No beams configuration file found. Check BEAMS_CFG.")
 

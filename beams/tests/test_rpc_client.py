@@ -61,11 +61,11 @@ def test_from_cfg(beams_cfg: str):
 
 
 def test_find_config(beams_cfg: str):
-    assert beams_cfg == RPCClient.find_config()
+    assert beams_cfg == str(RPCClient.find_config())
 
     # explicit BEAMS_CFG env var supercedes XDG_CONFIG_HOME
     os.environ['BEAMS_CFG'] = 'other/cfg'
-    assert 'other/cfg' == RPCClient.find_config()
+    assert 'other/cfg' == str(RPCClient.find_config())
 
 
 @patch("beams.service.rpc_client.BEAMS_rpcStub", MockStub)

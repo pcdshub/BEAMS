@@ -118,7 +118,7 @@ class TreeState():
         # Trees are ticked in worker subprocess, must pass relevant information
         # to the Ticker worker
         self.current_node = Value(c_char_p, b"")
-        self.current_status = Value(c_char_p, b"")  # Name of TickStatus enum
+        self.current_status = Value(c_char_p, b"INVALID")  # TickStatus enum name
 
         # Consitutes a TickConfigurationMessage
         self.tick_delay_ms = Value(c_uint, tick_delay_ms)
@@ -126,7 +126,8 @@ class TreeState():
         self.tick_config = Value(c_uint, tick_config)
 
         # Control Flow Variables of Should I and How Should I tick this tree
-        self.tick_current_tree = Value(c_bool, True)  # setting False will allow, stop_work / unloading
+        # setting False will allow, stop_work / unloading
+        self.tick_current_tree = Value(c_bool, True)
         self.pause_tree = Value(c_bool, True)  # start in paused state
 
     def get_node_name(self) -> Optional[str]:
@@ -141,9 +142,8 @@ class TreeState():
         self.current_node.value = name.encode()
 
     def get_root_status(self) -> TickStatus:
-        status_name = getattr(self.current_status, "value", b"").decode()
+        status_name = getattr(self.current_status, "value", b"INVALID").decode()
         status = getattr(TickStatus, status_name)
-
         return status
 
     def set_root_status(self, status: Status) -> None:

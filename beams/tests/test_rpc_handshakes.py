@@ -1,24 +1,70 @@
-import time
+from functools import partial
+from pathlib import Path
 
+from beams.service.remote_calls.behavior_tree_pb2 import TickStatus
 from beams.service.remote_calls.generic_message_pb2 import MessageType
+from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
 from beams.service.rpc_client import RPCClient
-from beams.service.rpc_handler import RPCHandler
+from beams.tests.conftest import wait_until
 
 
-class TestRPC:
-    def test_simple(self):
-        p = RPCHandler()
-        p.start_work()
+def assert_heartbeat_has_n_trees(client: RPCClient, n_entries) -> bool:
+    resp1 = client.get_heartbeat()
+    return len(resp1.behavior_tree_update) == n_entries
 
-        time.sleep(1)
 
-        c = RPCClient()
-        c.run(command="get_heartbeat")
+def assert_valid_tick_status_at_idx(client: RPCClient, tree_idx: int):
+    curr_status = client.get_heartbeat().behavior_tree_update[tree_idx].tick_status
+    return curr_status != TickStatus.INVALID
 
-        p.stop_work()
 
-        time_sec = time.time()
+def test_heartbeat(rpc_client: RPCClient):
+    resp = rpc_client.run(command="get_heartbeat")
 
-        assert c.response.mess_t == MessageType.MESSAGE_TYPE_HEARTBEAT
-        assert (c.response.reply_timestamp.ToSeconds() - time_sec) < 1
-        time.sleep(.1)
+    assert isinstance(resp, HeartBeatReply)
+    assert resp.mess_t == MessageType.MESSAGE_TYPE_HEARTBEAT
+
+
+def test_load_run_continuous_tree(rpc_client: RPCClient):
+    tree_path = Path(__file__).parent / "artifacts" / "eternal_guard.json"
+    rpc_client.load_new_tree(
+        new_tree_filepath=str(tree_path),
+        tick_config="CONTINUOUS",
+        tick_delay_ms=100,
+        tree_name="my_tree"
+    )
+
+    resp0 = rpc_client.get_heartbeat()
+    assert len(resp0.behavior_tree_update) == 0
+    # tree name taken from json, not our setting
+
+    rpc_client.start_tree("my_tree")
+
+    wait_until(partial(assert_heartbeat_has_n_trees, rpc_client, 1))
+    # tree name taken from json, not our setting
+    resp1 = rpc_client.get_heartbeat()
+    assert resp1.behavior_tree_update[0].tree_name == "Eternal Guard"
+    assert resp1.behavior_tree_update[0].tick_status is not TickStatus.INVALID
+
+
+def test_load_interactive_tree(rpc_client: RPCClient):
+    tree_path = Path(__file__).parent / "artifacts" / "eternal_guard.json"
+    rpc_client.load_new_tree(
+        new_tree_filepath=str(tree_path),
+        tick_config="INTERACTIVE",
+        tick_delay_ms=10,
+        tree_name="my_tree"
+    )
+
+    resp0 = rpc_client.get_heartbeat()
+    assert len(resp0.behavior_tree_update) == 0
+
+    # start tree, but don't tick
+    rpc_client.start_tree("my_tree")
+    wait_until(partial(assert_heartbeat_has_n_trees, rpc_client, 1))
+    resp0 = rpc_client.get_heartbeat()
+    assert resp0.behavior_tree_update[0].tick_status == TickStatus.INVALID
+
+    # tick tree
+    rpc_client.tick_tree("my_tree")
+    wait_until(partial(assert_valid_tick_status_at_idx, rpc_client, 0))

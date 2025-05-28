@@ -212,7 +212,6 @@ class RPCClient:
         cmd_msg.tree_name = tree_name
         return cmd_msg
 
-    @staticmethod
     def with_server_stub(func):
         """
         Create rpc stub inside the grpc context as a decorator for commands

@@ -19,8 +19,9 @@ logger = logging.getLogger(__name__)
 
 
 class RPCHandler(BEAMS_rpcServicer, Worker):
-    def __init__(self, sync_manager: Manager = None, port=50051):
-        # GRPC server launching things from docs: https://grpc.io/docs/languages/python/basics/#starting-the-server
+    def __init__(self, sync_manager: Manager, port=50051):
+        # GRPC server launching things from docs:
+        # https://grpc.io/docs/languages/python/basics/#starting-the-server
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=10)
         self.server = grpc.server(self.thread_pool)
         self.server_port = port
@@ -121,13 +122,3 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         while self.do_work.value:
             time.sleep(0.1)
         logger.debug("RPCHandler work_func exitted")
-
-
-if __name__ == "__main__":
-    # TODO: pull this out into its own entrypoint for testing purposes
-    logging.basicConfig()
-    p = RPCHandler()
-    p.start_work()
-
-    time.sleep(100)  # callout magic number for debugging grave
-    p.stop_work()

@@ -161,9 +161,8 @@ class RPCClient:
             If an unknown command is provided
         """
         if command.upper() == "GET_HEARTBEAT":
-            self.get_heartbeat()
-            logger.debug(self.last_response)
-            return self.last_response
+            response = self.get_heartbeat()
+            return response
 
         command = getattr(CommandType, command.upper())
         if command not in CommandType.values():
@@ -187,7 +186,6 @@ class RPCClient:
                 node_name=kwargs["node_name"], user=kwargs["user"],
             )
 
-        logger.debug(self.last_response)
         return self.last_response
 
     def construct_base_msg(self, command: CommandType, tree_name: str) -> CommandMessage:
@@ -247,6 +245,7 @@ class RPCClient:
             the rpc stub used to send messages, by default None
         """
         self.last_response = stub.request_heartbeat(Empty())
+        logger.debug(self.last_response)
         return self.last_response
 
     @with_server_stub
@@ -270,6 +269,7 @@ class RPCClient:
         """
         cmd_msg = self.construct_base_msg(CommandType.START_TREE, tree_name)
         self.last_response = stub.enqueue_command(cmd_msg)
+        logger.debug(self.last_response)
         return self.last_response
 
     @with_server_stub
@@ -293,6 +293,7 @@ class RPCClient:
         """
         cmd_msg = self.construct_base_msg(CommandType.TICK_TREE, tree_name)
         self.last_response = stub.enqueue_command(cmd_msg)
+        logger.debug(self.last_response)
         return self.last_response
 
     @with_server_stub
@@ -316,6 +317,7 @@ class RPCClient:
         """
         cmd_msg = self.construct_base_msg(CommandType.PAUSE_TREE, tree_name)
         self.last_response = stub.enqueue_command(cmd_msg)
+        logger.debug(self.last_response)
         return self.last_response
 
     @with_server_stub
@@ -339,6 +341,7 @@ class RPCClient:
         """
         cmd_msg = self.construct_base_msg(CommandType.UNLOAD_TREE, tree_name)
         self.last_response = stub.enqueue_command(cmd_msg)
+        logger.debug(self.last_response)
         return self.last_response
 
     @with_server_stub
@@ -381,6 +384,7 @@ class RPCClient:
 
         # persist response
         self.last_response = stub.enqueue_command(cmd_msg)
+        logger.debug(self.last_response)
         return self.last_response
 
     @with_server_stub
@@ -421,4 +425,5 @@ class RPCClient:
 
         # persist response
         self.last_response = stub.enqueue_command(cmd_msg)
+        logger.debug(self.last_response)
         return self.last_response

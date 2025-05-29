@@ -13,6 +13,8 @@ Bugfixes
 --------
 - Adjust tree ticker service to interpret tick delay as ms, as advertised.
 - Ensure TickStatus is always valid in
+- Fix the `beams client get_heartbeat` command, which previously didn't pass
+  its command name to the RPCClient properly
 
 Maintenance
 -----------

@@ -2,7 +2,7 @@ import logging
 import time
 from concurrent import futures
 from multiprocessing import Manager, Queue, Semaphore
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import grpc
 
@@ -13,13 +13,15 @@ from beams.service.remote_calls.behavior_tree_pb2 import \
     BehaviorTreeUpdateMessage
 from beams.service.remote_calls.generic_message_pb2 import MessageType
 from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
+from beams.service.tree_ticker import TreeTicker
 
 logger = logging.getLogger(__name__)
 
 
 class RPCHandler(BEAMS_rpcServicer, Worker):
-    def __init__(self, sync_manager: Manager = None, port=50051):
-        # GRPC server launching things from docs: https://grpc.io/docs/languages/python/basics/#starting-the-server
+    def __init__(self, sync_manager: Manager, port=50051):
+        # GRPC server launching things from docs:
+        # https://grpc.io/docs/languages/python/basics/#starting-the-server
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=10)
         self.server = grpc.server(self.thread_pool)
         self.server_port = port
@@ -44,15 +46,17 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
 
     # NOTE: these could also live and work in a process spawned by beams service..
     # returns a single bt update as a list...
-    def attempt_to_get_tree_update(self, tree_name: str) -> Optional[List[BehaviorTreeUpdateMessage]]:
+    def attempt_to_get_tree_update(
+        self, tree_name: str
+    ) -> Optional[List[BehaviorTreeUpdateMessage]]:
         if self.sync_man is None:  # for testing modularity
             return None
         with self.sync_man as my_boy:
-            tree_dict = my_boy.get_tree_dict()
+            tree_dict: Dict[str, TreeTicker] = my_boy.get_tree_dict()
             if tree_name in tree_dict.keys():
                 return [tree_dict.get(tree_name).get_behavior_tree_update()]
             else:
-                logger.error(f"Unable to find tree of name {tree_name} currently being tickde")
+                logger.error(f"Unable to find tree of name {tree_name} currently being ticked")
                 return None
 
     def get_all_tree_updates(self) -> Optional[List[BehaviorTreeUpdateMessage]]:
@@ -60,7 +64,7 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             return None
 
         with self.sync_man as your_boy:
-            tree_dict = your_boy.get_tree_dict()
+            tree_dict: Dict[str, TreeTicker] = your_boy.get_tree_dict()
             # if dictionary empty return none
             if len(tree_dict.items()) == 0:
                 return None
@@ -92,9 +96,11 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             return hbeat_message
 
     def request_heartbeat(self, request, context) -> HeartBeatReply:
-        # assumption that hitting this service endpoint means you want to know ALL the trees this service is currently ticking
+        # assumption that hitting this service endpoint means you want to know
+        # ALL the trees this service is currently ticking
 
-        # TODO: it is placing like here that I am not happy with the distance of the py_trees vs GRPC object, reflect on this
+        # TODO: it is placing like here that I am not happy with the distance
+        # of the py_trees vs GRPC object, reflect on this
         # for example: how could we keep thee py_tree treename and this one aligned?
         updates = self.get_all_tree_updates()
 
@@ -116,13 +122,3 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         while self.do_work.value:
             time.sleep(0.1)
         logger.debug("RPCHandler work_func exitted")
-
-
-if __name__ == "__main__":
-    # TODO: pull this out into its own entrypoint for testing purposes
-    logging.basicConfig()
-    p = RPCHandler()
-    p.start_work()
-
-    time.sleep(100)  # callout magic number for debugging grave
-    p.stop_work()

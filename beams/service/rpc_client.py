@@ -17,6 +17,7 @@ from beams.service.remote_calls.command_pb2 import (AckNodeMessage,
                                                     LoadNewTreeMessage,
                                                     TickConfigurationMessage)
 from beams.service.remote_calls.generic_message_pb2 import Empty, MessageType
+from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
 
 logger = logging.getLogger(__name__)
 
@@ -32,12 +33,11 @@ class RPCClient:
 
     def __init__(
         self,
-        *args,
         address: str = "localhost",
         port: int = 50051,
-        **kwargs
     ):
-        self.response = None
+        # Initialize with nonsense reply, techinically invalid
+        self.last_response: HeartBeatReply = HeartBeatReply()
         self.server_address = f"{address}:{port}"
 
     @classmethod
@@ -77,10 +77,13 @@ class RPCClient:
         cfg_parser = configparser.ConfigParser()
         cfg_parser.read(cfg)
         logger.debug(f"Loading configuration file at ({cfg})")
-        return cls.from_parsed_config(cfg_parser, cfg)
+        return cls.from_parsed_config(cfg_parser)
 
     @classmethod
-    def from_parsed_config(cls, cfg_parser: configparser.ConfigParser, cfg_path=""):
+    def from_parsed_config(
+        cls,
+        cfg_parser: configparser.ConfigParser,
+    ):
         """
         Initializes Client using a ConfigParser that has already read in a config.
         This method enables the caller to edit a config after parsing but before
@@ -108,7 +111,7 @@ class RPCClient:
 
         Returns
         -------
-        path : str
+        Path
             Absolute path to the configuration file
 
         Raises
@@ -117,11 +120,11 @@ class RPCClient:
             If no configuration file can be found by the described methodology
         """
         # Point to with an environment variable
-        if os.environ.get('BEAMS_CFG', False):
-            beams_cfg = os.environ.get('BEAMS_CFG')
+        env_path = os.environ.get('BEAMS_CFG', "")
+        if env_path:
             logger.debug("Found $BEAMS_CFG specification for Client "
-                         "configuration at %s", beams_cfg)
-            return beams_cfg
+                         "configuration at %s", env_path)
+            return Path(env_path)
         # Search in the current directory and home directory
         else:
             config_dirs = [os.environ.get('XDG_CONFIG_HOME', "."),
@@ -133,11 +136,11 @@ class RPCClient:
 
                     if os.path.exists(full_path):
                         logger.debug("Found configuration file at %r", full_path)
-                        return full_path
+                        return Path(full_path)
         # If found nothing
         raise OSError("No beams configuration file found. Check BEAMS_CFG.")
 
-    def run(self, command: str, **kwargs):
+    def run(self, command: str, **kwargs) -> HeartBeatReply:
         """
         Run a command
 
@@ -158,9 +161,8 @@ class RPCClient:
             If an unknown command is provided
         """
         if command.upper() == "GET_HEARTBEAT":
-            self.get_heartbeat()
-            logger.debug(self.response)
-            return
+            response = self.get_heartbeat()
+            return response
 
         command = getattr(CommandType, command.upper())
         if command not in CommandType.values():
@@ -178,21 +180,13 @@ class RPCClient:
                 tick_config=kwargs["tick_mode"],
                 tick_delay_ms=kwargs["tick_delay_ms"]
             )
-        elif command == CommandType.LOAD_NEW_TREE:
-            self.load_new_tree(
-                tree_name=tree_name,
-                new_tree_filepath=kwargs["new_tree_filepath"],
-                tick_config=kwargs["tick_mode"],
-                tick_delay_ms=kwargs["tick_delay_ms"],
-            )
         elif command == CommandType.ACK_NODE:
             self.ack_node(
                 tree_name=tree_name,
                 node_name=kwargs["node_name"], user=kwargs["user"],
             )
 
-        print(self.response)
-        logger.debug(self.response)
+        return self.last_response
 
     def construct_base_msg(self, command: CommandType, tree_name: str) -> CommandMessage:
         """
@@ -238,7 +232,7 @@ class RPCClient:
         return wrapper
 
     @with_server_stub
-    def get_heartbeat(self, stub: Optional[BEAMS_rpcStub] = None) -> None:
+    def get_heartbeat(self, stub: Optional[BEAMS_rpcStub] = None) -> HeartBeatReply:
         """
         Get service heartbeat.  Currently this includes information on every
         tree running on the service.
@@ -250,10 +244,16 @@ class RPCClient:
         stub : Optional[BEAMS_rpcStub], optional
             the rpc stub used to send messages, by default None
         """
-        self.response = stub.request_heartbeat(Empty())
+        self.last_response = stub.request_heartbeat(Empty())
+        logger.debug(self.last_response)
+        return self.last_response
 
     @with_server_stub
-    def start_tree(self, tree_name: str, stub: Optional[BEAMS_rpcStub] = None) -> None:
+    def start_tree(
+        self,
+        tree_name: str,
+        stub: Optional[BEAMS_rpcStub] = None
+    ) -> HeartBeatReply:
         """
         Start the tree with `tree_name`.  The tree must already be loaded onto
         the service.
@@ -268,10 +268,16 @@ class RPCClient:
             the rpc stub used to send messages, by default None
         """
         cmd_msg = self.construct_base_msg(CommandType.START_TREE, tree_name)
-        self.response = stub.enqueue_command(cmd_msg)
+        self.last_response = stub.enqueue_command(cmd_msg)
+        logger.debug(self.last_response)
+        return self.last_response
 
     @with_server_stub
-    def tick_tree(self, tree_name: str, stub: Optional[BEAMS_rpcStub] = None) -> None:
+    def tick_tree(
+        self,
+        tree_name: str,
+        stub: Optional[BEAMS_rpcStub] = None
+    ) -> HeartBeatReply:
         """
         Tick the tree with `tree_name`.  The tree must already be loaded onto
         the service.
@@ -286,10 +292,16 @@ class RPCClient:
             the rpc stub used to send messages, by default None
         """
         cmd_msg = self.construct_base_msg(CommandType.TICK_TREE, tree_name)
-        self.response = stub.enqueue_command(cmd_msg)
+        self.last_response = stub.enqueue_command(cmd_msg)
+        logger.debug(self.last_response)
+        return self.last_response
 
     @with_server_stub
-    def pause_tree(self, tree_name: str, stub: Optional[BEAMS_rpcStub] = None) -> None:
+    def pause_tree(
+        self,
+        tree_name: str,
+        stub: Optional[BEAMS_rpcStub] = None
+    ) -> HeartBeatReply:
         """
         Pause the tree with `tree_name`.  The tree must already be loaded onto
         the service.
@@ -304,10 +316,16 @@ class RPCClient:
             the rpc stub used to send messages, by default None
         """
         cmd_msg = self.construct_base_msg(CommandType.PAUSE_TREE, tree_name)
-        self.response = stub.enqueue_command(cmd_msg)
+        self.last_response = stub.enqueue_command(cmd_msg)
+        logger.debug(self.last_response)
+        return self.last_response
 
     @with_server_stub
-    def unload_tree(self, tree_name: str, stub: Optional[BEAMS_rpcStub] = None) -> None:
+    def unload_tree(
+        self,
+        tree_name: str,
+        stub: Optional[BEAMS_rpcStub] = None
+    ) -> HeartBeatReply:
         """
         Unload the tree with `tree_name`.  The tree must already be loaded onto
         the service.
@@ -322,7 +340,9 @@ class RPCClient:
             the rpc stub used to send messages, by default None
         """
         cmd_msg = self.construct_base_msg(CommandType.UNLOAD_TREE, tree_name)
-        self.response = stub.enqueue_command(cmd_msg)
+        self.last_response = stub.enqueue_command(cmd_msg)
+        logger.debug(self.last_response)
+        return self.last_response
 
     @with_server_stub
     def load_new_tree(
@@ -332,7 +352,7 @@ class RPCClient:
         tick_config: str,
         tick_delay_ms: int,
         stub: Optional[BEAMS_rpcStub] = None,
-    ) -> None:
+    ) -> HeartBeatReply:
         """
         Load a new tree into the service.  Does not start the tree automatically.
 
@@ -363,7 +383,9 @@ class RPCClient:
         cmd_msg.load_new_tree.CopyFrom(load_new_tree_mesg)
 
         # persist response
-        self.response = stub.enqueue_command(cmd_msg)
+        self.last_response = stub.enqueue_command(cmd_msg)
+        logger.debug(self.last_response)
+        return self.last_response
 
     @with_server_stub
     def ack_node(
@@ -372,7 +394,7 @@ class RPCClient:
         node_name: str,
         user: str,
         stub: Optional[BEAMS_rpcStub] = None,
-    ) -> None:
+    ) -> HeartBeatReply:
         """
         Acknowledge a node in a tree.
 
@@ -388,6 +410,11 @@ class RPCClient:
             User name requesting acknowledgement
         stub : Optional[BEAMS_rpcStub], optional
             the rpc stub used to send messages, by default None
+
+        Returns
+        -------
+        HeartBeatReply
+
         """
         cmd_msg = self.construct_base_msg(CommandType.ACK_NODE, tree_name)
         # TODO: grab user from kerberos?  Verify that user is who they say they are?
@@ -397,4 +424,6 @@ class RPCClient:
         cmd_msg.ack_node.CopyFrom(ack_node_mess)
 
         # persist response
-        self.response = stub.enqueue_command(cmd_msg)
+        self.last_response = stub.enqueue_command(cmd_msg)
+        logger.debug(self.last_response)
+        return self.last_response

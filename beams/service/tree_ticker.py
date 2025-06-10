@@ -23,7 +23,7 @@ from beams.behavior_tree.condition_node import AckConditionNode
 from beams.logging import LoggingVisitor
 from beams.service.helpers.worker import Worker
 from beams.service.remote_calls.behavior_tree_pb2 import (
-    BehaviorTreeUpdateMessage, TickConfiguration, TickStatus)
+    BehaviorTreeUpdateMessage, TickConfiguration, TickStatus, TreeStatus)
 from beams.service.remote_calls.generic_message_pb2 import MessageType
 from beams.tree_config import get_tree_from_path
 
@@ -128,7 +128,7 @@ class TreeState():
         # Control Flow Variables of Should I and How Should I tick this tree
         # setting False will allow, stop_work / unloading
         self.tick_current_tree = Value(c_bool, True)
-        self.pause_tree = Value(c_bool, True)  # start in paused state
+        self.tree_status = Value(c_char_p, b"IDLE")  # start in paused state
 
     def get_node_name(self) -> Optional[str]:
         """
@@ -157,14 +157,26 @@ class TreeState():
 
     def set_pause_tree(self, value: bool):
         logger.debug(f"setting pause tree on thread: {os.getpid()}")
-        self.pause_tree.value = value
+        if value:
+            self.tree_status.value = "IDLE".encode()
+        else:
+            self.tree_status.value = "TICKING".encode()
 
     def get_pause_tree(self) -> bool:
         logger.debug(f"checking pause tree on thread: {os.getpid()}")
-        return self.pause_tree.value
+        tree_status = getattr(self.tree_status, "value", b"ERROR").decode()
+        return tree_status == "IDLE"
 
     def get_tick_current_tree(self) -> bool:
         return self.tick_current_tree.value
+
+    def get_tree_status(self) -> TreeStatus:
+        tree_status_name = getattr(self.tree_status, "value", b"ERROR").decode()
+        status = getattr(TreeStatus, tree_status_name)
+        return status
+
+    def set_tree_status(self, status: TreeStatus) -> None:
+        self.tree_status.value = TreeStatus.Name(status).encode()
 
 
 class TreeTicker(Worker):
@@ -212,7 +224,8 @@ class TreeTicker(Worker):
                 tick_status=self.state.get_root_status(),
                 node_name=self.state.get_node_name(),
                 tick_config=self.state.get_tick_config(),
-                tick_delay_ms=self.state.get_tick_delay_ms()
+                tick_delay_ms=self.state.get_tick_delay_ms(),
+                tree_status=self.state.get_tree_status(),
             )
 
         return mess
@@ -232,6 +245,7 @@ class TreeTicker(Worker):
             while (self.state.get_tick_current_tree()):
                 while (self.state.get_pause_tree()):
                     # reusing this here.... could use a semaphore...
+                    self.state.set_tree_status(TreeStatus.IDLE)
                     time.sleep(self.state.get_tick_delay_ms() / 1000)
 
                 # If we are in interactive mode
@@ -239,12 +253,17 @@ class TreeTicker(Worker):
                     # wait till the semaphore gets incremented, this is the IPC
                     # method to communicate a tick_interactive
                     got_tick = self.tick_sem.acquire(timeout=0.2)
+
                     # because of the timeout (makes cleaning up thread easier)
                     # we need to check how it timed out
                     if got_tick:
+                        self.state.set_tree_status(TreeStatus.TICKING)
                         self.tree.tick()
+                    else:
+                        self.state.set_tree_status(TreeStatus.WAITING_ACK)
                 # otherwise we are in continous mode, tick the tree as normal!
                 else:
+                    self.state.set_tree_status(TreeStatus.TICKING)
                     self.tree.tick()
 
                 # grab the last node before traversal reversal

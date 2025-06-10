@@ -4,6 +4,7 @@ import "beams/service/remote_calls/generic_message.proto"; // MESSAGE_TYPE_BEHAV
 
 /* Behavior Tree Update related fields */
 
+// Names must match py_trees.common.Status fields precisely
 enum TickStatus {
   INVALID = 0;
   RUNNING = 1;
@@ -17,6 +18,13 @@ enum TickConfiguration {
   CONTINUOUS = 2;
 }
 
+enum TreeStatus {
+  IDLE = 0;
+  TICKING = 1;
+  WAITING_ACK = 2;
+  ERROR = 3;
+}
+
 message BehaviorTreeUpdateMessage {
   MessageType mess_t = 1; // MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE
   string tree_name = 2;
@@ -24,4 +32,5 @@ message BehaviorTreeUpdateMessage {
   TickStatus tick_status = 4;
   TickConfiguration tick_config= 5;
   int32 tick_delay_ms = 6;
+  TreeStatus tree_status = 7;
 }

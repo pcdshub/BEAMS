@@ -66,7 +66,7 @@ class BinaryConditionItem(BaseConditionItem):
 
 @dataclass
 class BoundedConditionItem(BaseConditionItem):
-    # TODO: convinience members such as "symettric bounds", "relative tolerance", etc
+    # TODO: convinience members such as "symetric bounds", "relative tolerance", etc
     lower_bound: BaseValue = field(default_factory=lambda: FixedValue(0))
     upper_bound: BaseValue = field(default_factory=lambda: FixedValue(0))
     value: BaseValue = field(default_factory=lambda: FixedValue(0))
@@ -84,3 +84,12 @@ class AcknowledgeConditionItem(BaseItem):
 
     def get_tree(self) -> AckConditionNode:
         return AckConditionNode(self.name, self.permisible_user_list)
+
+
+# Add items here if they should be made available in the GUI
+_supported_items = [
+    DummyConditionItem,
+    BinaryConditionItem,
+    BoundedConditionItem,
+    AcknowledgeConditionItem,
+]

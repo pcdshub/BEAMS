@@ -50,3 +50,10 @@ class UseCheckConditionItem(BaseConditionItem):
     If used in any other context the tree will not be constructable.
     """
     ...
+
+
+# Add items here if they should be made available in the GUI
+_supported_items = [
+    CheckAndDoItem,
+    UseCheckConditionItem,
+]

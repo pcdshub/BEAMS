@@ -241,35 +241,38 @@ class TreeTicker(Worker):
                         True,
                         False)
             )
+            try:
+                while (self.state.get_tick_current_tree()):
+                    while (self.state.get_pause_tree()):
+                        # reusing this here.... could use a semaphore...
+                        self.state.set_tree_status(TreeStatus.IDLE)
+                        time.sleep(self.state.get_tick_delay_ms() / 1000)
 
-            while (self.state.get_tick_current_tree()):
-                while (self.state.get_pause_tree()):
-                    # reusing this here.... could use a semaphore...
-                    self.state.set_tree_status(TreeStatus.IDLE)
-                    time.sleep(self.state.get_tick_delay_ms() / 1000)
+                    # If we are in interactive mode
+                    if self.state.get_tick_config() == TickConfiguration.INTERACTIVE:
+                        # wait till the semaphore gets incremented, this is the IPC
+                        # method to communicate a tick_interactive
+                        got_tick = self.tick_sem.acquire(timeout=0.2)
 
-                # If we are in interactive mode
-                if self.state.get_tick_config() == TickConfiguration.INTERACTIVE:
-                    # wait till the semaphore gets incremented, this is the IPC
-                    # method to communicate a tick_interactive
-                    got_tick = self.tick_sem.acquire(timeout=0.2)
-
-                    # because of the timeout (makes cleaning up thread easier)
-                    # we need to check how it timed out
-                    if got_tick:
+                        # because of the timeout (makes cleaning up thread easier)
+                        # we need to check how it timed out
+                        if got_tick:
+                            self.state.set_tree_status(TreeStatus.TICKING)
+                            self.tree.tick()
+                        else:
+                            self.state.set_tree_status(TreeStatus.WAITING_ACK)
+                    # otherwise we are in continous mode, tick the tree as normal!
+                    else:
                         self.state.set_tree_status(TreeStatus.TICKING)
                         self.tree.tick()
-                    else:
-                        self.state.set_tree_status(TreeStatus.WAITING_ACK)
-                # otherwise we are in continous mode, tick the tree as normal!
-                else:
-                    self.state.set_tree_status(TreeStatus.TICKING)
-                    self.tree.tick()
 
-                # grab the last node before traversal reversal
-                self.state.set_node_name(getattr(self.tree.tip(), "name", ""))
-                self.state.set_root_status(self.tree.root.status)
-                time.sleep(self.state.get_tick_delay_ms() / 1000)
+                    # grab the last node before traversal reversal
+                    self.state.set_node_name(getattr(self.tree.tip(), "name", ""))
+                    self.state.set_root_status(self.tree.root.status)
+                    time.sleep(self.state.get_tick_delay_ms() / 1000)
+            except Exception as ex:
+                self.state.set_tree_status(TreeStatus.ERROR)
+                logger.exception(ex)
 
     # Hooks for CommandMessages
 

@@ -46,8 +46,9 @@ def test_load_run_continuous_tree(rpc_client: RPCClient):
         tree_name="my_tree"
     )
 
+    wait_until(partial(assert_heartbeat_has_n_trees, rpc_client, 1))
     resp0 = rpc_client.get_heartbeat()
-    assert len(resp0.behavior_tree_update) == 0
+    assert resp0.behavior_tree_update[0].tree_status == TreeStatus.IDLE
     # tree name taken from json, not our setting
 
     rpc_client.start_tree("my_tree")
@@ -71,8 +72,9 @@ def test_load_interactive_tree(rpc_client: RPCClient):
         tree_name="my_tree"
     )
 
+    wait_until(partial(assert_heartbeat_has_n_trees, rpc_client, 1))
     resp0 = rpc_client.get_heartbeat()
-    assert len(resp0.behavior_tree_update) == 0
+    assert resp0.behavior_tree_update[0].tree_status == TreeStatus.IDLE
 
     # start tree, but don't tick
     rpc_client.start_tree("my_tree")

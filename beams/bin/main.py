@@ -20,6 +20,7 @@ COMMAND_TO_MODULE = {
     "gen_test_ioc": "gen_test_ioc",
     "service" : "service",
     "client": "client",
+    "ui": "ui"
 }
 
 

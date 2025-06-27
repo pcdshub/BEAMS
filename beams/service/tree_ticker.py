@@ -155,21 +155,6 @@ class TreeState():
     def get_tick_delay_ms(self) -> int:
         return int(self.tick_delay_ms.value)
 
-    def set_pause_tree(self, value: bool):
-        logger.debug(f"setting pause tree on thread: {os.getpid()}")
-        if value:
-            self.tree_status.value = "IDLE".encode()
-        else:
-            self.tree_status.value = "TICKING".encode()
-
-    def get_pause_tree(self) -> bool:
-        logger.debug(f"checking pause tree on thread: {os.getpid()}")
-        tree_status = getattr(self.tree_status, "value", b"ERROR").decode()
-        return tree_status == "IDLE"
-
-    def get_tick_current_tree(self) -> bool:
-        return self.tick_current_tree.value
-
     def get_tree_status(self) -> TreeStatus:
         tree_status_name = getattr(self.tree_status, "value", b"ERROR").decode()
         status = getattr(TreeStatus, tree_status_name)
@@ -177,6 +162,21 @@ class TreeState():
 
     def set_tree_status(self, status: TreeStatus) -> None:
         self.tree_status.value = TreeStatus.Name(status).encode()
+
+    def set_pause_tree(self, value: bool):
+        logger.debug(f"setting pause tree on thread: {os.getpid()}")
+        if value:
+            self.set_tree_status(TreeStatus.IDLE)
+        else:
+            self.set_tree_status(TreeStatus.TICKING)
+
+    def get_pause_tree(self) -> bool:
+        logger.debug(f"checking pause tree on thread: {os.getpid()}")
+        tree_status = self.get_tree_status()
+        return tree_status == TreeStatus.IDLE
+
+    def get_tick_current_tree(self) -> bool:
+        return self.tick_current_tree.value
 
 
 class TreeTicker(Worker):

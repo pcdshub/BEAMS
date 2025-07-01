@@ -10,11 +10,14 @@ beams.tree_config.action.SetPVActionItem -> beams.widgets.action.SetPVActionWidg
 """
 
 import importlib
+import logging
 from typing import Optional, Type
 
 from qtpy import QtWidgets
 
 from beams.tree_config.base import BaseItem
+
+logger = logging.getLogger(__name__)
 
 
 class EmbeddedNodeWidget(QtWidgets.QWidget):
@@ -56,8 +59,8 @@ def get_embedded_widget(item_cls: Type[BaseItem]) -> Optional[Type[EmbeddedNodeW
         item_base_name = item_cls.__name__.removesuffix("Item")
         mod = importlib.import_module(f"beams.widgets.{item_module_name}")
         widget = getattr(mod, f"{item_base_name}Widget")
-    except (ModuleNotFoundError, AttributeError) as ex:
-        print(ex)
+    except (ModuleNotFoundError, AttributeError):
+        logger.debug(f"No embedded widget found for {item_base_name}")
         return
 
     return widget

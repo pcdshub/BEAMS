@@ -13,7 +13,7 @@ def main(*args, **kwargs):
     my_style.node.layout_direction = LayoutDirection.VERTICAL
 
     add_items_to_registry(registry, style=my_style)
-    registry.register_model(RootNodeModel, style=my_style)
+    registry.register_model(RootNodeModel, style=my_style, category="Root")
     scene = nodeeditor.FlowScene(style=my_style, registry=registry)
 
     view = nodeeditor.FlowView(scene)

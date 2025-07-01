@@ -258,7 +258,8 @@ def add_items_to_registry(
     submodules: Optional[list[str]] = None,
 ):
     if submodules is None:
-        submodules = ["action", "composite", "condition", "idiom", "py_trees"]
+        submodules = ["action", "composite", "condition", "idiom", "py_trees",
+                      "prebuilt"]
 
     for submod in submodules:
         models = gather_models(submod)

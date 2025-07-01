@@ -22,7 +22,7 @@ from beams.tree_config.value import EPICSValue
 
 logger = logging.getLogger(__name__)
 
-SUBCOMMANDS = ["", "run", "gen_test_ioc", "service", "validate", "client"]
+SUBCOMMANDS = ["", "run", "gen_test_ioc", "service", "validate", "client", "ui"]
 
 
 def arg_variants(variants: tuple[tuple[tuple[str]]]):

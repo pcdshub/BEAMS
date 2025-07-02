@@ -35,9 +35,6 @@ class EmbeddedNodeWidget(QtWidgets.QWidget):
 
     Must implement the update_data for the corresponding dataclass
     """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def update_data(self, item: BaseItem) -> None:
         """
         Update `item` with information from this widget.

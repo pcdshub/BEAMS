@@ -12,8 +12,9 @@ from typing import Optional, Sequence, Type
 
 import qtpynodeeditor as nodeeditor
 from qtpy.QtWidgets import QWidget
-from qtpynodeeditor import (Connection, NodeData, NodeDataModel, NodeDataType,
-                            NodeValidationState, Port)
+from qtpynodeeditor import (Connection, ConnectionPolicy, NodeData,
+                            NodeDataModel, NodeDataType, NodeValidationState,
+                            Port)
 from qtpynodeeditor.style import StyleCollection
 
 from beams.tree_config import BaseItem
@@ -43,7 +44,37 @@ class RootNodeModel(NodeDataModel):
     }
     data_type = BlankNodeData.data_type
     name = " Root "
-    # TODO: return an invalid state while this doesn't have children
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._output_connections = []
+        self.update_validation()
+
+    def output_connection_created(self, connection: Connection):
+        """Triggered from `FlowScene` when a connection is created"""
+        if connection in self._output_connections:
+            return
+        self._output_connections.append(connection)
+        self.update_validation()
+
+    def output_connection_deleted(self, connection):
+        """Triggered from `FlowScene` when a connection is deleted"""
+        if connection not in self._output_connections:
+            return
+        self._output_connections.remove(connection)
+        self.update_validation()
+
+    def update_validation(self):
+        if len(self._output_connections) > 0:
+            self._validation_state = NodeValidationState.valid
+            self._validation_message = "Child detected"
+        else:
+            self._validation_state = NodeValidationState.warning
+            self._validation_message = "No children connected"
+
+    def port_out_connection_policy(self, port_index: int) -> ConnectionPolicy:
+        """Only allow one connection per output port"""
+        return ConnectionPolicy.one
 
 
 class MultiChildNodeModel(NodeDataModel):
@@ -102,6 +133,10 @@ class MultiChildNodeModel(NodeDataModel):
         except IndexError:
             self._validation_state = NodeValidationState.warning
             self._validation_message = "Uninitialized"
+
+    def port_out_connection_policy(self, port_index: int) -> ConnectionPolicy:
+        """Only allow one connection per output port"""
+        return ConnectionPolicy.one
 
     @property
     def num_ports(self):

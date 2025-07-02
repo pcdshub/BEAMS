@@ -3,6 +3,5 @@ grpcio-tools
 jinja2
 py-trees
 pyepics
-pygraphviz
 pyyaml
 qtpynodeeditor @ git+https://github.com/pcdshub/qtpynodeeditor.git@master

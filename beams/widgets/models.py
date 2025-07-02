@@ -43,17 +43,7 @@ class RootNodeModel(NodeDataModel):
     }
     data_type = BlankNodeData.data_type
     name = " Root "
-
-    def set_out_data(self, node_data: BlankNodeData, port: Port):
-        # only validating that the parent node is a valid predecessor
-        # self._parent_node = node_data.parent_node
-        try:
-            self._child_node = port.connections[0].output_node
-            self._validation_state = NodeValidationState.valid
-            self._validation_message = "Connected"
-        except IndexError:
-            self._validation_state = NodeValidationState.warning
-            self._validation_message = "Uninitialized"
+    # TODO: return an invalid state while this doesn't have children
 
 
 class MultiChildNodeModel(NodeDataModel):
@@ -101,8 +91,10 @@ class MultiChildNodeModel(NodeDataModel):
         return self._validation_message
 
     def set_in_data(self, node_data: BlankNodeData, port: Port):
-        # only validating that the parent node is a valid predecessor
-        # self._parent_node = node_data.parent_node
+        """
+        Callback run when input data is changed.  We hook this to verify
+        that there is a valid parent node
+        """
         try:
             self._parent_node = port.connections[0].input_node
             self._validation_state = NodeValidationState.valid
@@ -124,21 +116,25 @@ class MultiChildNodeModel(NodeDataModel):
         return self._port_caption_visible
 
     def output_connection_created(self, connection: Connection):
-        # triggered from FlowScene when connection created.
-        # want to add a new node
+        """Triggered from `FlowScene` when a connection is created"""
         if connection in self.output_connections:
             return
         self.output_connections.append(connection)
         self._update_output_info()
 
     def output_connection_deleted(self, connection):
-        # need to take all existing connections and re-order them
+        """Triggered from `FlowScene` when a connection is deleted"""
         if connection not in self.output_connections:
             return
         self.output_connections.remove(connection)
         self._update_output_info()
 
     def _update_output_info(self):
+        """
+        Update the output information to match the number of connections we
+        are currently holding onto.  Provides an extra connection point for adding
+        new connections.
+        """
         if self.max_children > 0:
             num_new_conn = min(len(self.output_connections) + 1,
                                self.max_children)
@@ -173,16 +169,15 @@ class LeafNodeModel(NodeDataModel):
         self._validation_state = NodeValidationState.warning
         self._validation_message = "Uninitialized"
 
-    def __init_subclass__(cls, verify=True, **kwargs):
-        return super().__init_subclass__(verify, **kwargs)
-
     @property
     def caption(self):
         return self.name
 
     def set_in_data(self, node_data: BlankNodeData, port: Port):
-        # only validating that the parent node is a valid predecessor
-        # self._parent_node = node_data.parent_node
+        """
+        Callback run when input data is changed.  We hook this to verify
+        that there is a valid parent node
+        """
         try:
             self._parent_node = port.connections[0].input_node
             self._validation_state = NodeValidationState.valid

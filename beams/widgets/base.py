@@ -7,6 +7,14 @@ their item.
 Example:
 
 beams.tree_config.action.SetPVActionItem -> beams.widgets.action.SetPVActionWidget
+
+The `get_embedded_widget` function is meant to be called by `TreeNodeMixin` when
+tree node models are programmatically generated, so that widgets are automatically
+added to the right nodes.
+
+Thus, when making new node widgets, you should not have to worry about the
+qtpynodeeditor NodeDataModel details.  Rather one simply needs to subclass
+EmbeddedNodeWidget and name it correctly.
 """
 
 import importlib

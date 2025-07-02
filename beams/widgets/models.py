@@ -48,7 +48,14 @@ class RootNodeModel(NodeDataModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._output_connections = []
-        self.update_validation()
+        self._validation_state = NodeValidationState.warning
+        self._validation_message = "No children connected"
+
+    def validation_state(self) -> NodeValidationState:
+        return self._validation_state
+
+    def validation_message(self) -> str:
+        return self._validation_message
 
     def output_connection_created(self, connection: Connection):
         """Triggered from `FlowScene` when a connection is created"""

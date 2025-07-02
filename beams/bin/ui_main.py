@@ -1,6 +1,6 @@
 import qtpynodeeditor as nodeeditor
 from qtpy.QtWidgets import QApplication
-from qtpynodeeditor.node_geometry import LayoutDirection
+from qtpynodeeditor.style import LayoutDirection, SplineType
 
 from beams.widgets.models import RootNodeModel, add_items_to_registry
 
@@ -11,6 +11,7 @@ def main(*args, **kwargs):
 
     my_style = nodeeditor.StyleCollection()
     my_style.node.layout_direction = LayoutDirection.VERTICAL
+    my_style.connection.spline_type = SplineType.LINEAR
 
     add_items_to_registry(registry, style=my_style)
     registry.register_model(RootNodeModel, style=my_style, category="Root")

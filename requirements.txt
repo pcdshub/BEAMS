@@ -4,3 +4,4 @@ jinja2
 py-trees
 pyepics
 pyyaml
+qtpynodeeditor @ git+https://github.com/pcdshub/qtpynodeeditor.git@master

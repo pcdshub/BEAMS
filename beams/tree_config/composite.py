@@ -105,3 +105,12 @@ class SequenceConditionItem(BaseSequenceItem, BaseConditionItem):
             return ok
 
         return cond_func
+
+
+# Add items here if they should be made available in the GUI
+_supported_items = [
+    ParallelItem,
+    SelectorItem,
+    SequenceItem,
+    SequenceConditionItem,
+]

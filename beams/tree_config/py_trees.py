@@ -124,3 +124,24 @@ class WaitForBlackboardVariableValueItem(BaseItem):
             operator=getattr(operator, self.check.operator.value)
         )
         return WaitForBlackboardVariableValue(name=self.name, check=comp_exp)
+
+
+# Add items here if they should be made available in the GUI
+_supported_items = [
+    SuccessItem,
+    FailureItem,
+    RunningItem,
+    DummyItem,
+    PeriodicItem,
+    StatusQueueItem,
+    StatusQueueItem,
+    SuccessEveryNItem,
+    TickCounterItem,
+    BlackboardToStatusItem,
+    CheckBlackboardVariableExistsItem,
+    WaitForBlackboardVariableItem,
+    UnsetBlackboardVariableItem,
+    SetBlackboardVariableItem,
+    CheckBlackboardVariableValueItem,
+    WaitForBlackboardVariableValueItem,
+]

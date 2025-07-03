@@ -94,3 +94,10 @@ class IncPVActionItem(BaseItem):
         )
 
         return node
+
+
+# Add items here if they should be made available in the GUI
+_supported_items = [
+    SetPVActionItem,
+    IncPVActionItem,
+]

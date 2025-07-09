@@ -44,9 +44,13 @@ message CommandMessage {
   MessageType mess_t = 1; // MESSAGE_TYPE_COMMAND_MESSAGE
   CommandType command_t = 2; // informs which option to try deser
   // May want to add notion of priority here
+
+  // Can specify which tree to act on with either name or uuid
   string tree_name = 3;
-  optional int32 tick_rate_ms = 4;
-  optional AckNodeMessage ack_node = 5;
-  optional LoadNewTreeMessage load_new_tree = 6;
-  optional TickConfigurationMessage tick_config = 7;
+  string tree_uuid = 4;
+
+  optional int32 tick_rate_ms = 5;
+  optional AckNodeMessage ack_node = 6;
+  optional LoadNewTreeMessage load_new_tree = 7;
+  optional TickConfigurationMessage tick_config = 8;
 }

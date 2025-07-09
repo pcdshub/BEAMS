@@ -25,12 +25,30 @@ enum TreeStatus {
   ERROR = 3;
 }
 
+// identification information for a node
+message NodeId {
+  string name = 1;
+  string uuid = 2;
+}
+
 message BehaviorTreeUpdateMessage {
   MessageType mess_t = 1; // MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE
-  string tree_name = 2;
-  string node_name = 3;
+  NodeId tree_id = 2;
+  NodeId node_id = 3;
   TickStatus tick_status = 4;
-  TickConfiguration tick_config= 5;
+  TickConfiguration tick_config = 5;
   int32 tick_delay_ms = 6;
   TreeStatus tree_status = 7;
+}
+
+message NodeInfo {
+  NodeId id = 1;
+  TickStatus status = 2;
+  repeated NodeInfo children = 3;
+}
+
+message TreeDetails {
+  NodeId tree_id = 1;
+  NodeInfo node_info = 2;
+  TreeStatus tree_status = 3;
 }

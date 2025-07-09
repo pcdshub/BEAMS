@@ -3,6 +3,7 @@ syntax = "proto3";
 import "beams/service/remote_calls/generic_message.proto"; // Empty
 import "beams/service/remote_calls/heartbeat.proto"; // HeartBeatReply
 import "beams/service/remote_calls/command.proto"; // CommandMessage
+import "beams/service/remote_calls/behavior_tree.proto";
 
 // Sequencer Service Definition
 service BEAMS_rpc {
@@ -11,4 +12,7 @@ service BEAMS_rpc {
 
   // Heart beat message for clients
   rpc request_heartbeat (Empty) returns (HeartBeatReply) {}
+
+  // Detailed message for clients
+  rpc request_tree_details (NodeId) returns (TreeDetails) {}
 }

@@ -12,7 +12,8 @@ import "beams/service/remote_calls/behavior_tree.proto";
 
 message HeartBeatReply {
   MessageType mess_t = 1;
-  repeated BehaviorTreeUpdateMessage behavior_tree_update = 2; // when our program is ticking many trees this may become a repeated or mapped fields
+  // when our program is ticking many trees this may become a repeated or mapped fields
+  repeated BehaviorTreeUpdateMessage behavior_tree_update = 2;
   google.protobuf.Timestamp reply_timestamp = 3;
   // maybe program uptime and git hash??
 }

@@ -223,7 +223,11 @@ class RPCClient:
 
             if stub is None:
                 # TODO: obviously not this. Grab from config
-                with grpc.insecure_channel(self.server_address) as channel:
+                with grpc.insecure_channel(
+                    self.server_address,
+                    # Default ecs config uses psproxy, which doesn't work here
+                    options=(("grpc.enable_http_proxy", 0),)
+                ) as channel:
                     stub = BEAMS_rpcStub(channel)
                     return func(self, stub=stub, *args, **kwargs)
             else:

@@ -1,7 +1,9 @@
+from uuid import uuid4
+
 from google.protobuf.timestamp_pb2 import Timestamp
 
 from beams.service.remote_calls.behavior_tree_pb2 import (
-    BehaviorTreeUpdateMessage, TickConfiguration, TickStatus)
+    BehaviorTreeUpdateMessage, NodeId, TickConfiguration, TickStatus)
 from beams.service.remote_calls.command_pb2 import (AckNodeMessage,
                                                     CommandMessage,
                                                     CommandType,
@@ -20,27 +22,27 @@ class TestProtos:
     def test_behavior_tree_messages(self):
         y = BehaviorTreeUpdateMessage(
                 mess_t=MessageType.MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE,
-                tree_name="CoolTree",
-                node_name="current_node",
+                tree_id=NodeId(name="CoolTree", uuid=str(uuid4())),
+                node_id=NodeId(name="current_node", uuid=str(uuid4())),
                 tick_status=TickStatus.RUNNING,
                 tick_config=TickConfiguration.INTERACTIVE,
                 tick_delay_ms=200
             )
-        assert y.tree_name == "CoolTree"
+        assert y.tree_id.name == "CoolTree"
 
     def test_heartbeat(self):
         tree1 = BehaviorTreeUpdateMessage(
             mess_t=MessageType.MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE,
-            tree_name="Tree1",
-            node_name="current_node",
+            tree_id=NodeId(name="Tree1", uuid=str(uuid4())),
+            node_id=NodeId(name="current_node", uuid=str(uuid4())),
             tick_status=TickStatus.RUNNING,
             tick_config=TickConfiguration.INTERACTIVE,
             tick_delay_ms=200
         )
         tree2 = BehaviorTreeUpdateMessage(
             mess_t=MessageType.MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE,
-            tree_name="Tree2",
-            node_name="current_node",
+            tree_id=NodeId(name="Tree2", uuid=str(uuid4())),
+            node_id=NodeId(name="current_node", uuid=str(uuid4())),
             tick_status=TickStatus.RUNNING,
             tick_config=TickConfiguration.INTERACTIVE,
             tick_delay_ms=200
@@ -53,8 +55,8 @@ class TestProtos:
         )
 
         # protobuf asserts order is maintained
-        assert z.behavior_tree_update[0].tree_name == "Tree1"
-        assert z.behavior_tree_update[1].tree_name == "Tree2"
+        assert z.behavior_tree_update[0].tree_id.name == "Tree1"
+        assert z.behavior_tree_update[1].tree_id.name == "Tree2"
 
     # can better test to show how optionals can be desrialized
     def test_command_message(self):

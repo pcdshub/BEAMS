@@ -22,7 +22,7 @@ def assert_test_status(rpc_client: RPCClient, name: str, status: TreeStatus) -> 
     resp = rpc_client.get_heartbeat()
     my_msg = None
     for update_msg in resp.behavior_tree_update:
-        if update_msg.tree_name == name:
+        if update_msg.tree_id.name == name:
             my_msg = update_msg
 
     if my_msg is None:
@@ -56,7 +56,7 @@ def test_load_run_continuous_tree(rpc_client: RPCClient):
     wait_until(partial(assert_heartbeat_has_n_trees, rpc_client, 1))
     # tree name taken from json, not our setting
     resp1 = rpc_client.get_heartbeat()
-    assert resp1.behavior_tree_update[0].tree_name == "Eternal Guard"
+    assert resp1.behavior_tree_update[0].tree_id.name == "Eternal Guard"
     wait_until(partial(assert_valid_tick_status_at_idx, rpc_client, 0))
 
     wait_until(partial(assert_test_status,

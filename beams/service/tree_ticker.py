@@ -11,7 +11,8 @@ from functools import partial
 from multiprocessing import Semaphore, Value
 from multiprocessing.managers import BaseManager
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
+from uuid import UUID
 
 from py_trees.common import Status
 from py_trees.console import read_single_keypress
@@ -23,7 +24,8 @@ from beams.behavior_tree.condition_node import AckConditionNode
 from beams.logging import LoggingVisitor
 from beams.service.helpers.worker import Worker
 from beams.service.remote_calls.behavior_tree_pb2 import (
-    BehaviorTreeUpdateMessage, TickConfiguration, TickStatus, TreeStatus)
+    BehaviorTreeUpdateMessage, NodeId, TickConfiguration, TickStatus,
+    TreeStatus)
 from beams.service.remote_calls.generic_message_pb2 import MessageType
 from beams.tree_config import get_tree_from_path
 
@@ -118,6 +120,7 @@ class TreeState():
         # Trees are ticked in worker subprocess, must pass relevant information
         # to the Ticker worker
         self.current_node = Value(c_char_p, b"")
+        self.current_node_uuid = Value(c_char_p, b"")
         self.current_status = Value(c_char_p, b"INVALID")  # TickStatus enum name
 
         # Consitutes a TickConfigurationMessage
@@ -130,16 +133,21 @@ class TreeState():
         self.tick_current_tree = Value(c_bool, True)
         self.tree_status = Value(c_char_p, b"IDLE")  # start in paused state
 
-    def get_node_name(self) -> Optional[str]:
+    def get_node_name(self) -> Optional[NodeId]:
         """
         Returns the name of the node that ended the current tick.  This will
         be the "tip" of the tree, provided by py_trees
         """
-        if self.current_node.value is not None:
-            return self.current_node.value.decode()
+        if ((self.current_node.value is not None) and
+            (self.current_node_uuid.value is not None)):
+            return NodeId(
+                name=self.current_node.value.decode(),
+                uuid=self.current_node_uuid.value.decode(),
+            )
 
-    def set_node_name(self, name: str) -> None:
+    def set_node_name(self, name: str, uuid: Union[UUID, str]) -> None:
         self.current_node.value = name.encode()
+        self.current_node_uuid.value = str(uuid).encode()
 
     def get_root_status(self) -> TickStatus:
         status_name = getattr(self.current_status, "value", b"INVALID").decode()
@@ -220,9 +228,10 @@ class TreeTicker(Worker):
     def get_behavior_tree_update(self) -> BehaviorTreeUpdateMessage:
         mess = BehaviorTreeUpdateMessage(
                 mess_t=MessageType.MESSAGE_TYPE_BEHAVIOR_TREE_MESSAGE,
-                tree_name=self.tree.root.name,
+                tree_id=NodeId(name=self.tree.root.name,
+                               uuid=str(self.tree.root.id)),
                 tick_status=self.state.get_root_status(),
-                node_name=self.state.get_node_name(),
+                node_id=self.state.get_node_name(),
                 tick_config=self.state.get_tick_config(),
                 tick_delay_ms=self.state.get_tick_delay_ms(),
                 tree_status=self.state.get_tree_status(),
@@ -267,7 +276,10 @@ class TreeTicker(Worker):
                         self.tree.tick()
 
                     # grab the last node before traversal reversal
-                    self.state.set_node_name(getattr(self.tree.tip(), "name", ""))
+                    self.state.set_node_name(
+                        name=getattr(self.tree.tip(), "name", ""),
+                        uuid=getattr(self.tree.tip(), "id", ""),
+                    )
                     self.state.set_root_status(self.tree.root.status)
                     time.sleep(self.state.get_tick_delay_ms() / 1000)
             except Exception as ex:

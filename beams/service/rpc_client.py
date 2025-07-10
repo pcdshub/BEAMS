@@ -5,12 +5,15 @@ import logging
 import os
 from functools import wraps
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
+from uuid import UUID
 
 import grpc
 
 from beams.service.remote_calls.beams_rpc_pb2_grpc import BEAMS_rpcStub
-from beams.service.remote_calls.behavior_tree_pb2 import TickConfiguration
+from beams.service.remote_calls.behavior_tree_pb2 import (NodeId,
+                                                          TickConfiguration,
+                                                          TreeDetails)
 from beams.service.remote_calls.command_pb2 import (AckNodeMessage,
                                                     CommandMessage,
                                                     CommandType,
@@ -431,3 +434,41 @@ class RPCClient:
         self.last_response = stub.enqueue_command(cmd_msg)
         logger.debug(self.last_response)
         return self.last_response
+
+    def get_detailed_update(
+        self,
+        tree_name: Optional[str] = None,
+        tree_uuid: Optional[Union[UUID, str]] = None,
+        stub: Optional[BEAMS_rpcStub] = None,
+    ) -> TreeDetails:
+        """
+        Gets a detailed update for a tree from the service.
+        Trees can be identified by either their name or uuid, but at least one
+        of these must be provided
+
+        If the uuid is provided, the tree name is ignored.
+
+        Parameters
+        ----------
+        tree_name : Optional[str]
+            _description_
+        tree_uuid : Optional[Union[UUID, str]]
+            _description_
+        stub : Optional[BEAMS_rpcStub], optional
+            _description_, by default None
+
+        Returns
+        -------
+        TreeDetails
+            _description_
+        """
+        tree_id = NodeId(name=tree_name, uuid=str(tree_uuid))
+        if stub is None:
+            # TODO: obviously not this. Grab from config
+            with grpc.insecure_channel(self.server_address) as channel:
+                stub = BEAMS_rpcStub(channel)
+                resp = stub.request_tree_details(tree_id)
+        else:
+            resp = stub.request_tree_details(tree_id)
+
+        return resp

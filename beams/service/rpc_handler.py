@@ -2,7 +2,8 @@ import logging
 import time
 from concurrent import futures
 from dataclasses import dataclass, field
-from multiprocessing import Manager, Queue, Semaphore
+from multiprocessing import Queue, Semaphore
+from multiprocessing.managers import BaseManager
 from typing import Dict, List, Optional, Union
 from uuid import UUID, uuid4
 
@@ -78,7 +79,7 @@ def get_tree_from_treetickerdict(
 
     if isinstance(uuid, UUID):
         return tree_dict.get(TreeIdKey(name="", uuid=uuid))
-    elif isinstance(uuid, str):
+    elif isinstance(uuid, str) and uuid:
         if len(uuid) < 5:
             raise ValueError("Partial uuids must provide at least "
                              f"5 characters, got ({uuid})")
@@ -93,7 +94,7 @@ def get_tree_from_treetickerdict(
 
 
 class RPCHandler(BEAMS_rpcServicer, Worker):
-    def __init__(self, sync_manager: Manager, port=50051):
+    def __init__(self, sync_manager: BaseManager, port=50051):
         # GRPC server launching things from docs:
         # https://grpc.io/docs/languages/python/basics/#starting-the-server
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=10)
@@ -110,6 +111,7 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             # process safe dictionary given by BEAMSService so we can appropriately respond with heartbeat
             logger.debug(f"Connecting to sync_man at: {self.sync_man.address}")
             self.sync_man.connect()
+            # do these need to be here? the manager will have these registered already
             self.sync_man.register("get_tree_dict")
             self.sync_man.register("TreeTicker")
             self.sync_man.register("TreeState")
@@ -194,7 +196,7 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             hbeat_message.behavior_tree_update.extend(updates)
             return hbeat_message
 
-    def request_tree_details(self, request: NodeId, context) -> TreeDetails:
+    def request_tree_details(self, request: NodeId, context) -> Optional[TreeDetails]:
         """
         Gather tree details for the node ID provided
 
@@ -212,7 +214,20 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             tree_dict: TreeTickerDict = manager.get_tree_dict()
             tree_ticker = get_tree_from_treetickerdict(tree_dict, request.name, request.uuid)
             if tree_ticker is not None:
-                return tree_ticker.get_detailed_update()
+                details = tree_ticker.get_detailed_update()
+                # grab key details
+                for key, ticker in tree_dict.items():
+                    if ticker is tree_ticker:
+                        break
+                # repackage into new message with the right details
+                new_details = TreeDetails(
+                    tree_id=NodeId(name=key.name, uuid=str(key.uuid)),
+                    node_info=details.node_info,
+                    tree_status=details.tree_status,
+                )
+                return new_details
+
+            return TreeDetails()
 
     def work_func(self):
         logger.debug(f"{self.proc_name} running")

@@ -8,12 +8,13 @@ import os
 import time
 from ctypes import c_bool, c_char_p, c_uint
 from functools import partial
-from multiprocessing import Semaphore, Value
+from multiprocessing import Queue, Semaphore, Value
 from multiprocessing.managers import BaseManager
 from pathlib import Path
 from typing import Optional, Union
 from uuid import UUID
 
+from py_trees.behaviour import Behaviour
 from py_trees.common import Status
 from py_trees.console import read_single_keypress
 from py_trees.display import unicode_blackboard, unicode_tree
@@ -24,8 +25,8 @@ from beams.behavior_tree.condition_node import AckConditionNode
 from beams.logging import LoggingVisitor
 from beams.service.helpers.worker import Worker
 from beams.service.remote_calls.behavior_tree_pb2 import (
-    BehaviorTreeUpdateMessage, NodeId, TickConfiguration, TickStatus,
-    TreeStatus)
+    BehaviorTreeUpdateMessage, NodeId, NodeInfo, TickConfiguration, TickStatus,
+    TreeDetails, TreeStatus)
 from beams.service.remote_calls.generic_message_pb2 import MessageType
 from beams.tree_config import get_tree_from_path
 
@@ -133,6 +134,9 @@ class TreeState():
         self.tick_current_tree = Value(c_bool, True)
         self.tree_status = Value(c_char_p, b"IDLE")  # start in paused state
 
+        self.details_q = Queue(maxsize=1)
+        self.details_q.put(TreeDetails())
+
     def get_node_name(self) -> Optional[NodeId]:
         """
         Returns the name of the node that ended the current tick.  This will
@@ -186,6 +190,16 @@ class TreeState():
     def get_tick_current_tree(self) -> bool:
         return self.tick_current_tree.value
 
+    def get_details(self) -> TreeDetails:
+        details = self.details_q.get()
+        # replace so we can get as may times as we like
+        self.details_q.put(details)
+        return details
+
+    def set_details(self, details: TreeDetails) -> None:
+        self.details_q.get()
+        self.details_q.put(details)
+
 
 class TreeTicker(Worker):
     def __init__(self, filepath: str,
@@ -204,6 +218,8 @@ class TreeTicker(Worker):
 
         self.tree = get_tree_from_path(fp)
 
+        # TODO: fix.  This is actually not always equivalent to the passed in
+        # init_tree_state, which can be an AutoProxy member of a SyncManager itself
         if init_tree_state is None:
             self.state = TreeState()
         else:
@@ -238,6 +254,26 @@ class TreeTicker(Worker):
             )
 
         return mess
+
+    def get_detailed_update(self) -> TreeDetails:
+        dets = self.state.get_details()
+        return dets
+
+    def get_tree_details(self, tree: BehaviourTree) -> TreeDetails:
+        """get the details for this tree in particular"""
+        def _get_node_info(node: Behaviour) -> NodeInfo:
+            child_info = [_get_node_info(child) for child in node.children]
+            return NodeInfo(
+                id=NodeId(name=node.name, uuid=str(node.id)),
+                status=getattr(TickStatus, node.status.name),
+                children=child_info,
+            )
+
+        details = TreeDetails(
+            node_info=_get_node_info(tree.root),
+            tree_status=getattr(TickStatus, tree.root.status.name),
+        )
+        return details
 
     def work_func(self):
         while (self.do_work.value):
@@ -281,6 +317,10 @@ class TreeTicker(Worker):
                         uuid=getattr(self.tree.tip(), "id", ""),
                     )
                     self.state.set_root_status(self.tree.root.status)
+                    # update tree details
+                    new_details = self.get_tree_details(self.tree)
+                    self.state.set_details(new_details)
+
                     time.sleep(self.state.get_tick_delay_ms() / 1000)
             except Exception as ex:
                 self.state.set_tree_status(TreeStatus.ERROR)
@@ -303,7 +343,7 @@ class TreeTicker(Worker):
     def pause_tree(self):
         # if tree is already paused log error
         if (self.state.get_pause_tree()):
-            logging.error(f"Tree off name {self.tree.root.name} is already paused!!")
+            logging.error(f"Tree of name {self.tree.root.name} is already paused!!")
         self.state.set_pause_tree(True)
         logger.debug(f"Pausing tree of name {self.tree.root.name}")
 

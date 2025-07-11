@@ -84,7 +84,6 @@ class BeamsService(Worker):
             x = man.TreeTicker(filepath=request.load_new_tree.tree_file_path,
                                init_tree_state=init_state)
             tree_dict = man.get_tree_dict()
-            print(type(tree_dict))
 
             # New trees won't have uuids, but likely have names
             tree_id = TreeIdKey(name=request.tree_name)

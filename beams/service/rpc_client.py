@@ -438,30 +438,33 @@ class RPCClient:
     def get_detailed_update(
         self,
         tree_name: Optional[str] = None,
-        tree_uuid: Optional[Union[UUID, str]] = None,
+        tree_uuid: Optional[Union[UUID, str]] = "",
         stub: Optional[BEAMS_rpcStub] = None,
     ) -> TreeDetails:
         """
         Gets a detailed update for a tree from the service.
         Trees can be identified by either their name or uuid, but at least one
-        of these must be provided
+        of these must be provided.
 
         If the uuid is provided, the tree name is ignored.
 
         Parameters
         ----------
         tree_name : Optional[str]
-            _description_
+            The name of the tree in question
         tree_uuid : Optional[Union[UUID, str]]
-            _description_
+            The uuid of the tree in question.  May be a partial uuid (>= 5 characters)
         stub : Optional[BEAMS_rpcStub], optional
-            _description_, by default None
+            the rpc stub used to send messages, by default None
 
         Returns
         -------
         TreeDetails
-            _description_
+            a detailed view of the tree
         """
+        if not (tree_name or tree_uuid):
+            raise ValueError("Must provide either tree_name or tree_uuid")
+
         tree_id = NodeId(name=tree_name, uuid=str(tree_uuid))
         if stub is None:
             # TODO: obviously not this. Grab from config

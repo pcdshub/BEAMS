@@ -96,7 +96,7 @@ class BeamsService(Worker):
         with self.sync_man as man:
             # get tree
             tree_dict = man.get_tree_dict()
-            tree_ticker = get_tree_from_treetickerdict(
+            _, tree_ticker = get_tree_from_treetickerdict(
                 tree_dict, name=request.tree_name, uuid=request.tree_uuid,
             )
             if tree_ticker is not None:
@@ -106,7 +106,7 @@ class BeamsService(Worker):
         with self.sync_man as man:
             # get tree
             tree_dict = man.get_tree_dict()
-            tree_ticker = get_tree_from_treetickerdict(
+            _, tree_ticker = get_tree_from_treetickerdict(
                 tree_dict, name=request.tree_name, uuid=request.tree_uuid,
             )
             if tree_ticker is not None:
@@ -116,7 +116,7 @@ class BeamsService(Worker):
         with self.sync_man as man:
             # get tree
             tree_dict = man.get_tree_dict()
-            tree_ticker = get_tree_from_treetickerdict(
+            _, tree_ticker = get_tree_from_treetickerdict(
                 tree_dict, name=request.tree_name, uuid=request.tree_uuid,
             )
             if tree_ticker is not None:
@@ -127,7 +127,7 @@ class BeamsService(Worker):
         user_acking_node = request.ack_node.user_acking_node
         with self.sync_man as man:
             tree_dict = man.get_tree_dict()
-            tree_ticker = get_tree_from_treetickerdict(
+            _, tree_ticker = get_tree_from_treetickerdict(
                 tree_dict, name=request.tree_name, uuid=request.tree_uuid,
             )
             if tree_ticker is not None:

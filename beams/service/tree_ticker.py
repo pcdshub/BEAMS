@@ -256,8 +256,10 @@ class TreeTicker(Worker):
         return mess
 
     def get_detailed_update(self) -> TreeDetails:
-        dets = self.state.get_details()
-        return dets
+        det = self.state.get_details()
+        # update tick status, details only update after tick, not on pause
+        det.tree_status = self.state.get_tree_status()
+        return det
 
     def get_tree_details(self, tree: BehaviourTree) -> TreeDetails:
         """get the details for this tree in particular"""

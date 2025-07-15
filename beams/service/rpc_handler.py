@@ -51,7 +51,6 @@ class TreeIdKey:
             else:
                 uuid_match = False
             name_match = (self.name == other)
-            print(uuid_match, name_match)
             return uuid_match or name_match
         elif isinstance(other, UUID):
             return self.uuid == other
@@ -155,7 +154,6 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
 
                 )]
             else:
-                print(key, tree_ticker)
                 logger.error(f"Unable to find tree of name {tree_name} currently being ticked")
                 return None
 

@@ -4,7 +4,7 @@ from concurrent import futures
 from dataclasses import dataclass, field
 from multiprocessing import Queue, Semaphore
 from multiprocessing.managers import BaseManager
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
 import grpc
@@ -45,8 +45,14 @@ class TreeIdKey:
         # Require partial strings to be greater than 5 to avoid collisions
         # Eventually maybe somebody does some stats to figure out what a good
         # threshold is (birthday paradox)
-        if isinstance(other, str) and len(other) >= 5:
-            return str(self.uuid).startswith(other)
+        if isinstance(other, str):
+            if len(other) >= 5:
+                uuid_match = str(self.uuid).startswith(other)
+            else:
+                uuid_match = False
+            name_match = (self.name == other)
+            print(uuid_match, name_match)
+            return uuid_match or name_match
         elif isinstance(other, UUID):
             return self.uuid == other
         elif isinstance(other, TreeIdKey):
@@ -61,9 +67,9 @@ def get_tree_from_treetickerdict(
     tree_dict: TreeTickerDict,
     name: Optional[str] = None,
     uuid: Optional[Union[UUID, str]] = None,
-) -> Optional[TreeTicker]:
+) -> Union[Tuple[TreeIdKey, TreeTicker], Tuple[None, None]]:
     """
-    Returns TreeTicker from `tree_dict` to best effort.
+    Returns TreeIdKey and TreeTicker from `tree_dict` to best effort.
     In order of priority:
     1. Check for uuid full match
     2. Check for uuid partial match
@@ -73,24 +79,25 @@ def get_tree_from_treetickerdict(
     Returns None if no match can be found
     """
     # `tree_dict` is often actually a multiprocessing.BaseProxy, which only exposes
-    # methods, not attributes (or subscripting).  Thus we use .get()
+    # methods, not attributes (or subscripting).  Also, the way we use this
+    # the values of the dictionary are frequently AutoProxy[TreeTicker],
+    # which cannot be checked for identity against itself.
+    # So in the end we do this the slow and silly way
     if not (name or uuid):
         raise ValueError("One of `name` and `uuid` must be provided")
 
-    if isinstance(uuid, UUID):
-        return tree_dict.get(TreeIdKey(name="", uuid=uuid))
-    elif isinstance(uuid, str) and uuid:
-        if len(uuid) < 5:
-            raise ValueError("Partial uuids must provide at least "
-                             f"5 characters, got ({uuid})")
-        for key in tree_dict.keys():
-            if key.uuid == uuid:
-                return tree_dict.get(key)
+    if isinstance(uuid, str) and len(uuid) < 5 and uuid != "":
+        raise ValueError("Partial uuids must provide at least "
+                         f"5 characters, got ({uuid})")
 
-    # no uuid matchees, try exact name match
-    for tree_id in tree_dict.keys():
-        if tree_id.name == name:
-            return tree_dict.get(tree_id)
+    for key, value in tree_dict.items():
+        # covers partial uuids, full uuids (string or object)
+        if key == uuid:
+            return key, value
+        elif key == name:
+            return key, value
+
+    return None, None
 
 
 class RPCHandler(BEAMS_rpcServicer, Worker):
@@ -127,17 +134,28 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         tree_name: Optional[str] = None,
         tree_uuid: Optional[Union[UUID, str]] = None,
     ) -> Optional[List[BehaviorTreeUpdateMessage]]:
-        # TODO UUID SWAP
         if self.sync_man is None:  # for testing modularity
             return None
         with self.sync_man as man:
             tree_dict: TreeTickerDict = man.get_tree_dict()
-            tree_ticker = get_tree_from_treetickerdict(
+            key, tree_ticker = get_tree_from_treetickerdict(
                 tree_dict, name=tree_name, uuid=tree_uuid
             )
-            if tree_ticker:
-                return [tree_ticker.get_behavior_tree_update()]
+            if key and tree_ticker:
+                update = tree_ticker.get_behavior_tree_update()
+                # replace tree_id with information that can identify tree in service
+                return [BehaviorTreeUpdateMessage(
+                    mess_t=update.mess_t,
+                    tree_id=NodeId(name=key.name, uuid=str(key.uuid)),
+                    node_id=update.node_id,
+                    tick_status=update.tick_status,
+                    tick_config=update.tick_config,
+                    tick_delay_ms=update.tick_delay_ms,
+                    tree_status=update.tree_status,
+
+                )]
             else:
+                print(key, tree_ticker)
                 logger.error(f"Unable to find tree of name {tree_name} currently being ticked")
                 return None
 
@@ -151,8 +169,19 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             if len(tree_dict.items()) == 0:
                 return None
 
-            updates = [tree.get_behavior_tree_update()
-                       for tree in tree_dict.values()]
+            updates = []
+            for key, tree_ticker in tree_dict.items():
+                update = tree_ticker.get_behavior_tree_update()
+                update_msg = BehaviorTreeUpdateMessage(
+                    mess_t=update.mess_t,
+                    tree_id=NodeId(name=key.name, uuid=str(key.uuid)),
+                    node_id=update.node_id,
+                    tick_status=update.tick_status,
+                    tick_config=update.tick_config,
+                    tick_delay_ms=update.tick_delay_ms,
+                    tree_status=update.tree_status,
+                )
+                updates.append(update_msg)
 
             return updates
 
@@ -212,13 +241,11 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         """
         with self.sync_man as manager:
             tree_dict: TreeTickerDict = manager.get_tree_dict()
-            tree_ticker = get_tree_from_treetickerdict(tree_dict, request.name, request.uuid)
-            if tree_ticker is not None:
+            key, tree_ticker = get_tree_from_treetickerdict(tree_dict, request.name,
+                                                            request.uuid)
+            if tree_ticker and key:
                 details = tree_ticker.get_detailed_update()
-                # grab key details
-                for key, ticker in tree_dict.items():
-                    if ticker is tree_ticker:
-                        break
+
                 # repackage into new message with the right details
                 new_details = TreeDetails(
                     tree_id=NodeId(name=key.name, uuid=str(key.uuid)),

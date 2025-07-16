@@ -143,7 +143,7 @@ class RPCClient:
         # If found nothing
         raise OSError("No beams configuration file found. Check BEAMS_CFG.")
 
-    def run(self, command: str, **kwargs) -> HeartBeatReply:
+    def run(self, command: str, **kwargs) -> Union[HeartBeatReply, TreeDetails]:
         """
         Run a command
 
@@ -167,13 +167,17 @@ class RPCClient:
             response = self.get_heartbeat()
             return response
 
+        # TODO: deal with none as tree name
+        tree_name = kwargs.get("tree_name") or ""
+        # These commands only need captured tree name and command itself
+        if command.upper() == "GET_TREE_DETAILS":
+            response = self.get_detailed_update(tree_name=tree_name)
+            return response
+
         command = getattr(CommandType, command.upper())
         if command not in CommandType.values():
             raise ValueError(f"Unsupported command provided: {command}")
 
-        # TODO: deal with none as tree name
-        tree_name = kwargs.get("tree_name") or ""
-        # These commands only need captured tree name and command itself
         if command in self.BASE_COMMANDS:
             getattr(self, f"{CommandType.Name(command).lower()}")(tree_name)
         elif command == CommandType.LOAD_NEW_TREE:
@@ -474,4 +478,5 @@ class RPCClient:
         else:
             resp = stub.request_tree_details(tree_id)
 
+        self.last_response = resp
         return resp

@@ -145,10 +145,17 @@ def build_arg_parser(argparser=None):
     )
     unload_parser.set_defaults(command="unload_tree")
 
+    details_parser = subparsers.add_parser(
+        "get_tree_details",
+        aliases=["GET_TREE_DETAILS", "details"],
+        help="Get details for a loaded tree"
+    )
+    details_parser.set_defaults(command="get_tree_details")
+
     # apply required tree identification arg for applicable subcommands
     for sub in [start_parser, load_new_tree_parser, tick_config_parser,
                 ack_node_parser, pause_parser, tick_parser,
-                unload_parser,]:
+                unload_parser, details_parser]:
         sub.add_argument(
             "tree_name",
             type=str,
@@ -167,4 +174,4 @@ def main(*args, **kwargs):
     cmd = kwargs.pop("command")
     logger.debug(f"Executing {cmd} with args {args, kwargs}")
     client = RPCClient()  # TODO: gather client from config
-    client.run(cmd, *args, **kwargs)
+    print(client.run(cmd, *args, **kwargs))

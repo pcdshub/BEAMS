@@ -195,7 +195,7 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
 
         bt_update = None
         if self.sync_man is not None:  # for testing modularity
-            bt_update = self.attempt_to_get_tree_update(request.tree_name)
+            bt_update = self.attempt_to_get_tree_update(request.tree_name, request.tree_uuid)
 
         hbeat_message = HeartBeatReply(mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT)
         hbeat_message.reply_timestamp.GetCurrentTime()

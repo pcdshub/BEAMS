@@ -122,10 +122,6 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             # process safe dictionary given by BEAMSService so we can appropriately respond with heartbeat
             logger.debug(f"Connecting to sync_man at: {self.sync_man.address}")
             self.sync_man.connect()
-            # do these need to be here? the manager will have these registered already
-            self.sync_man.register("get_tree_dict")
-            self.sync_man.register("TreeTicker")
-            self.sync_man.register("TreeState")
 
         # queue for owning object to grab commands s
         self.incoming_command_queue = Queue()

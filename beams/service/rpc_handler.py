@@ -27,9 +27,14 @@ class TreeIdKey:
     """
     Tree ID information bundle.
 
-    Name exists for readability only, and all comparisons are made on the uuid.
+    Name exists for readability primarily, and comparisons are first made on
+    the uuid, then the name.
     Partial uuids (str) matching the beginning of an instance's uuid are
-    considered equal to the instance (for ease of matching)
+    considered equal to the instance (for ease of matching).
+
+    When used as a dictionary key, items can be accessed with either:
+    - a TreeIdKey with the correct UUID
+    - a matching UUID directly
 
     Note that this does not let you use partial strings to match dictionary keys
     via the `in` keyword, since __contains__ uses hashes
@@ -223,7 +228,7 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
             hbeat_message.behavior_tree_update.extend(updates)
             return hbeat_message
 
-    def request_tree_details(self, request: NodeId, context) -> Optional[TreeDetails]:
+    def request_tree_details(self, request: NodeId, context) -> TreeDetails:
         """
         Gather tree details for the node ID provided
 

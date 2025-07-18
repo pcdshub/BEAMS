@@ -137,9 +137,9 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         self,
         tree_name: Optional[str] = None,
         tree_uuid: Optional[Union[UUID, str]] = None,
-    ) -> Optional[List[BehaviorTreeUpdateMessage]]:
+    ) -> List[BehaviorTreeUpdateMessage]:
         if self.sync_man is None:  # for testing modularity
-            return None
+            return []
         with self.sync_man as man:
             tree_dict: TreeTickerDict = man.get_tree_dict()
             key, tree_ticker = get_tree_from_treetickerdict(
@@ -160,17 +160,17 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
                 )]
             else:
                 logger.error(f"Unable to find tree of name {tree_name} currently being ticked")
-                return None
+                return []
 
-    def get_all_tree_updates(self) -> Optional[List[BehaviorTreeUpdateMessage]]:
+    def get_all_tree_updates(self) -> List[BehaviorTreeUpdateMessage]:
         if self.sync_man is None:  # for testing modularity
-            return None
+            return []
 
         with self.sync_man as man:
             tree_dict: TreeTickerDict = man.get_tree_dict()
             # if dictionary empty return none
             if len(tree_dict.items()) == 0:
-                return None
+                return []
 
             updates = []
             for key, tree_ticker in tree_dict.items():
@@ -204,11 +204,8 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         hbeat_message = HeartBeatReply(mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT)
         hbeat_message.reply_timestamp.GetCurrentTime()
 
-        if bt_update is None:
-            return hbeat_message
-        else:
-            hbeat_message.behavior_tree_update.extend(bt_update)
-            return hbeat_message
+        hbeat_message.behavior_tree_update.extend(bt_update)
+        return hbeat_message
 
     def request_heartbeat(self, request, context) -> HeartBeatReply:
         # assumption that hitting this service endpoint means you want to know
@@ -222,11 +219,8 @@ class RPCHandler(BEAMS_rpcServicer, Worker):
         hbeat_message = HeartBeatReply(mess_t=MessageType.MESSAGE_TYPE_HEARTBEAT)
         hbeat_message.reply_timestamp.GetCurrentTime()
 
-        if updates is None:
-            return hbeat_message
-        else:
-            hbeat_message.behavior_tree_update.extend(updates)
-            return hbeat_message
+        hbeat_message.behavior_tree_update.extend(updates)
+        return hbeat_message
 
     def request_tree_details(self, request: NodeId, context) -> TreeDetails:
         """

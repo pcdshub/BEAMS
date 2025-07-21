@@ -15,9 +15,10 @@ import pytest
 from py_trees.behaviour import Behaviour
 from py_trees.trees import BehaviourTree
 
-from beams.bin.service_main import BeamsService
 from beams.logging import setup_logging
+from beams.service.remote_calls.behavior_tree_pb2 import TickStatus, TreeStatus
 from beams.service.rpc_client import RPCClient
+from beams.service.rpc_handler import BeamsService
 
 
 def pytest_configure():
@@ -159,3 +160,26 @@ def wait_until(condition: Callable[[], bool], timeout=5, polling_period=0.5):
         time.sleep(polling_period)
 
     raise TimeoutError(f"Condition failed to resolve within timeout ({timeout} s)")
+
+
+def assert_heartbeat_has_n_trees(client: RPCClient, n_entries) -> bool:
+    resp1 = client.get_heartbeat()
+    return len(resp1.behavior_tree_update) == n_entries
+
+
+def assert_valid_tick_status_at_idx(client: RPCClient, tree_idx: int) -> bool:
+    curr_status = client.get_heartbeat().behavior_tree_update[tree_idx].tick_status
+    print(curr_status)
+    return curr_status != TickStatus.INVALID
+
+
+def assert_test_status(rpc_client: RPCClient, name: str, status: TreeStatus) -> bool:
+    resp = rpc_client.get_heartbeat()
+    my_msg = None
+    for update_msg in resp.behavior_tree_update:
+        if update_msg.tree_id.name == name:
+            my_msg = update_msg
+
+    if my_msg is None:
+        return False
+    return my_msg.tree_status == status

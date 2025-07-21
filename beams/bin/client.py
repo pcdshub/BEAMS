@@ -152,14 +152,26 @@ def build_arg_parser(argparser=None):
     )
     details_parser.set_defaults(command="get_tree_details")
 
-    # apply required tree identification arg for applicable subcommands
-    for sub in [start_parser, load_new_tree_parser, tick_config_parser,
+    # apply required tree identification arg or uuid for applicable subcommands
+    load_new_tree_parser.add_argument(
+        "tree_name",
+        type=str,
+        help="name of tree to load"
+    )
+
+    for sub in [start_parser, tick_config_parser,
                 ack_node_parser, pause_parser, tick_parser,
                 unload_parser, details_parser]:
-        sub.add_argument(
-            "tree_name",
+        group = sub.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            "--tree_name",
             type=str,
-            help="name of tree to interact with (or load)"
+            help="name of tree to interact with"
+        )
+        group.add_argument(
+            "--tree_uuid",
+            type=str,
+            help="UUID of tree to interact with"
         )
 
     return argparser

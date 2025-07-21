@@ -63,8 +63,18 @@ def load_tree_cli():
     return inner_load
 
 
+def get_uuid_for_name(rpc_client: RPCClient, name: str) -> str:
+    hb_info = rpc_client.get_heartbeat()
+    for update in hb_info.behavior_tree_update:
+        if update.tree_id.name == name:
+            uuid = update.tree_id.uuid
+            break
+        raise ValueError(f"unable to find name ({name}) in heartbeat")
+    return uuid
+
+
 @pytest.fixture()
-def start_tree_client(rpc_client: RPCClient):
+def start_tree_client_name(rpc_client: RPCClient):
     def inner_start():
         rpc_client.start_tree(tree_name="my_tree")
 
@@ -72,9 +82,18 @@ def start_tree_client(rpc_client: RPCClient):
 
 
 @pytest.fixture()
-def start_tree_cli():
+def start_tree_client_uuid(rpc_client: RPCClient):
     def inner_start():
-        args = ["beams", "client", "start_tree", "my_tree"]
+        uuid = get_uuid_for_name(rpc_client=rpc_client, name="my_tree")
+        rpc_client.start_tree(tree_uuid=uuid)
+
+    return inner_start
+
+
+@pytest.fixture()
+def start_tree_cli_name():
+    def inner_start():
+        args = ["beams", "client", "start_tree", "--tree_name", "my_tree"]
         with cli_args(args), restore_logging():
             main()
 
@@ -82,7 +101,18 @@ def start_tree_cli():
 
 
 @pytest.fixture()
-def pause_tree_client(rpc_client: RPCClient):
+def start_tree_cli_uuid(rpc_client: RPCClient):
+    def inner_start():
+        uuid = get_uuid_for_name(rpc_client, "my_tree")
+        args = ["beams", "client", "start_tree", "--tree_uuid", uuid]
+        with cli_args(args), restore_logging():
+            main()
+
+    return inner_start
+
+
+@pytest.fixture()
+def pause_tree_client_name(rpc_client: RPCClient):
     def inner_pause():
         rpc_client.pause_tree(tree_name="my_tree")
 
@@ -90,9 +120,18 @@ def pause_tree_client(rpc_client: RPCClient):
 
 
 @pytest.fixture()
-def pause_tree_cli():
+def pause_tree_client_uuid(rpc_client: RPCClient):
     def inner_pause():
-        args = ["beams", "client", "pause_tree", "my_tree"]
+        uuid = get_uuid_for_name(rpc_client, "my_tree")
+        rpc_client.pause_tree(tree_uuid=uuid)
+
+    return inner_pause
+
+
+@pytest.fixture()
+def pause_tree_cli_name():
+    def inner_pause():
+        args = ["beams", "client", "pause_tree", "--tree_name", "my_tree"]
         with cli_args(args), restore_logging():
             main()
 
@@ -100,7 +139,18 @@ def pause_tree_cli():
 
 
 @pytest.fixture()
-def tick_tree_client(rpc_client: RPCClient):
+def pause_tree_cli_uuid(rpc_client: RPCClient):
+    def inner_pause():
+        uuid = get_uuid_for_name(rpc_client, "my_tree")
+        args = ["beams", "client", "pause_tree", "--tree_uuid", uuid]
+        with cli_args(args), restore_logging():
+            main()
+
+    return inner_pause
+
+
+@pytest.fixture()
+def tick_tree_client_name(rpc_client: RPCClient):
     def inner_tick():
         rpc_client.tick_tree(tree_name="my_tree")
 
@@ -108,9 +158,29 @@ def tick_tree_client(rpc_client: RPCClient):
 
 
 @pytest.fixture()
-def tick_tree_cli():
+def tick_tree_client_uuid(rpc_client: RPCClient):
     def inner_tick():
-        args = ["beams", "client", "tick_tree", "my_tree"]
+        uuid = get_uuid_for_name(rpc_client, "my_tree")
+        rpc_client.tick_tree(tree_uuid=uuid)
+
+    return inner_tick
+
+
+@pytest.fixture()
+def tick_tree_cli_name():
+    def inner_tick():
+        args = ["beams", "client", "tick_tree", "--tree_name", "my_tree"]
+        with cli_args(args), restore_logging():
+            main()
+
+    return inner_tick
+
+
+@pytest.fixture()
+def tick_tree_cli_uuid(rpc_client: RPCClient):
+    def inner_tick():
+        uuid = get_uuid_for_name(rpc_client, "my_tree")
+        args = ["beams", "client", "tick_tree", "--tree_uuid", uuid]
         with cli_args(args), restore_logging():
             main()
 
@@ -150,15 +220,23 @@ def assert_tree_started(rpc_client: RPCClient, rpc_server: BeamsService):
     yield inner_assert
 
 
+LOAD_TREE_FIXTURE_NAMES = ["load_tree_client", "load_tree_cli"]
+START_TREE_FIXTURE_NAMES = ["start_tree_client_name", "start_tree_client_uuid",
+                            "start_tree_cli_name", "start_tree_cli_uuid"]
+TICK_TREE_FIXTURE_NAMES = ["tick_tree_client_name", "tick_tree_client_uuid",
+                           "tick_tree_cli_name", "tick_tree_cli_uuid"]
+PAUSE_TREE_FIXTURE_NAMES = ["pause_tree_client_name", "pause_tree_client_uuid",
+                            "pause_tree_cli_name", "pause_tree_cli_uuid"]
+
+
 # Test cases.  These will be parametrized by every possible combinations of
 # service interaction fixture.
-
 
 @pytest.mark.parametrize(
     "load_tree_fn, start_tree_fn,",
     product(
-        ("load_tree_client", "load_tree_cli"),
-        ("start_tree_client", "start_tree_cli"),
+        LOAD_TREE_FIXTURE_NAMES,
+        START_TREE_FIXTURE_NAMES,
     )
 )
 def test_continuous(
@@ -177,9 +255,9 @@ def test_continuous(
 @pytest.mark.parametrize(
     "load_tree_fn, start_tree_fn, tick_tree_fn",
     product(
-        ("load_tree_client", "load_tree_cli"),
-        ("start_tree_client", "start_tree_cli"),
-        ("tick_tree_client", "tick_tree_cli"),
+        ["load_tree_client_name"],
+        START_TREE_FIXTURE_NAMES,
+        TICK_TREE_FIXTURE_NAMES,
     )
 )
 def test_load_interactive_tree(
@@ -209,9 +287,9 @@ def test_load_interactive_tree(
 @pytest.mark.parametrize(
     "load_tree_fn, start_tree_fn, pause_tree_fn",
     product(
-        ("load_tree_client", "load_tree_cli"),
-        ("start_tree_client", "start_tree_cli"),
-        ("pause_tree_client", "pause_tree_cli"),
+        ["load_tree_client",],
+        ["start_tree_client_name",],
+        PAUSE_TREE_FIXTURE_NAMES,
     )
 )
 def test_pause_tree(
@@ -235,9 +313,9 @@ def test_pause_tree(
 @pytest.mark.parametrize(
     "load_tree_fn, start_tree_fn, tick_tree_fn",
     product(
-        ("load_tree_client", "load_tree_cli"),
-        ("start_tree_client", "start_tree_cli"),
-        ("tick_tree_client", "tick_tree_cli")
+        LOAD_TREE_FIXTURE_NAMES,
+        ["start_tree_client_name",],
+        TICK_TREE_FIXTURE_NAMES,
     )
 )
 def test_tree_details(

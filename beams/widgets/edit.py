@@ -1,15 +1,15 @@
 import logging
-from typing import Generator, List, Tuple
+from typing import Optional
 
 from qtpy import QtWidgets
+from qtpynodeeditor import FlowView
 
+from beams.tree_config.base import BehaviorTreeItem
 from beams.widgets.core import DesignerDisplay, insert_widget
-from beams.widgets.node_models import BeamsNode, create_editor_view
+from beams.widgets.node_models import create_editor_view, tree_from_graph
+from beams.widgets.qt_models import BehaviorTreeModel
 
 logger = logging.getLogger(__name__)
-
-
-BFS_GENERATOR = Generator[Tuple[BeamsNode, List[BeamsNode]], None, None]
 
 
 class EditPage(DesignerDisplay, QtWidgets.QWidget):
@@ -19,14 +19,25 @@ class EditPage(DesignerDisplay, QtWidgets.QWidget):
     node_widget: QtWidgets.QWidget
     auto_arrange_button: QtWidgets.QPushButton
 
+    node_editor: FlowView
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._setup_editor_widget()
         self._setup_callbacks()
+        self.update_tree_model()
 
     def _setup_editor_widget(self):
         self.node_editor = create_editor_view()
         insert_widget(self.node_editor, self.node_widget)
+
+    def update_tree_model(self, tree: Optional[BehaviorTreeItem] = None):
+        if tree is None:
+            digraph = self.node_editor.scene.to_digraph()
+            tree = tree_from_graph(digraph)
+        # setup tree view
+        self.tree_model = BehaviorTreeModel(tree=tree)
+        self.tree_view.setModel(self.tree_model)
 
     def _setup_callbacks(self):
         self.auto_arrange_button.clicked.connect(self.auto_arrange_nodes)

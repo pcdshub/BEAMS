@@ -9,7 +9,7 @@ NodeDataModel = nodes
 """
 import importlib
 from copy import deepcopy
-from typing import Dict, List, Optional, Sequence, Type
+from typing import Dict, Generator, List, Optional, Sequence, Tuple, Type
 
 import networkx as nx
 import qtpynodeeditor as nodeeditor
@@ -21,7 +21,6 @@ from qtpynodeeditor.style import LayoutDirection, SplineType, StyleCollection
 
 from beams.tree_config import BaseItem, BehaviorTreeItem
 from beams.widgets.base import get_embedded_widget
-from beams.widgets.edit import BFS_GENERATOR
 
 
 class BlankNodeData(NodeData):
@@ -332,6 +331,9 @@ def create_editor_view() -> nodeeditor.FlowView:
     view.resize(800, 600)
 
     return view
+
+
+BFS_GENERATOR = Generator[Tuple[BeamsNode, List[BeamsNode]], None, None]
 
 
 def tree_from_graph(digraph: nx.DiGraph) -> BehaviorTreeItem:

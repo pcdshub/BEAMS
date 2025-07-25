@@ -23,7 +23,7 @@ class SetPVActionWidget(EmbeddedNodeWidget):
         self.loop_period_edit = QtWidgets.QDoubleSpinBox()
         self.form_layout.addRow("Loop Period:", self.loop_period_edit)
 
-    def update_item(self, item: SetPVActionItem):
+    def update_data(self, item: SetPVActionItem):
         item.pv = self.pv_edit.text()
         item.value = self.value_edit.text()  # TODO: deal with types
         item.loop_period_sec = self.loop_period_edit.value()

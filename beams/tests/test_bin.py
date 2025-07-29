@@ -258,7 +258,7 @@ TICK_CONFIG_ARGS = (
     (("-m", "INTERACTIVE"), ("--tick_mode", "INTERACTIVE"), ("-m", "CONTINUOUS"),
      ("--tick_mode", "CONTINUOUS"), ()),
     (("-d", "3"), ("--tick_delay_ms", "3"), ()),
-    (("tree_name",),),
+    (("--tree_name", "tree_name",), ("--tree_uuid", "1234756")),
 )
 
 
@@ -284,7 +284,7 @@ def test_client_tick_cfg(MockClient, subcommand: str, added_args: tuple[str]):
     "unload_tree", "UNLOAD_TREE", "unload"
 ))
 def test_client_simple_subcommands(MockClient, subcommand: str):
-    args = ["beams", "client", subcommand, "tree_name"]
+    args = ["beams", "client", subcommand, "--tree_name", "tree_name"]
     print(args)
     with cli_args(args), restore_logging():
         main()

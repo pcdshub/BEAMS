@@ -255,7 +255,7 @@ def test_continuous(
 @pytest.mark.parametrize(
     "load_tree_fn, start_tree_fn, tick_tree_fn",
     product(
-        ["load_tree_client_name"],
+        ["load_tree_client"],
         START_TREE_FIXTURE_NAMES,
         TICK_TREE_FIXTURE_NAMES,
     )

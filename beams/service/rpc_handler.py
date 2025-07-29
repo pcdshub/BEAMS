@@ -4,7 +4,7 @@ from concurrent import futures
 from dataclasses import dataclass, field
 from multiprocessing import Queue, Semaphore
 from multiprocessing.managers import BaseManager
-from typing import Callable, Dict, List, Optional, Tuple, TypeAlias, Union
+from typing import Callable, Dict, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
 import grpc
@@ -64,7 +64,7 @@ class TreeIdKey:
         return False
 
 
-TreeTickerDict: TypeAlias = Dict[TreeIdKey, TreeTicker]
+TreeTickerDict = Dict[TreeIdKey, TreeTicker]
 
 
 def get_tree_from_treetickerdict(

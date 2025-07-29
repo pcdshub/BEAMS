@@ -16,6 +16,14 @@ import beams.tree_config.py_trees  # noqa: F401
 from beams.tree_config.base import BaseItem, BehaviorTreeItem
 
 
+def get_tree_item_from_path(path: Path) -> BehaviorTreeItem:
+    with open(path, "r") as fd:
+        deser = json.load(fd)
+        tree_item = deserialize(BehaviorTreeItem, deser)
+
+    return tree_item
+
+
 def get_tree_from_path(path: Path) -> BehaviourTree:
     """
     Deserialize a json file, return the tree it specifies.
@@ -23,11 +31,7 @@ def get_tree_from_path(path: Path) -> BehaviourTree:
     This can be used internally to conveniently and consistently load
     serialized json files as ready-to-run behavior trees.
     """
-    with open(path, "r") as fd:
-        deser = json.load(fd)
-        tree_item = deserialize(BehaviorTreeItem, deser)
-
-    return tree_item.get_tree()
+    return get_tree_item_from_path(path).get_tree()
 
 
 def save_tree_item_to_path(path: Union[Path, str], root: BaseItem):

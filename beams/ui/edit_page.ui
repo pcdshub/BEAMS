@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>edit_page</class>
+ <widget class="QWidget" name="edit_page">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
@@ -21,17 +21,20 @@
      </property>
      <widget class="QTreeView" name="tree_view">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-        <horstretch>0</horstretch>
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>1</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
      </widget>
-     <widget class="QWidget" name="verticalLayoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="bottomMargin">
-        <number>10</number>
-       </property>
+     <widget class="QWidget" name="edit_widgets" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>3</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QWidget" name="node_widget" native="true">
          <property name="sizePolicy">
@@ -43,11 +46,22 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="auto_arrange_button">
-         <property name="text">
-          <string>Auto-arrange</string>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="button_layout">
+         <item>
+          <widget class="QPushButton" name="update_tree_button">
+           <property name="text">
+            <string>Update Tree</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="auto_arrange_button">
+           <property name="text">
+            <string>Auto-arrange</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>

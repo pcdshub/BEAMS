@@ -341,6 +341,12 @@ def tree_from_graph(digraph: nx.DiGraph) -> BehaviorTreeItem:
     grab digraph from scene and generate a BehaviorTreeItem using the information
     """
     roots: List[BeamsNode] = [n for n, d in digraph.in_degree() if d == 0]
+
+    # no valid root, return a dummy tree.  Maybe raise an error?
+    # TODO install pydm exception handler probably
+    if not roots:
+        return BehaviorTreeItem(root=BaseItem())
+
     root_node = roots[0]
 
     node_item_map: Dict[Node, BaseItem] = {}

@@ -183,3 +183,10 @@ def assert_test_status(rpc_client: RPCClient, name: str, status: TreeStatus) -> 
     if my_msg is None:
         return False
     return my_msg.tree_status == status
+
+
+# path to a bt that doesn't need any IOC communication
+ETERNAL_GUARD_PATH = Path(__file__).parent / "artifacts" / "eternal_guard.json"
+if not ETERNAL_GUARD_PATH.exists():
+    raise FileNotFoundError("Eternal Guard Behavior Tree file missing: "
+                            f"{ETERNAL_GUARD_PATH}")

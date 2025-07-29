@@ -12,16 +12,11 @@ from beams.service.remote_calls.generic_message_pb2 import MessageType
 from beams.service.remote_calls.heartbeat_pb2 import HeartBeatReply
 from beams.service.rpc_client import RPCClient
 from beams.service.rpc_handler import BeamsService
-from beams.tests.conftest import (assert_heartbeat_has_n_trees,
+from beams.tests.conftest import (ETERNAL_GUARD_PATH,
+                                  assert_heartbeat_has_n_trees,
                                   assert_test_status,
                                   assert_valid_tick_status_at_idx, cli_args,
                                   restore_logging, wait_until)
-
-# path to a bt that doesn't need any IOC communication
-ETERNAL_GUARD_PATH = Path(__file__).parent / "artifacts" / "eternal_guard.json"
-if not ETERNAL_GUARD_PATH.exists():
-    raise FileNotFoundError("Eternal Guard Behavior Tree file missing: "
-                            f"{ETERNAL_GUARD_PATH}")
 
 
 def test_heartbeat(rpc_client: RPCClient):

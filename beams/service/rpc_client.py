@@ -172,8 +172,7 @@ class RPCClient:
         tree_uuid = kwargs.get("tree_uuid") or ""
         # These commands only need captured tree name and command itself
         if command.upper() == "GET_TREE_DETAILS":
-            response = self.get_detailed_update(tree_name=tree_name, tree_uuid=tree_uuid)
-            return response
+            return self.get_detailed_update(tree_name=tree_name, tree_uuid=tree_uuid)
 
         command = getattr(CommandType, command.upper())
         if command not in CommandType.values():

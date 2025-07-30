@@ -1,16 +1,5 @@
 """
 Communicate with a running BEAMS service (you are the client)
-
-Provides subcommands for the following actions:
-- get_heartbeat
-- start_tree
-- tick_tree
-- pause_tree
-- unload_tree
-- load_tree
-- change_tick_rate_of_tree
-- change_tick_configuration
-- ack_node
 """
 
 import argparse
@@ -38,7 +27,10 @@ def build_arg_parser(argparser=None):
     )
 
     # get heartbeat
-    sub = subparsers.add_parser("get_heartbeat")
+    sub = subparsers.add_parser(
+        "get_heartbeat",
+        help="get heartbeat information for all currently loaded trees"
+    )
     sub.set_defaults(command="get_heartbeat")
 
     # load new tree

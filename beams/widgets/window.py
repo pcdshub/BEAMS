@@ -38,6 +38,11 @@ class MainWindow(DesignerDisplay, QMainWindow):
         self.action_save_file.triggered.connect(self.save)
         self.action_save_as.triggered.connect(self.save_as)
 
+        # Tab close enabled in designer, need to wire close action manually
+        self.tab_widget.tabCloseRequested.connect(
+            self.tab_widget.removeTab
+        )
+
         # Exception handling: show a dialog to catch exceptions in main qt thread
         install(use_default_handler=False)
         self.exception_notifier = DefaultExceptionNotifier(main_parent=self)

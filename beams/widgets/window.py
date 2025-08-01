@@ -7,6 +7,7 @@ from qtpy.QtWidgets import QAction, QFileDialog, QMainWindow, QTabWidget
 from beams.tree_config import get_tree_from_path
 from beams.widgets.core import DesignerDisplay
 from beams.widgets.edit import EditPage
+from beams.widgets.exception import DefaultExceptionNotifier, install
 
 
 class MainWindow(DesignerDisplay, QMainWindow):
@@ -22,6 +23,10 @@ class MainWindow(DesignerDisplay, QMainWindow):
 
         self.tab_widget.addTab(edit_widget, "edit")
         self.action_open_file.triggered.connect(self.open_file)
+
+        # Exception handling: show a dialog to catch exceptions in main qt thread
+        install(use_default_handler=False)
+        self.exception_notifier = DefaultExceptionNotifier(main_parent=self)
 
     def open_file(self, *args, filename: Optional[str] = None, **kwargs):
         """

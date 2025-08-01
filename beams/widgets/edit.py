@@ -22,7 +22,7 @@ class EditPage(DesignerDisplay, QtWidgets.QWidget):
     update_tree_button: QtWidgets.QPushButton
 
     node_editor: FlowView
-    tree: BehaviorTreeItem
+    tree: Optional[BehaviorTreeItem]
 
     def __init__(
         self,
@@ -34,8 +34,12 @@ class EditPage(DesignerDisplay, QtWidgets.QWidget):
         super().__init__(*args, **kwargs)
         self._setup_editor_widget()
         self._setup_callbacks()
+
         if tree is not None:
             self.load_tree(tree)
+        else:
+            self.tree = tree
+
         self.full_path = full_path
 
     def _setup_editor_widget(self) -> None:
@@ -51,7 +55,7 @@ class EditPage(DesignerDisplay, QtWidgets.QWidget):
         checked: bool = False,
         tree: Optional[BehaviorTreeItem] = None
     ) -> None:
-        if tree is None:
+        if tree is None or self.tree is None:
             digraph = self.node_editor.scene.to_digraph()
             self.tree = tree_from_graph(digraph)
         tree = self.tree
@@ -61,6 +65,7 @@ class EditPage(DesignerDisplay, QtWidgets.QWidget):
             show_status=False
         )
         self.tree_view.setModel(self.tree_model)
+        self.tree_view.expandAll()
 
     def auto_arrange_nodes(self, *args, **kwargs) -> None:
         try:

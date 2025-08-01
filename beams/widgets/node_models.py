@@ -342,10 +342,9 @@ def tree_from_graph(digraph: nx.DiGraph) -> BehaviorTreeItem:
     """
     roots: List[BeamsNode] = [n for n, d in digraph.in_degree() if d == 0]
 
-    # no valid root, return a dummy tree.  Maybe raise an error?
-    # TODO install pydm exception handler probably
-    if not roots:
-        return BehaviorTreeItem(root=BaseItem())
+    if not roots or len(roots) != 1:
+        raise RuntimeError("Cannot construct a tree, invalid number of root "
+                           f"nodes: {len(roots)}")
 
     root_node = roots[0]
 

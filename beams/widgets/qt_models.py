@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
-from typing import Any, Generator, Optional
+from typing import Any, Generator, Optional, Union
 from uuid import UUID
 
 import qtawesome as qta
@@ -11,7 +11,8 @@ from py_trees.common import Status
 from qtpy import QtCore
 
 from beams.service.remote_calls.behavior_tree_pb2 import (NodeInfo, TickStatus,
-                                                          TreeDetails)
+                                                          TreeDetails,
+                                                          TreeStatus)
 from beams.tree_config.base import BaseItem, BehaviorTreeItem
 
 logger = logging.getLogger(__name__)
@@ -42,7 +43,7 @@ class QtBTreeItem:
     name: str = ""
     node_id: Optional[UUID] = None
     node_type: str = ""
-    status: TickStatus = TickStatus.INVALID
+    status: Union[TickStatus, TreeStatus] = TickStatus.INVALID
 
     # Do these need to be renamed to deconflict qt methods?
     parent: Optional[QtBTreeItem] = None
@@ -54,23 +55,39 @@ class QtBTreeItem:
     def update_from_tree_details(self, details: TreeDetails):
         """
         Update with information from tree_details (Status, uuid)
-        fills uuids if dne, otherwise only fills if uuids match
+
+        This assumes that self is the top-level root node, with only one child
         """
-        def _inner_update(tree_item: QtBTreeItem, node_info: NodeInfo):
-            if tree_item.node_id is None:
-                tree_item.node_id = UUID(node_info.id.uuid)
+        if not isinstance(details, TreeDetails):
+            raise ValueError("Provided details must be a `TreeDetails` object "
+                             f"as provided by the BEAMS Service, not {type(details)}")
 
-            tree_item.status = getattr(Status, TickStatus.Name(node_info.status))
+        if len(self.children) != 1:
+            raise ValueError("Please call this method from the root QtBTreeItem")
 
-            if len(tree_item.children) != len(node_info.children):
-                raise ValueError("Provided details do not match the tree being"
-                                 "updated.")
-            for item_c, node_c in zip(tree_item.children, node_info.children):
-                _inner_update(item_c, node_c)
+        # Update the root node manually
+        self.status = details.tree_status
+        self.node_id = UUID(details.tree_id.uuid)
 
-            return tree_item
+        return self.children[0].update_from_node_info(details.node_info)
 
-        return _inner_update(self, details.node_info)
+    def update_from_node_info(self: QtBTreeItem, node_info: NodeInfo):
+        """
+        Update this tree item from a node_info object.
+
+        In contrast to `.update_from_tree_details`, this must be called from a
+        node that is not the root
+        """
+        self.node_id = UUID(node_info.id.uuid)
+        self.status = getattr(Status, TickStatus.Name(node_info.status))
+
+        # This is the simplest check I could think of to verify the two tree
+        # structures matched
+        if len(self.children) != len(node_info.children):
+            raise ValueError("Provided details do not match the tree being"
+                             "updated.  (number of children mismatched)")
+        for item_c, node_c in zip(self.children, node_info.children):
+            item_c.update_from_node_info(node_c)
 
     @classmethod
     def from_behavior_tree_item(cls, tree: BehaviorTreeItem) -> QtBTreeItem:
@@ -156,6 +173,23 @@ class QtBTreeItem:
         icon_id = STATUS_ICON_MAP.get(self.status)
         return qta.icon(icon_id)
 
+    def walk_tree(
+        self,
+    ) -> Generator[QtBTreeItem, None, None]:
+        """
+        Walk the tree depth-first and yield each node.
+        """
+        yield self
+        for child in self.get_children():
+            yield from child.walk_tree()
+
+    def get_child(self, uuid: UUID) -> Optional[QtBTreeItem]:
+        for item in self.walk_tree():
+            if item.node_id == uuid:
+                return item
+
+        return None
+
 
 class BehaviorTreeModel(QtCore.QAbstractItemModel):
     def __init__(
@@ -169,11 +203,6 @@ class BehaviorTreeModel(QtCore.QAbstractItemModel):
         self.root_item = tree
         self.headers = ['name', 'type', 'status']
         self.show_status = show_status
-
-    # def refresh_tree(self) -> None:
-    #     self.layoutAboutToBeChanged.emit()
-    #     # self.root_item = build_tree(self.base_entry)
-    #     self.layoutChanged.emit()
 
     def headerData(
         self,

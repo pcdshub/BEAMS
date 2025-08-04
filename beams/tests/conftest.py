@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pathlib
 import subprocess
 import sys
 import time
@@ -190,3 +191,20 @@ ETERNAL_GUARD_PATH = Path(__file__).parent / "artifacts" / "eternal_guard.json"
 if not ETERNAL_GUARD_PATH.exists():
     raise FileNotFoundError("Eternal Guard Behavior Tree file missing: "
                             f"{ETERNAL_GUARD_PATH}")
+
+
+def test_configs() -> list[pathlib.Path]:
+    """all valid tree configs"""
+    filenames = ['eggs.json', 'eggs2.json', 'eternal_guard.json', 'im2l0_test.json',
+                 'wait_for_ack.json']
+    test_config_path = pathlib.Path(__file__).parent / 'artifacts'
+    config_paths = [test_config_path / fn for fn in filenames]
+    return config_paths
+
+
+TEST_CONFIG_PATHS = test_configs()
+
+
+@pytest.fixture(params=TEST_CONFIG_PATHS)
+def configs(request):
+    return request.param

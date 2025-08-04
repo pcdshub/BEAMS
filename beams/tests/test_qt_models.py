@@ -75,10 +75,39 @@ def eternal_guard_details() -> TreeDetails:
     return details
 
 
-def test_update_qtitem_with_details():
-    return
+def assert_base_qtbtreeitem_info(tree_item: QtBTreeItem):
+    # walks DFS
+    for item, name, node_type in zip(
+        tree_item.walk_tree(),
+        ["<root>", "Eternal Guard", "Condition 1", "Condition 2", "Task Sequence",
+         "Worker 1", "Worker 2"],
+        ["", "Sequence", "StatusQueue", "StatusQueue", "Sequence", "Success",
+         "Running"],
+    ):
+        assert item.name == name
+        assert item.node_type == node_type
 
 
-def test_create_qttreeite(eternal_guard_item):
+def test_create_qttreeitem(eternal_guard_item):
     tree_item = QtBTreeItem.from_behavior_tree_item(eternal_guard_item)
-    assert tree_item.name == "Eternal Guard"
+    assert tree_item.children[0].name == "Eternal Guard"
+
+    for child, child_ct in zip(tree_item.children[0].children, [0, 0, 2]):
+        assert len(child.children) == child_ct
+
+    assert_base_qtbtreeitem_info(tree_item)
+
+
+def test_update_qtitem_with_details(eternal_guard_item, eternal_guard_details):
+    tree_item = QtBTreeItem.from_behavior_tree_item(eternal_guard_item)
+    for item in tree_item.walk_tree():
+        assert item.status is TickStatus.INVALID
+
+    tree_item.update_from_tree_details(eternal_guard_details)
+
+    assert tree_item.status == TreeStatus.TICKING
+    for item in tree_item.walk_tree():
+        assert item.status is not TickStatus.INVALID
+        assert item.node_id is not None
+
+    assert_base_qtbtreeitem_info(tree_item)

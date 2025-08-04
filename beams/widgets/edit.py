@@ -1,3 +1,6 @@
+"""
+Edit Page.  Used to create behavior tree configurations graphically.
+"""
 import logging
 from pathlib import Path
 from typing import Optional, Union
@@ -55,6 +58,20 @@ class EditPage(DesignerDisplay, QtWidgets.QWidget):
         checked: bool = False,
         tree: Optional[BehaviorTreeItem] = None
     ) -> None:
+        """
+        Update the internal tree model from the provided `tree`. If a `tree` is
+        not provided, attempt to create one from the node editor configuration.
+
+        Updates the tree view widget with the new trees
+
+        Parameters
+        ----------
+        checked : bool, optional
+            If the button is checked, by default False.
+            Meant to be filled by Qt signals, not used by the application
+        tree : Optional[BehaviorTreeItem], optional
+            The tree used to update internal models, by default None
+        """
         if tree is None or self.tree is None:
             digraph = self.node_editor.scene.to_digraph()
             self.tree = tree_from_graph(digraph)
@@ -68,13 +85,21 @@ class EditPage(DesignerDisplay, QtWidgets.QWidget):
         self.tree_view.expandAll()
 
     def auto_arrange_nodes(self, *args, **kwargs) -> None:
+        """Auto-arrange the nodes in the node editor using a pygraphviz layout"""
         try:
             self.node_editor.scene.auto_arrange(layout="pygraphviz", prog="dot")
         except ImportError:
             logger.debug("pygraphviz not available to run auto arrange routine")
 
     def create_nodes_from_tree(self, tree: BehaviorTreeItem) -> None:
-        """Create nodes and autoarrange the existing setup"""
+        """
+        Create and autoarrange nodes as defined by the structure in `tree`.
+
+        Parameters
+        ----------
+        tree : BehaviorTreeItem
+            the tree to create nodes from.l
+        """
         tree_item = QtBTreeItem.from_behavior_tree_item(tree)
         scene = self.node_editor.scene
 
@@ -99,7 +124,10 @@ class EditPage(DesignerDisplay, QtWidgets.QWidget):
         self.auto_arrange_nodes()
 
     def load_tree(self, tree: BehaviorTreeItem) -> None:
-        """Load a tree"""
+        """
+        Load a `tree`, updating the internal model and autogenerating nodes
+        in the node editor
+        """
         self.tree = tree
         self.update_tree_model(tree=self.tree)
         self.create_nodes_from_tree(self.tree)

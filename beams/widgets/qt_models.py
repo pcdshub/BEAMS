@@ -1,3 +1,7 @@
+"""
+Qt models and items for use across the BEAMS GUI.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -50,13 +54,28 @@ class QtBTreeItem:
     children: list[QtBTreeItem] = field(default_factory=list)
 
     def __post_init__(self):
+        # internal tracker for own row under parent.
+        # Gets updated by qt updated by add/remove children methods
         self._row = 0
 
     def update_from_tree_details(self, details: TreeDetails):
         """
         Update with information from tree_details (Status, uuid)
 
-        This assumes that self is the top-level root node, with only one child
+        This assumes that self is the top-level root node, with only one child.
+        This method handles the root node and calls :py:meth:`~.update_from_node_info`.
+
+        see:
+
+        Parameters
+        ----------
+        details : TreeDetails
+            Tree details as returned from the BEAMS RPC service
+
+        Raises
+        ------
+        ValueError
+            If the provided `details` object is invalid (improper type or not root)
         """
         if not isinstance(details, TreeDetails):
             raise ValueError("Provided details must be a `TreeDetails` object "
@@ -71,13 +90,27 @@ class QtBTreeItem:
 
         return self.children[0].update_from_node_info(details.node_info)
 
-    def update_from_node_info(self: QtBTreeItem, node_info: NodeInfo):
+    def update_from_node_info(self, node_info: NodeInfo):
         """
         Update this tree item from a node_info object.
 
-        In contrast to `.update_from_tree_details`, this must be called from a
-        node that is not the root
+        In contrast to :py:meth:`~.update_from_tree_details`, this must be
+        called from a node that is not the root
+
+        Parameters
+        ----------
+        node_info : NodeInfo
+            The NodeInfo to update this QtBTreeItem with.  This comes from the
+            BEAMS RPC Service as a child of the TreeDetails object
+
+        Raises
+        ------
+        ValueError
+            If the provided NodeInfo does not match the tree item being updated.
         """
+        # TODO figure out a better way to check the tree matches the node_info
+        # perhaps checking all tree-structure with encoded tree?
+        # perhaps adjust tree details proto to also encode node types
         self.node_id = UUID(node_info.id.uuid)
         self.status = getattr(Status, TickStatus.Name(node_info.status))
 
@@ -91,7 +124,20 @@ class QtBTreeItem:
 
     @classmethod
     def from_behavior_tree_item(cls, tree: BehaviorTreeItem) -> QtBTreeItem:
-        """convert from BehaviorTreeItem to QT-TreeItem"""
+        """
+        Convert from BehaviorTreeItem to QT-BehaviorTreeItem from.
+        A `BehaviorTreeItem` is the deserialized BEAMS tree object.
+
+        Parameters
+        ----------
+        tree : BehaviorTreeItem
+            BehaviorTreeItem to create a QtBTreeItem from
+
+        Returns
+        -------
+        QtBTreeItem
+            _description_
+        """
         def _inner_get_tree_item(tree: BaseItem) -> QtBTreeItem:
             item = QtBTreeItem(
                 name=tree.name, node_type=type(tree).__name__.removesuffix("Item")
@@ -184,6 +230,10 @@ class QtBTreeItem:
             yield from child.walk_tree()
 
     def get_child(self, uuid: UUID) -> Optional[QtBTreeItem]:
+        """
+        Return the child with `uuid` from this tree's descendants.  Returns
+        `None` if a match cannot be found.
+        """
         for item in self.walk_tree():
             if item.node_id == uuid:
                 return item

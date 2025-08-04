@@ -166,7 +166,7 @@ class MainWindow(DesignerDisplay, QMainWindow):
 
     def set_current_tab_name(self, filename: str):
         """
-        Set the title of the current tab based on the filename.
+        Set the title of the current tab based on the `filename`.
         """
         self.tab_widget.setTabText(
             self.tab_widget.currentIndex(),

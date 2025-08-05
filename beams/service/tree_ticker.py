@@ -268,6 +268,7 @@ class TreeTicker(Worker):
             return NodeInfo(
                 id=NodeId(name=node.name, uuid=str(node.id)),
                 status=getattr(TickStatus, node.status.name),
+                type=type(node).__name__,
                 children=child_info,
             )
 

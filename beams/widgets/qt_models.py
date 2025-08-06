@@ -108,17 +108,18 @@ class QtBTreeItem:
         ValueError
             If the provided NodeInfo does not match the tree item being updated.
         """
-        # TODO figure out a better way to check the tree matches the node_info
-        # perhaps checking all tree-structure with encoded tree?
-        # perhaps adjust tree details proto to also encode node types
         self.node_id = UUID(node_info.id.uuid)
         self.status = getattr(Status, TickStatus.Name(node_info.status))
 
         # This is the simplest check I could think of to verify the two tree
         # structures matched
         if len(self.children) != len(node_info.children):
-            raise ValueError("Provided details do not match the tree being"
+            raise ValueError("Provided details do not match the tree being "
                              "updated.  (number of children mismatched)")
+        if self.node_type != node_info.type:
+            raise ValueError("Provided details do not match the tree being "
+                             "updated.  Node types mismatch: "
+                             f"{self.node_type} vs {node_info.type}")
         for item_c, node_c in zip(self.children, node_info.children):
             item_c.update_from_node_info(node_c)
 

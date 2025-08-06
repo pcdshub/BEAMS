@@ -28,6 +28,7 @@ def eternal_guard_details() -> TreeDetails:
                 uuid="56e4da1e-b3a9-4dc8-b27a-1c82cd0ba68d",
             ),
             status=TickStatus.RUNNING,
+            type="Sequence",
             children=[
                 NodeInfo(
                     id=NodeId(
@@ -35,6 +36,7 @@ def eternal_guard_details() -> TreeDetails:
                         uuid="05a83efd-6318-408f-9737-25f01d2d3090",
                     ),
                     status=TickStatus.SUCCESS,
+                    type="StatusQueue",
                     children=[],
                 ),
                 NodeInfo(
@@ -43,6 +45,7 @@ def eternal_guard_details() -> TreeDetails:
                         uuid="a33b309c-08cc-4922-a61d-bb3a4c799165",
                     ),
                     status=TickStatus.SUCCESS,
+                    type="StatusQueue",
                     children=[],
                 ),
                 NodeInfo(
@@ -51,6 +54,7 @@ def eternal_guard_details() -> TreeDetails:
                         uuid="c201a150-b6f2-4afe-aa0a-4c52aa4a8a87",
                     ),
                     status=TickStatus.RUNNING,
+                    type="Sequence",
                     children=[
                         NodeInfo(
                             id=NodeId(
@@ -58,6 +62,7 @@ def eternal_guard_details() -> TreeDetails:
                                 uuid="e8f2c943-fc22-4a3a-993a-c2f4c44f8651",
                             ),
                             status=TickStatus.SUCCESS,
+                            type="Success",
                         ),
                         NodeInfo(
                             id=NodeId(
@@ -65,6 +70,7 @@ def eternal_guard_details() -> TreeDetails:
                                 uuid="2c654b9e-8659-444f-96ef-d9b20fec9c5f",
                             ),
                             status=TickStatus.RUNNING,
+                            type="Running",
                         ),
                     ],
                 ),

@@ -126,7 +126,7 @@ class QtBTreeItem:
     @classmethod
     def from_behavior_tree_item(cls, tree: BehaviorTreeItem) -> QtBTreeItem:
         """
-        Convert from BehaviorTreeItem to QT-BehaviorTreeItem from.
+        Convert from `BehaviorTreeItem` to QT-BehaviorTreeItem.
         A `BehaviorTreeItem` is the deserialized BEAMS tree object.
 
         Parameters
@@ -137,7 +137,6 @@ class QtBTreeItem:
         Returns
         -------
         QtBTreeItem
-            _description_
         """
         def _inner_get_tree_item(tree: BaseItem) -> QtBTreeItem:
             item = QtBTreeItem(
@@ -152,6 +151,47 @@ class QtBTreeItem:
 
         tree_root_item = _inner_get_tree_item(tree.root)
         root_item = QtBTreeItem(name="<root>")
+        root_item.addChild(tree_root_item)
+        return root_item
+
+    @classmethod
+    def from_tree_details(cls, tree: TreeDetails) -> QtBTreeItem:
+        """
+        Convert from `TreeDetails` to QT-BehaviorTreeItem.
+        `TreeDetails` is the proto message from the BEAMS service.
+        Use this if you want to represent a tree entirely with information
+        from the service.
+
+        Parameters
+        ----------
+        tree : TreeDetails
+            TreeDetails message to create a QtBTreeItem from
+
+        Returns
+        -------
+        QtBTreeItem
+        """
+        def _inner_get_tree_item(info: NodeInfo) -> QtBTreeItem:
+            item = QtBTreeItem(
+                name=info.id.name,
+                node_type=info.type,
+                node_id=UUID(info.id.uuid),
+                status=info.status
+            )
+            if hasattr(info, "children"):
+                children = [_inner_get_tree_item(child) for child in info.children]
+                for child in children:
+                    item.addChild(child)
+
+            return item
+
+        tree_root_item = _inner_get_tree_item(tree.node_info)
+        root_item = QtBTreeItem(
+            name=tree.tree_id.name,
+            node_id=UUID(tree.tree_id.uuid),
+            node_type="<root>",
+            status=tree.tree_status,
+        )
         root_item.addChild(tree_root_item)
         return root_item
 

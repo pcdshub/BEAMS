@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 
 import grpc
 
+from beams.config import BeamsConfig
 from beams.service.helpers.worker import Worker
 from beams.service.remote_calls.beams_rpc_pb2_grpc import (
     BEAMS_rpcServicer, add_BEAMS_rpcServicer_to_server)
@@ -105,12 +106,14 @@ def get_tree_from_treetickerdict(
 
 
 class RPCHandler(BEAMS_rpcServicer, Worker):
-    def __init__(self, sync_manager: BaseManager, port=50051):
+    def __init__(self, sync_manager: BaseManager, config: Optional[BeamsConfig] = None):
+        if config is None:
+            config = BeamsConfig()
         # GRPC server launching things from docs:
         # https://grpc.io/docs/languages/python/basics/#starting-the-server
         self.thread_pool = futures.ThreadPoolExecutor(max_workers=10)
         self.server = grpc.server(self.thread_pool)
-        self.server_port = port
+        self.server_port = config.port
 
         # calling Worker's super
         super().__init__(proc_name="RPCHandler",

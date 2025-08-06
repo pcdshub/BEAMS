@@ -8,9 +8,9 @@ something like:
 
 beams.cfg
 
-[DEFAULT]
-server_host = my-favorite-server
-server_port = 5001
+[server]
+host = my-favorite-server
+port = 5001
 """
 
 import configparser
@@ -24,8 +24,8 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class BeamsConfig:
-    server_host: str
-    server_port: int
+    host: str = "localhost"
+    port: int = 50051
 
 
 def find_config() -> str:
@@ -51,7 +51,7 @@ def find_config() -> str:
             logger.debug("Found configuration file at %r", full_path)
             return full_path
     # Give up
-    raise OSError("No beams configuration file found. Check BEAMS_CFG.")
+    raise RuntimeError("No beams configuration file found. Check BEAMS_CFG.")
 
 
 def load_config(config: Optional[str] = None) -> BeamsConfig:
@@ -63,8 +63,8 @@ def load_config(config: Optional[str] = None) -> BeamsConfig:
     config_parser = configparser.ConfigParser()
     files_read = config_parser.read(config)
     if not files_read:
-        raise OSError(f"Cannot read config file {config}")
+        raise RuntimeError(f"Cannot read config file {config}")
     return BeamsConfig(
-        server_host=config_parser["DEFAULT"]["server_host"],
-        server_port=int(config_parser["DEFAULT"]["server_port"]),
+        host=config_parser["server"]["host"],
+        port=int(config_parser["server"]["port"]),
     )

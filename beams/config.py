@@ -8,6 +8,7 @@ something like:
 
 beams.cfg
 
+[DEFAULT]
 server_host = my-favorite-server
 server_port = 5001
 """
@@ -24,23 +25,25 @@ logger = logging.getLogger(__name__)
 @dataclasses.dataclass
 class BeamsConfig:
     server_host: str
-    server_port: str
+    server_port: int
 
 
 def find_config() -> str:
     """
     Return the directory that contains the user's beams.cfg file.
     """
-    # Environment variable
+    # Environment variable first
     beams_cfg = os.environ.get("BEAMS_CFG", "")
     if beams_cfg:
         logger.debug("Found $BEAMS_CFG specification at %s", beams_cfg)
         return beams_cfg
-    # Home directory
-    config_dirs = [
-        os.environ.get("XDG_CONFIG_HOME", "."),
-        os.path.expanduser("~/.config"),
-    ]
+    # Working directory next
+    config_dirs = ["."]
+    # General config directories last
+    xdg_config = os.environ.get("XDG_CONFIG_HOME")
+    if xdg_config is not None:
+        config_dirs.append(xdg_config)
+    config_dirs.append(os.path.expanduser("~/.config"))
     for directory in config_dirs:
         logger.debug("Searching for Beams config in %s", directory)
         full_path = os.path.join(directory, "beams.cfg")
@@ -55,3 +58,13 @@ def load_config(config: Optional[str] = None) -> BeamsConfig:
     """
     Get the beams configuration.
     """
+    if config is None:
+        config = find_config()
+    config_parser = configparser.ConfigParser()
+    files_read = config_parser.read(config)
+    if not files_read:
+        raise OSError(f"Cannot read config file {config}")
+    return BeamsConfig(
+        server_host=config_parser["DEFAULT"]["server_host"],
+        server_port=int(config_parser["DEFAULT"]["server_port"]),
+    )

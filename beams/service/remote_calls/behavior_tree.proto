@@ -44,7 +44,8 @@ message BehaviorTreeUpdateMessage {
 message NodeInfo {
   NodeId id = 1;
   TickStatus status = 2;
-  repeated NodeInfo children = 3;
+  string type = 3;
+  repeated NodeInfo children = 4;
 }
 
 message TreeDetails {

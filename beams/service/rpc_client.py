@@ -174,7 +174,7 @@ class RPCClient:
         if command.upper() == "GET_TREE_DETAILS":
             return self.get_detailed_update(tree_name=tree_name, tree_uuid=tree_uuid)
 
-        command = getattr(CommandType, command.upper())
+        command: CommandType = getattr(CommandType, command.upper())
         if command not in CommandType.values():
             raise ValueError(f"Unsupported command provided: {command}")
 

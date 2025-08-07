@@ -65,8 +65,6 @@ class QtBTreeItem:
         This assumes that self is the top-level root node, with only one child.
         This method handles the root node and calls :py:meth:`~.update_from_node_info`.
 
-        see:
-
         Parameters
         ----------
         details : TreeDetails
@@ -95,7 +93,7 @@ class QtBTreeItem:
         Update this tree item from a node_info object.
 
         In contrast to :py:meth:`~.update_from_tree_details`, this must be
-        called from a node that is not the root
+        called from a node that is not the root.
 
         Parameters
         ----------
@@ -108,24 +106,25 @@ class QtBTreeItem:
         ValueError
             If the provided NodeInfo does not match the tree item being updated.
         """
-        # TODO figure out a better way to check the tree matches the node_info
-        # perhaps checking all tree-structure with encoded tree?
-        # perhaps adjust tree details proto to also encode node types
         self.node_id = UUID(node_info.id.uuid)
         self.status = getattr(Status, TickStatus.Name(node_info.status))
 
         # This is the simplest check I could think of to verify the two tree
         # structures matched
         if len(self.children) != len(node_info.children):
-            raise ValueError("Provided details do not match the tree being"
+            raise ValueError("Provided details do not match the tree being "
                              "updated.  (number of children mismatched)")
+        if self.node_type != node_info.type:
+            raise ValueError("Provided details do not match the tree being "
+                             "updated.  Node types mismatch: "
+                             f"{self.node_type} vs {node_info.type}")
         for item_c, node_c in zip(self.children, node_info.children):
             item_c.update_from_node_info(node_c)
 
     @classmethod
     def from_behavior_tree_item(cls, tree: BehaviorTreeItem) -> QtBTreeItem:
         """
-        Convert from BehaviorTreeItem to QT-BehaviorTreeItem from.
+        Convert from `BehaviorTreeItem` to QT-BehaviorTreeItem.
         A `BehaviorTreeItem` is the deserialized BEAMS tree object.
 
         Parameters
@@ -136,7 +135,6 @@ class QtBTreeItem:
         Returns
         -------
         QtBTreeItem
-            _description_
         """
         def _inner_get_tree_item(tree: BaseItem) -> QtBTreeItem:
             item = QtBTreeItem(
@@ -151,6 +149,47 @@ class QtBTreeItem:
 
         tree_root_item = _inner_get_tree_item(tree.root)
         root_item = QtBTreeItem(name="<root>")
+        root_item.addChild(tree_root_item)
+        return root_item
+
+    @classmethod
+    def from_tree_details(cls, tree: TreeDetails) -> QtBTreeItem:
+        """
+        Convert from `TreeDetails` to QT-BehaviorTreeItem.
+        `TreeDetails` is the proto message from the BEAMS service.
+        Use this if you want to represent a tree entirely with information
+        from the service.
+
+        Parameters
+        ----------
+        tree : TreeDetails
+            TreeDetails message to create a QtBTreeItem from
+
+        Returns
+        -------
+        QtBTreeItem
+        """
+        def _inner_get_tree_item(info: NodeInfo) -> QtBTreeItem:
+            item = QtBTreeItem(
+                name=info.id.name,
+                node_type=info.type,
+                node_id=UUID(info.id.uuid),
+                status=info.status
+            )
+            if hasattr(info, "children"):
+                children = [_inner_get_tree_item(child) for child in info.children]
+                for child in children:
+                    item.addChild(child)
+
+            return item
+
+        tree_root_item = _inner_get_tree_item(tree.node_info)
+        root_item = QtBTreeItem(
+            name=tree.tree_id.name,
+            node_id=UUID(tree.tree_id.uuid),
+            node_type="<root>",
+            status=tree.tree_status,
+        )
         root_item.addChild(tree_root_item)
         return root_item
 

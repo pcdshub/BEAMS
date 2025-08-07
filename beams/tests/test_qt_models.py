@@ -28,6 +28,7 @@ def eternal_guard_details() -> TreeDetails:
                 uuid="56e4da1e-b3a9-4dc8-b27a-1c82cd0ba68d",
             ),
             status=TickStatus.RUNNING,
+            type="Sequence",
             children=[
                 NodeInfo(
                     id=NodeId(
@@ -35,6 +36,7 @@ def eternal_guard_details() -> TreeDetails:
                         uuid="05a83efd-6318-408f-9737-25f01d2d3090",
                     ),
                     status=TickStatus.SUCCESS,
+                    type="StatusQueue",
                     children=[],
                 ),
                 NodeInfo(
@@ -43,6 +45,7 @@ def eternal_guard_details() -> TreeDetails:
                         uuid="a33b309c-08cc-4922-a61d-bb3a4c799165",
                     ),
                     status=TickStatus.SUCCESS,
+                    type="StatusQueue",
                     children=[],
                 ),
                 NodeInfo(
@@ -51,6 +54,7 @@ def eternal_guard_details() -> TreeDetails:
                         uuid="c201a150-b6f2-4afe-aa0a-4c52aa4a8a87",
                     ),
                     status=TickStatus.RUNNING,
+                    type="Sequence",
                     children=[
                         NodeInfo(
                             id=NodeId(
@@ -58,6 +62,7 @@ def eternal_guard_details() -> TreeDetails:
                                 uuid="e8f2c943-fc22-4a3a-993a-c2f4c44f8651",
                             ),
                             status=TickStatus.SUCCESS,
+                            type="Success",
                         ),
                         NodeInfo(
                             id=NodeId(
@@ -65,6 +70,7 @@ def eternal_guard_details() -> TreeDetails:
                                 uuid="2c654b9e-8659-444f-96ef-d9b20fec9c5f",
                             ),
                             status=TickStatus.RUNNING,
+                            type="Running",
                         ),
                     ],
                 ),
@@ -77,18 +83,21 @@ def eternal_guard_details() -> TreeDetails:
 
 def assert_base_qtbtreeitem_info(tree_item: QtBTreeItem):
     # walks DFS
+    tree_items = tree_item.walk_tree()
+    next(tree_items)  # skip root, can differ depending on source
+
     for item, name, node_type in zip(
-        tree_item.walk_tree(),
-        ["<root>", "Eternal Guard", "Condition 1", "Condition 2", "Task Sequence",
+        tree_items,
+        ["Eternal Guard", "Condition 1", "Condition 2", "Task Sequence",
          "Worker 1", "Worker 2"],
-        ["", "Sequence", "StatusQueue", "StatusQueue", "Sequence", "Success",
+        ["Sequence", "StatusQueue", "StatusQueue", "Sequence", "Success",
          "Running"],
     ):
         assert item.name == name
         assert item.node_type == node_type
 
 
-def test_create_qttreeitem(eternal_guard_item):
+def test_create_qttreeitem_from_tree(eternal_guard_item):
     tree_item = QtBTreeItem.from_behavior_tree_item(eternal_guard_item)
     assert tree_item.children[0].name == "Eternal Guard"
 
@@ -109,5 +118,15 @@ def test_update_qtitem_with_details(eternal_guard_item, eternal_guard_details):
     for item in tree_item.walk_tree():
         assert item.status is not TickStatus.INVALID
         assert item.node_id is not None
+
+    assert_base_qtbtreeitem_info(tree_item)
+
+
+def test_create_qtbtreeitem_from_treedetails(eternal_guard_details):
+    tree_item = QtBTreeItem.from_tree_details(eternal_guard_details)
+    assert tree_item.children[0].name == "Eternal Guard"
+
+    for child, child_ct in zip(tree_item.children[0].children, [0, 0, 2]):
+        assert len(child.children) == child_ct
 
     assert_base_qtbtreeitem_info(tree_item)

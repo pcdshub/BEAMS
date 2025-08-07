@@ -65,8 +65,6 @@ class QtBTreeItem:
         This assumes that self is the top-level root node, with only one child.
         This method handles the root node and calls :py:meth:`~.update_from_node_info`.
 
-        see:
-
         Parameters
         ----------
         details : TreeDetails
@@ -95,7 +93,7 @@ class QtBTreeItem:
         Update this tree item from a node_info object.
 
         In contrast to :py:meth:`~.update_from_tree_details`, this must be
-        called from a node that is not the root
+        called from a node that is not the root.
 
         Parameters
         ----------

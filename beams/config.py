@@ -68,3 +68,21 @@ def load_config(config: Optional[str] = None) -> BeamsConfig:
         host=config_parser["server"]["host"],
         port=int(config_parser["server"]["port"]),
     )
+
+
+def load_config_or_default() -> BeamsConfig:
+    """
+    Get the beams configuration if it exists, or the default if not.
+
+    Logs a warning if we used the default config.
+
+    This is a convenience function for entrypoints that don't care if the user
+    has a configuration file or not and are OK with the default configuration
+    being used.
+    """
+    try:
+        return load_config()
+    except RuntimeError:
+        logger.debug("Error traceback from loading beams config", exc_info=True)
+        logger.warning("No valid beams config found, using default server host and port")
+        return BeamsConfig()

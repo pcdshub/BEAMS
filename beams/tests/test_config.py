@@ -9,42 +9,33 @@ SAMPLE_CFG = Path(__file__).parent / "config.cfg"
 
 
 @pytest.fixture(scope="function")
-def xdg_config_patch(tmp_path):
+def beams_cfg(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    # patch config discovery paths
     config_home = tmp_path / "xdg_config_home"
     config_home.mkdir()
-    return config_home
 
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(config_home))
+    if os.environ.get("BEAMS_CFG") is not None:
+        monkeypatch.delenv("BEAMS_CFG")
 
-@pytest.fixture(scope="function")
-def beams_cfg(xdg_config_patch: Path):
-    # patch config discovery paths
-    xdg_cfg = os.environ.get("XDG_CONFIG_HOME", "")
-    beams_cfg_path = os.environ.get("BEAMS_CFG", "")
-
-    os.environ["XDG_CONFIG_HOME"] = str(xdg_config_patch)
-    os.environ["BEAMS_CFG"] = ""
-
-    beams_cfg_path = xdg_config_patch / "beams.cfg"
+    beams_cfg_path = config_home / "beams.cfg"
     beams_cfg_path.symlink_to(SAMPLE_CFG)
 
     yield str(beams_cfg_path)
-
-    # reset env vars
-    os.environ["BEAMS_CFG"] = str(beams_cfg_path)
-    os.environ["XDG_CONFIG_HOME"] = xdg_cfg
 
 
 def test_load_config(beams_cfg: str):
     config = load_config(beams_cfg)
     assert config == BeamsConfig(
-        host="host",
+        host="the-server-name",
         port=9999,
     )
 
 
-def test_find_config(beams_cfg: str):
-    assert beams_cfg == str(find_config())
+def test_find_config_xdg(beams_cfg: str):
+    assert find_config() == beams_cfg
 
-    # explicit BEAMS_CFG env var supercedes XDG_CONFIG_HOME
-    os.environ["BEAMS_CFG"] = "other/cfg"
-    assert "other/cfg" == str(find_config())
+
+def test_find_config_env_var(beams_cfg: str, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("BEAMS_CFG", "other/cfg")
+    assert find_config() == "other/cfg"

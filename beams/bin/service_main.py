@@ -3,7 +3,7 @@ import time
 from multiprocessing.managers import BaseManager
 from typing import Callable, Dict, Optional
 
-from beams.config import BeamsConfig, load_config
+from beams.config import BeamsConfig, load_config_or_default
 from beams.logging import setup_logging
 from beams.service.helpers.worker import Worker
 from beams.service.remote_calls.command_pb2 import CommandMessage, CommandType
@@ -140,7 +140,7 @@ class BeamsService(Worker):
 
 
 def main(*args, **kwargs):
-    service = BeamsService(config=load_config())
+    service = BeamsService(config=load_config_or_default())
     service.start_work()
 
     while (input("press q+<enter> to kill") != 'q'):

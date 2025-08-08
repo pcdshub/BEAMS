@@ -38,6 +38,7 @@ class RPCClient:
         # Initialize with nonsense reply, techinically invalid
         self.last_response: HeartBeatReply = HeartBeatReply()
         self.server_address = f"{config.host}:{config.port}"
+        logger.debug(f"Using server address {self.server_address}")
 
     def run(self, command: str, **kwargs) -> HeartBeatReply:
         """

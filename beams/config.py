@@ -84,5 +84,5 @@ def load_config_or_default() -> BeamsConfig:
         return load_config()
     except RuntimeError:
         logger.debug("Error traceback from loading beams config", exc_info=True)
-        logger.warning("No valid beams config found, using default server host and port")
+        logger.warning("No valid beams config found, using defaults")
         return BeamsConfig()

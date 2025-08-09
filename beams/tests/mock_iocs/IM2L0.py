@@ -7,7 +7,7 @@ from caproto.server import PVGroup, ioc_arg_parser, pvproperty, run
 
 
 class TargetState(str, Enum):
-    UNKOWN = "UNKOWN"
+    UNKNOWN = "UNKNOWN"
     OUT = "OUT"
     YAG = "YAG"
     DIAMOND = "DIAMOND"
@@ -15,7 +15,7 @@ class TargetState(str, Enum):
 
 
 class FilterWheelValue(str, Enum):
-    UNKOWN = "UNKOWN"
+    UNKNOWN = "UNKNOWN"
     T1 = "T1"
     T5 = "T5"
     T10 = "T10"
@@ -39,7 +39,7 @@ class MockIML20(PVGroup):
 
     im2l0_target = pvproperty(
         name="MMS:STATE:GET_RBV",
-        value=f"{TargetState.UNKOWN.value.upper()}",
+        value=f"{TargetState.UNKNOWN.value.upper()}",
         dtype=str,
         doc=f"Represents state of simulated imager target. Options {[i.upper() for i in TargetState]}",
         max_length=10,
@@ -58,7 +58,7 @@ class MockIML20(PVGroup):
     )
     im2l0_filter_wheel = pvproperty(
         name="MFW:GET_RBV",
-        value=f"{FilterWheelValue.UNKOWN.value.upper()}",
+        value=f"{FilterWheelValue.UNKNOWN.value.upper()}",
         dtype=str,
         doc=f"Represents filter wheel value. Options {[i.upper() for i in FilterWheelValue]}",
         max_length=10,

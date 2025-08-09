@@ -8,16 +8,18 @@ NodeData = edges
 NodeDataModel = nodes
 """
 import importlib
-from typing import Optional, Sequence, Type
+from copy import deepcopy
+from typing import Dict, Generator, List, Optional, Sequence, Tuple, Type
 
+import networkx as nx
 import qtpynodeeditor as nodeeditor
 from qtpy.QtWidgets import QWidget
-from qtpynodeeditor import (Connection, ConnectionPolicy, NodeData,
+from qtpynodeeditor import (Connection, ConnectionPolicy, Node, NodeData,
                             NodeDataModel, NodeDataType, NodeValidationState,
                             Port)
-from qtpynodeeditor.style import StyleCollection
+from qtpynodeeditor.style import LayoutDirection, SplineType, StyleCollection
 
-from beams.tree_config import BaseItem
+from beams.tree_config import BaseItem, BehaviorTreeItem
 from beams.widgets.base import get_embedded_widget
 
 
@@ -256,11 +258,20 @@ class TreeNodeMixin:
     def get_item(self):
         if self._widget:
             self._widget.update_data(self.item)
-        return self.item
+        return deepcopy(self.item)
 
     def embedded_widget(self) -> Optional[QWidget]:
         """Fetch a QWidget"""
         return self._widget
+
+
+class BeamsNode(Node):
+    """for type hinting purposes"""
+    model: TreeNodeMixin
+
+    def __init__(self, *args, **kwargs):
+        raise NotImplementedError("This is for type hinting and should not "
+                                  "be instantiated.")
 
 
 def gather_models(submodule: str) -> Sequence[TreeNodeMixin]:
@@ -302,3 +313,62 @@ def add_items_to_registry(
         models = gather_models(submod)
         for model in models:
             registry.register_model(model, category=submod, style=style)
+
+
+def create_editor_view() -> nodeeditor.FlowView:
+    registry = nodeeditor.DataModelRegistry()
+
+    my_style = nodeeditor.StyleCollection()
+    my_style.node.layout_direction = LayoutDirection.VERTICAL
+    my_style.connection.spline_type = SplineType.LINEAR
+
+    add_items_to_registry(registry, style=my_style)
+    registry.register_model(RootNodeModel, style=my_style, category="Root")
+    scene = nodeeditor.FlowScene(style=my_style, registry=registry)
+
+    view = nodeeditor.FlowView(scene)
+    view.setWindowTitle("Beams Behavior Tree Builder")
+    view.resize(800, 600)
+
+    return view
+
+
+BFS_GENERATOR = Generator[Tuple[BeamsNode, List[BeamsNode]], None, None]
+
+
+def tree_from_graph(digraph: nx.DiGraph) -> BehaviorTreeItem:
+    """
+    grab digraph from scene and generate a BehaviorTreeItem using the information
+    """
+    roots: List[BeamsNode] = [n for n, d in digraph.in_degree() if d == 0]
+
+    if not roots or len(roots) != 1:
+        raise RuntimeError("Cannot construct a tree, invalid number of root "
+                           f"nodes: {len(roots)}")
+
+    root_node = roots[0]
+
+    node_item_map: Dict[Node, BaseItem] = {}
+    bfs_successors: BFS_GENERATOR = nx.bfs_successors(digraph, root_node)
+
+    # Process the first node (root)
+    _, successors = next(bfs_successors)
+    succ_item = successors[0].model.get_item()
+    root_item = BehaviorTreeItem(root=succ_item)
+    _ = node_item_map.setdefault(successors[0], succ_item)
+
+    # process the rest
+    for parent_node, successor_nodes in bfs_successors:
+        # grab parent item if it exists, otherwise create it
+        parent_item = node_item_map.setdefault(
+            parent_node, parent_node.model.get_item()
+        )
+
+        for succ_node in successor_nodes:
+            # Eventually I'd like to figure out how to use Protocol's to
+            # assure type hints that the parent has as children attr
+            succ_item = succ_node.model.get_item()
+            parent_item.children.append(succ_item)
+            node_item_map[succ_node] = succ_item
+
+    return root_item

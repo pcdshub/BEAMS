@@ -40,7 +40,7 @@ class RPCClient:
         self.server_address = f"{config.host}:{config.port}"
         logger.debug(f"Using server address {self.server_address}")
 
-    def run(self, command: str, **kwargs) -> HeartBeatReply:
+    def run(self, command: str, **kwargs) -> Union[HeartBeatReply, TreeDetails]:
         """
         Run a command
 
@@ -64,18 +64,24 @@ class RPCClient:
             response = self.get_heartbeat()
             return response
 
+        # TODO: deal with none as tree name
+        tree_name = kwargs.get("tree_name") or ""
+        tree_uuid = kwargs.get("tree_uuid") or ""
+        # These commands only need captured tree name and command itself
+        if command.upper() == "GET_TREE_DETAILS":
+            return self.get_detailed_update(tree_name=tree_name, tree_uuid=tree_uuid)
+
         command = getattr(CommandType, command.upper())
         if command not in CommandType.values():
             raise ValueError(f"Unsupported command provided: {command}")
 
-        # TODO: deal with none as tree name
-        tree_name = kwargs.get("tree_name") or ""
-        # These commands only need captured tree name and command itself
         if command in self.BASE_COMMANDS:
-            getattr(self, f"{CommandType.Name(command).lower()}")(tree_name)
+            cmd_method = getattr(self, f"{CommandType.Name(command).lower()}")
+            cmd_method(tree_name=tree_name, tree_uuid=tree_uuid)
         elif command == CommandType.LOAD_NEW_TREE:
             self.load_new_tree(
                 tree_name=tree_name,
+                tree_uuid=tree_uuid,
                 new_tree_filepath=kwargs["new_tree_filepath"],
                 tick_config=kwargs["tick_mode"],
                 tick_delay_ms=kwargs["tick_delay_ms"]
@@ -88,7 +94,12 @@ class RPCClient:
 
         return self.last_response
 
-    def construct_base_msg(self, command: CommandType, tree_name: str) -> CommandMessage:
+    def construct_base_msg(
+        self,
+        command: CommandType,
+        tree_name: str,
+        tree_uuid: str,
+    ) -> CommandMessage:
         """
         Construct the base CommandMessage for RPC communication.  Some command
         types may require additonal configuration of the message
@@ -99,6 +110,8 @@ class RPCClient:
             The message subcommand type
         tree_name : str
             The name of the tree to manipulate
+        tree_uuid : str
+            The uuid of the tree to manipulate
 
         Returns
         -------
@@ -108,6 +121,7 @@ class RPCClient:
         cmd_msg = CommandMessage(mess_t=MessageType.MESSAGE_TYPE_COMMAND_MESSAGE)
         cmd_msg.command_t = command
         cmd_msg.tree_name = tree_name
+        cmd_msg.tree_uuid = tree_uuid
         return cmd_msg
 
     def with_server_stub(func):
@@ -155,12 +169,13 @@ class RPCClient:
     @with_server_stub
     def start_tree(
         self,
-        tree_name: str,
+        tree_name: str = "",
+        tree_uuid: str = "",
         stub: Optional[BEAMS_rpcStub] = None
     ) -> HeartBeatReply:
         """
-        Start the tree with `tree_name`.  The tree must already be loaded onto
-        the service.
+        Start the tree by specifying either its `tree_name` or `tree_uuid`.
+        The tree must already be loaded onto the service.
 
         If `stub` is not provided, this will create one based on client settings
 
@@ -168,10 +183,15 @@ class RPCClient:
         ----------
         tree_name : str
             the name of the tree to start
+        tree_uuid : str
+            the uuid of the tree to start
         stub : Optional[BEAMS_rpcStub], optional
             the rpc stub used to send messages, by default None
         """
-        cmd_msg = self.construct_base_msg(CommandType.START_TREE, tree_name)
+        if not (tree_name or tree_uuid):
+            raise ValueError("Must provide either tree_name or tree_uuid")
+
+        cmd_msg = self.construct_base_msg(CommandType.START_TREE, tree_name, tree_uuid)
         self.last_response = stub.enqueue_command(cmd_msg)
         logger.debug(self.last_response)
         return self.last_response
@@ -179,12 +199,13 @@ class RPCClient:
     @with_server_stub
     def tick_tree(
         self,
-        tree_name: str,
+        tree_name: str = "",
+        tree_uuid: str = "",
         stub: Optional[BEAMS_rpcStub] = None
     ) -> HeartBeatReply:
         """
-        Tick the tree with `tree_name`.  The tree must already be loaded onto
-        the service.
+        Tick the tree by specifying either its `tree_name` or `tree_uuid`.
+        The tree must already be loaded onto the service.
 
         If `stub` is not provided, this will create one based on client settings
 
@@ -192,10 +213,15 @@ class RPCClient:
         ----------
         tree_name : str
             the name of the tree to tick
+        tree_uuid : str
+            the uuid of the tree to start
         stub : Optional[BEAMS_rpcStub], optional
             the rpc stub used to send messages, by default None
         """
-        cmd_msg = self.construct_base_msg(CommandType.TICK_TREE, tree_name)
+        if not (tree_name or tree_uuid):
+            raise ValueError("Must provide either tree_name or tree_uuid")
+
+        cmd_msg = self.construct_base_msg(CommandType.TICK_TREE, tree_name, tree_uuid)
         self.last_response = stub.enqueue_command(cmd_msg)
         logger.debug(self.last_response)
         return self.last_response
@@ -203,12 +229,13 @@ class RPCClient:
     @with_server_stub
     def pause_tree(
         self,
-        tree_name: str,
+        tree_name: str = "",
+        tree_uuid: str = "",
         stub: Optional[BEAMS_rpcStub] = None
     ) -> HeartBeatReply:
         """
-        Pause the tree with `tree_name`.  The tree must already be loaded onto
-        the service.
+        Pause the tree by specifying either its `tree_name` or `tree_uuid`.
+        The tree must already be loaded onto the service.
 
         If `stub` is not provided, this will create one based on client settings
 
@@ -216,10 +243,15 @@ class RPCClient:
         ----------
         tree_name : str
             the name of the tree to pause
+        tree_uuid : str
+            the uuid of the tree to start
         stub : Optional[BEAMS_rpcStub], optional
             the rpc stub used to send messages, by default None
         """
-        cmd_msg = self.construct_base_msg(CommandType.PAUSE_TREE, tree_name)
+        if not (tree_name or tree_uuid):
+            raise ValueError("Must provide either tree_name or tree_uuid")
+
+        cmd_msg = self.construct_base_msg(CommandType.PAUSE_TREE, tree_name, tree_uuid)
         self.last_response = stub.enqueue_command(cmd_msg)
         logger.debug(self.last_response)
         return self.last_response
@@ -227,12 +259,13 @@ class RPCClient:
     @with_server_stub
     def unload_tree(
         self,
-        tree_name: str,
+        tree_name: str = "",
+        tree_uuid: str = "",
         stub: Optional[BEAMS_rpcStub] = None
     ) -> HeartBeatReply:
         """
-        Unload the tree with `tree_name`.  The tree must already be loaded onto
-        the service.
+        Unload the tree by specifying either its `tree_name` or `tree_uuid`.
+        The tree must already be loaded onto the service.
 
         If `stub` is not provided, this will create one based on client settings
 
@@ -240,10 +273,15 @@ class RPCClient:
         ----------
         tree_name : str
             the name of the tree to start
+        tree_uuid : str
+            the uuid of the tree to start
         stub : Optional[BEAMS_rpcStub], optional
             the rpc stub used to send messages, by default None
         """
-        cmd_msg = self.construct_base_msg(CommandType.UNLOAD_TREE, tree_name)
+        if not (tree_name or tree_uuid):
+            raise ValueError("Must provide either tree_name or tree_uuid")
+
+        cmd_msg = self.construct_base_msg(CommandType.UNLOAD_TREE, tree_name, tree_uuid)
         self.last_response = stub.enqueue_command(cmd_msg)
         logger.debug(self.last_response)
         return self.last_response
@@ -251,14 +289,16 @@ class RPCClient:
     @with_server_stub
     def load_new_tree(
         self,
-        tree_name: str,
         new_tree_filepath: str,
-        tick_config: str,
-        tick_delay_ms: int,
+        tree_name: str = "",
+        tree_uuid: str = "",
+        tick_config: str = "INTERACTIVE",
+        tick_delay_ms: int = 5000,
         stub: Optional[BEAMS_rpcStub] = None,
     ) -> HeartBeatReply:
         """
         Load a new tree into the service.  Does not start the tree automatically.
+        One of `tree_name` or `tree_uuid` must be provided
 
         If `stub` is not provided, this will create one based on client settings
 
@@ -266,16 +306,21 @@ class RPCClient:
         ----------
         tree_name : str
             Name to identify the tree by
+        tree_uuid: str
+            UUID to identify tree by
         new_tree_filepath : str
             Path to the serialized tree
-        tick_config : str
-            The tick mode (INTERACTIVE, CONTINUOUS)
-        tick_delay_ms : int
-            The delay between ticks in ms
+        tick_config : str, optional
+            The tick mode (INTERACTIVE, CONTINUOUS), by default INTERACTIVE
+        tick_delay_ms : int, optional
+            The delay between ticks in ms, by default 5000 (5s)
         stub : Optional[BEAMS_rpcStub], optional
             the rpc stub used to send messages, by default None
         """
-        cmd_msg = self.construct_base_msg(CommandType.LOAD_NEW_TREE, tree_name)
+        if not (tree_name or tree_uuid):
+            raise ValueError("Must provide either tree_name or tree_uuid")
+
+        cmd_msg = self.construct_base_msg(CommandType.LOAD_NEW_TREE, tree_name, tree_uuid)
         load_new_tree_mesg = LoadNewTreeMessage()
         load_new_tree_mesg.tree_file_path = new_tree_filepath
         # make tick config
@@ -294,13 +339,14 @@ class RPCClient:
     @with_server_stub
     def ack_node(
         self,
-        tree_name: str,
         node_name: str,
         user: str,
+        tree_name: str = "",
+        tree_uuid: str = "",
         stub: Optional[BEAMS_rpcStub] = None,
     ) -> HeartBeatReply:
         """
-        Acknowledge a node in a tree.
+        Acknowledge a node in a tree specified by either its name or uuid
 
         If `stub` is not provided, this will create one based on client settings
 
@@ -308,6 +354,8 @@ class RPCClient:
         ----------
         tree_name : str
             Name of the tree holding node to acknowledge
+        tree_uuid: str
+            UUID of the tree holding node to acknowledge
         node_name : str
             Name of node being acknowledged
         user : str
@@ -320,7 +368,10 @@ class RPCClient:
         HeartBeatReply
 
         """
-        cmd_msg = self.construct_base_msg(CommandType.ACK_NODE, tree_name)
+        if not (tree_name or tree_uuid):
+            raise ValueError("Must provide either tree_name or tree_uuid")
+
+        cmd_msg = self.construct_base_msg(CommandType.ACK_NODE, tree_name, tree_uuid)
         # TODO: grab user from kerberos?  Verify that user is who they say they are?
         ack_node_mess = AckNodeMessage(
             node_name_to_ack=node_name, user_acking_node=user
@@ -371,4 +422,5 @@ class RPCClient:
         else:
             resp = stub.request_tree_details(tree_id)
 
+        self.last_response = resp
         return resp

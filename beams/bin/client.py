@@ -1,16 +1,5 @@
 """
 Communicate with a running BEAMS service (you are the client)
-
-Provides subcommands for the following actions:
-- get_heartbeat
-- start_tree
-- tick_tree
-- pause_tree
-- unload_tree
-- load_tree
-- change_tick_rate_of_tree
-- change_tick_configuration
-- ack_node
 """
 
 import argparse
@@ -38,7 +27,10 @@ def build_arg_parser(argparser=None):
     )
 
     # get heartbeat
-    sub = subparsers.add_parser("get_heartbeat")
+    sub = subparsers.add_parser(
+        "get_heartbeat",
+        help="get heartbeat information for all currently loaded trees"
+    )
     sub.set_defaults(command="get_heartbeat")
 
     # load new tree
@@ -145,14 +137,33 @@ def build_arg_parser(argparser=None):
     )
     unload_parser.set_defaults(command="unload_tree")
 
-    # apply required tree identification arg for applicable subcommands
-    for sub in [start_parser, load_new_tree_parser, tick_config_parser,
+    details_parser = subparsers.add_parser(
+        "get_tree_details",
+        aliases=["GET_TREE_DETAILS", "details"],
+        help="Get details for a loaded tree"
+    )
+    details_parser.set_defaults(command="get_tree_details")
+
+    # apply required tree identification arg or uuid for applicable subcommands
+    load_new_tree_parser.add_argument(
+        "tree_name",
+        type=str,
+        help="name of tree to load"
+    )
+
+    for sub in [start_parser, tick_config_parser,
                 ack_node_parser, pause_parser, tick_parser,
-                unload_parser,]:
-        sub.add_argument(
-            "tree_name",
+                unload_parser, details_parser]:
+        group = sub.add_mutually_exclusive_group(required=True)
+        group.add_argument(
+            "--tree_name",
             type=str,
-            help="name of tree to interact with (or load)"
+            help="name of tree to interact with"
+        )
+        group.add_argument(
+            "--tree_uuid",
+            type=str,
+            help="UUID of tree to interact with"
         )
 
     return argparser
@@ -168,4 +179,4 @@ def main(*args, **kwargs):
     cmd = kwargs.pop("command")
     logger.debug(f"Executing {cmd} with args {args, kwargs}")
     client = RPCClient(config=load_config_or_default())
-    client.run(cmd, *args, **kwargs)
+    print(client.run(cmd, *args, **kwargs))

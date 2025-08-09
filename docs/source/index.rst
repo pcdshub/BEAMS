@@ -10,6 +10,10 @@ Welcome to beams's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   api.rst
+   releases.rst
+   upcoming_changes.rst
+
 .. toctree::
    :maxdepth: 1
    :caption: Links

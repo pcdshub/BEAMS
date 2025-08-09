@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTabWidget" name="tab_widget">
+      <property name="tabsClosable">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="action_open_file"/>
+    <addaction name="action_save_file"/>
+    <addaction name="action_save_as"/>
+   </widget>
+   <widget class="QMenu" name="menuMonitor">
+    <property name="title">
+     <string>Monitor</string>
+    </property>
+    <addaction name="action_open_from_service"/>
+    <addaction name="action_config_connect"/>
+   </widget>
+   <addaction name="menuEdit"/>
+   <addaction name="menuMonitor"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_open_file">
+   <property name="text">
+    <string>Open from File</string>
+   </property>
+  </action>
+  <action name="action_save_file">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="action_open_from_service">
+   <property name="text">
+    <string>Open from Service</string>
+   </property>
+  </action>
+  <action name="action_save_as">
+   <property name="text">
+    <string>Save as...</string>
+   </property>
+  </action>
+  <action name="action_config_connect">
+   <property name="text">
+    <string>Configure Connection</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

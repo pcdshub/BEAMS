@@ -4,3 +4,4 @@ caproto
 coverage
 pytest
 pytest-cov
+pytest-qt

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pathlib
 import subprocess
 import sys
 import time
@@ -15,9 +16,10 @@ import pytest
 from py_trees.behaviour import Behaviour
 from py_trees.trees import BehaviourTree
 
-from beams.bin.service_main import BeamsService
 from beams.logging import setup_logging
+from beams.service.remote_calls.behavior_tree_pb2 import TickStatus, TreeStatus
 from beams.service.rpc_client import RPCClient
+from beams.service.rpc_handler import BeamsService
 
 
 def pytest_configure(config: pytest.Config):
@@ -162,3 +164,50 @@ def wait_until(condition: Callable[[], bool], timeout=5, polling_period=0.5):
         time.sleep(polling_period)
 
     raise TimeoutError(f"Condition failed to resolve within timeout ({timeout} s)")
+
+
+def assert_heartbeat_has_n_trees(client: RPCClient, n_entries) -> bool:
+    resp1 = client.get_heartbeat()
+    return len(resp1.behavior_tree_update) == n_entries
+
+
+def assert_valid_tick_status_at_idx(client: RPCClient, tree_idx: int) -> bool:
+    curr_status = client.get_heartbeat().behavior_tree_update[tree_idx].tick_status
+    print(curr_status)
+    return curr_status != TickStatus.INVALID
+
+
+def assert_test_status(rpc_client: RPCClient, name: str, status: TreeStatus) -> bool:
+    resp = rpc_client.get_heartbeat()
+    my_msg = None
+    for update_msg in resp.behavior_tree_update:
+        if update_msg.tree_id.name == name:
+            my_msg = update_msg
+
+    if my_msg is None:
+        return False
+    return my_msg.tree_status == status
+
+
+# path to a bt that doesn't need any IOC communication
+ETERNAL_GUARD_PATH = Path(__file__).parent / "artifacts" / "eternal_guard.json"
+if not ETERNAL_GUARD_PATH.exists():
+    raise FileNotFoundError("Eternal Guard Behavior Tree file missing: "
+                            f"{ETERNAL_GUARD_PATH}")
+
+
+def test_configs() -> list[pathlib.Path]:
+    """all valid tree configs"""
+    filenames = ['eggs.json', 'eggs2.json', 'eternal_guard.json', 'im2l0_test.json',
+                 'wait_for_ack.json']
+    test_config_path = pathlib.Path(__file__).parent / 'artifacts'
+    config_paths = [test_config_path / fn for fn in filenames]
+    return config_paths
+
+
+TEST_CONFIG_PATHS = test_configs()
+
+
+@pytest.fixture(params=TEST_CONFIG_PATHS)
+def configs(request):
+    return request.param

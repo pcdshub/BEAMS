@@ -22,7 +22,7 @@ from beams.service.rpc_client import RPCClient
 from beams.service.rpc_handler import BeamsService
 
 
-def pytest_configure():
+def pytest_configure(config: pytest.Config):
     """
     Regenerate the grpc python files from protos.  This ensures generated
     files exist and are up-to-date for the test suite.  This is itself a test,
@@ -33,6 +33,9 @@ def pytest_configure():
     tests.  This cannot happen in a fixture, since some tests may try to import
     from the generated python files.
     """
+    # Do not regen the grpc files when an IDE just wants to collect the tests
+    if config.option.collectonly:
+        return
     root_dir = Path(__file__).parent.parent.parent
     subprocess.run(args=["make", "gen_grpc"], cwd=root_dir, check=True)
 

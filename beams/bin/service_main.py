@@ -1,6 +1,7 @@
 import logging
 import time
 
+from beams.config import load_config_or_default
 from beams.logging import setup_logging
 from beams.service.rpc_handler import BeamsService
 
@@ -8,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def main(*args, **kwargs):
-    service = BeamsService()
+    service = BeamsService(config=load_config_or_default())
     service.start_work()
 
     while (input("press q+<enter> to kill") != 'q'):

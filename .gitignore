@@ -100,6 +100,9 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# vscode project settings
+.vscode
+
 # vim swap files
 *.swp
 

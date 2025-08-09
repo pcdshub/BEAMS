@@ -8,6 +8,9 @@ gen_grpc:
 	@# This runs the GRPC proto on GRPC proto file
 	@python3 -m grpc_tools.protoc -I . --python_out=. --pyi_out=. --grpc_python_out=. beams/service/remote_calls/beams_rpc.proto
 
+# alias
+grpc: gen_grpc
+
 .PHONY: update_beams
 update_beams:
 	@cd beams && pip install --editable ..

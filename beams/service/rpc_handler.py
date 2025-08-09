@@ -300,7 +300,7 @@ class BeamsService(Worker):
                 tree.shutdown()
 
     def work_func(self):
-        self.grpc_service = RPCHandler(sync_manager=self.sync_man)
+        self.grpc_service = RPCHandler(sync_manager=self.sync_man, config=self.config)
         self.grpc_service.start_work()
 
         # the job of this work function will be to consume messages and update

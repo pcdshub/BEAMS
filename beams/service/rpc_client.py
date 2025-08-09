@@ -39,6 +39,9 @@ class RPCClient:
         self.last_response: HeartBeatReply = HeartBeatReply()
         self.server_address = f"{config.host}:{config.port}"
         logger.debug(f"Using server address {self.server_address}")
+        # Default ecs config uses psproxy, which doesn't work here
+        # TODO move grpc options to the config file
+        self.grpc_options = (("grpc.enable_http_proxy", 0),)
 
     def run(self, command: str, **kwargs) -> Union[HeartBeatReply, TreeDetails]:
         """
@@ -139,8 +142,7 @@ class RPCClient:
                 # TODO: obviously not this. Grab from config
                 with grpc.insecure_channel(
                     self.server_address,
-                    # Default ecs config uses psproxy, which doesn't work here
-                    options=(("grpc.enable_http_proxy", 0),)
+                    options=self.grpc_options,
                 ) as channel:
                     stub = BEAMS_rpcStub(channel)
                     return func(self, stub=stub, *args, **kwargs)
@@ -416,7 +418,7 @@ class RPCClient:
         tree_id = NodeId(name=tree_name, uuid=str(tree_uuid))
         if stub is None:
             # TODO: obviously not this. Grab from config
-            with grpc.insecure_channel(self.server_address) as channel:
+            with grpc.insecure_channel(self.server_address, options=self.grpc_options) as channel:
                 stub = BEAMS_rpcStub(channel)
                 resp = stub.request_tree_details(tree_id)
         else:
